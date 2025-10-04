@@ -1,9 +1,9 @@
-# Trabajo Práctico Especial de Arquitectura de Computadoras
+# Trabajo Práctico 2 - Sistemas Operativos
 
 ## Integrantes
-* Augusto Felipe Ospal Madeo (63669)
-* Valentino Esteves (64335)
-* Santiago Cibeira (64560)
+* Manuel Suñol - msunol@itba.edu.ar
+* Mateo Stella - mastella@itba.edu.ar
+* Augusto Felipe Ospal Madeo - aospalmadeo@itba.edu.ar
 
 ## Manual de Usuario
 Es requisito tener instalados los siguientes programas:
@@ -18,9 +18,9 @@ Una vez ubicado en el directorio deseado, desde la terminal ejecutar los siguien
 
 ```bash
 docker pull agodio/itba-so:2.0
-git clone https://github.com/AugustoOspal/Arqui-TPE.git
-cd Arqui-TPE/x64BareBones
-docker run -d -v ${PWD}:/root --security-opt seccomp:unconfined -it --name TPE agodio/itba-so:2.0
+git clone https://github.com/AugustoOspal/Sistemas-Operativos-TP2.git
+cd Sistemas-Operativos-TP2/x64BareBones
+docker run -d -v ${PWD}:/root --security-opt seccomp:unconfined -it --name Sistemas-Operativos-TP2 agodio/itba-so:2.0
 ```
 
 ### Compilación
@@ -44,13 +44,3 @@ Dentro del directorio Arqui-TPE/x64BareBones, ejecutar:
 ```bash
 ./clean.sh
 ```
-
-### Cómo conseguir el hash MD5?
-
-Descarga el ZIP del proyecto desde GitHub. En la terminal, ejecuta:
-
-```bash
-md5sum Arqui-TPE-master.zip
-```
-
-El número que se mostrará es el hash MD5.# Sistemas-Operativos-TP2
