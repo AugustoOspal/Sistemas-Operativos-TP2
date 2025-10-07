@@ -8,6 +8,7 @@
 #include <idtLoader.h>
 #include <timeLib.h>
 #include <soundDriver.h>
+#include <pmem.h>
 
 extern uint8_t text;
 extern uint8_t rodata;
@@ -15,6 +16,8 @@ extern uint8_t data;
 extern uint8_t bss;
 extern uint8_t endOfKernelBinary;
 extern uint8_t endOfKernel;
+extern char _pm_pool_start;
+extern char _pm_pool_end;
 
 static const uint64_t PageSize = 0x1000;
 
@@ -51,8 +54,15 @@ void * initializeKernelBinary()
 	return getStackBase();
 }
 
+static void kernel_memory_init(void) {
+    void  *pool_start = (void*)&_pm_pool_start;
+    size_t pool_len = (size_t)((char*)&_pm_pool_end - (char*)&_pm_pool_start);
+    pm_init(pool_start, pool_len);
+}
+
 int main()
-{	
+{
+	kernel_memory_init();
 	load_idt();
 	play_boot_sound();
 	return ((EntryPoint)sampleCodeModuleAddress)();
