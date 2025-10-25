@@ -17,10 +17,10 @@ Es requisito tener instalados los siguientes programas:
 Una vez ubicado en el directorio deseado, desde la terminal ejecutar los siguientes comandos:
 
 ```bash
-docker pull agodio/itba-so:2.0
+docker pull agodio/itba-so-multi-platform:3.0
 git clone https://github.com/AugustoOspal/Sistemas-Operativos-TP2.git
 cd Sistemas-Operativos-TP2/x64BareBones
-docker run -d -v ${PWD}:/root --security-opt seccomp:unconfined -it --name Sistemas-Operativos-TP2 agodio/itba-so:2.0
+docker run -d -v ${PWD}:/root --security-opt seccomp:unconfined -it --name Sistemas-Operativos-TP2 agodio/itba-so-multi-platform:3.0
 ```
 
 ### Compilación
@@ -32,11 +32,7 @@ Dentro del directorio Arqui-TPE/x64BareBones, ejecutar:
 ### Ejecución
 Dentro del directorio Arqui-TPE/x64BareBones, ejecutar:
 ```bash
-# Para linux
-./runLinux.sh
-
-# Para macOS
-./runMacOS.sh
+./run.sh
 ```
 
 ### Limpieza de archivos temporales

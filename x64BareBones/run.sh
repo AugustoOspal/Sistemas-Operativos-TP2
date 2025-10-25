@@ -1,0 +1,20 @@
+#!/bin/bash
+# La parte a partir del -audiodev es para el sonido
+#
+# Para macOS: -audiodev coreaudio,id=speaker
+# Para Linux: -audiodev pa,id=speaker -machine pcspk-audiodev=speaker
+
+# Detectar el sistema operativo
+OS="$(uname -s)"
+
+if [[ "$OS" == Linux* ]]; then
+    AUDIO_FLAGS="-audiodev pa,id=speaker"
+elif [[ "$OS" == Darwin* ]]; then
+    AUDIO_FLAGS="-audiodev coreaudio,id=speaker"
+else
+    echo "Error: Sistema operativo no soportado: $OS"
+    echo "Este script solo funciona en Linux y macOS"
+    exit 1
+fi
+
+qemu-system-x86_64 -hda Image/x64BareBonesImage.qcow2 -m 512 $AUDIO_FLAGS -machine pcspk-audiodev=speaker
