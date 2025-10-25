@@ -1,6 +1,6 @@
-#include <color.h>
-#include <pongisLib.h>
-#include <pongisconfig.h>
+#include "color.h"
+#include "pongisLib.h"
+#include "pongisconfig.h"
 
 static uint8_t playersCounter = 1;
 static uint8_t winner;

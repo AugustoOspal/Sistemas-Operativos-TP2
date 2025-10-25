@@ -2,7 +2,7 @@
 #define _LIB_H
 
 #include <stdint.h>
-#include <syscallLib.h>
+#include "syscallLib.h"
 
 void clearScreen(void);
 void putPixel(uint32_t hexColor, uint64_t x, uint64_t y);

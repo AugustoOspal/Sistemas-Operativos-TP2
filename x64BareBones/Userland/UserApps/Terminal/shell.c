@@ -1,4 +1,4 @@
-#include <shell.h>
+#include "shell.h"
 
 #define BUFFER 500
 #define COMMAND_SIZE 12
@@ -176,8 +176,13 @@ void busy_wait() {
 
 void busy_wait_kernel() {
     printf("Running kernel busy-wait. Press Ctrl+R now.\n");
-    
+
     sleepMilli(5000);
 
     printf("Kernel busy-wait finished.\n");
+}
+
+int main() {
+    startShell();
+    return 0;
 }

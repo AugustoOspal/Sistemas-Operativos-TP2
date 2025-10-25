@@ -2,4 +2,6 @@
 .bash_history
 /.idea/*
 !/.idea/runConfigurations
+
 /CLAUDE.md
+/AGENTS.md

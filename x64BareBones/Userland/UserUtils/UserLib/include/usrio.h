@@ -2,7 +2,7 @@
 #define _USRIO_H_
 
 #include <stdarg.h>
-#include <syscallLib.h>
+#include "syscallLib.h"
 
 int scanf(const char *format, ...);
 int printf(const char *format, ...);

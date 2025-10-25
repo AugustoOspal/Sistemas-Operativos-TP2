@@ -1,4 +1,4 @@
-#include <fonts.h>
+#include "fonts.h"
 
 int currentFont = 1;  // 0=small,1=medium,2=large
 

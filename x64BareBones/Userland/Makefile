@@ -1,19 +1,22 @@
 include Makefile.inc
 
-.PHONY: all clean SampleCodeModule sampleDataModule
+.PHONY: all clean UserUtils UserApps shellDataModule
 
-all: SampleCodeModule sampleDataModule
+all: UserUtils UserApps shellDataModule
 
-# primero compilamos la librería que ahora está dentro de SampleCodeModule
-SampleCodeModule:
-	$(MAKE) -C SampleCodeModule/UserLib
-	$(MAKE) -C SampleCodeModule
+# primero compilamos las utilidades (librerías)
+UserUtils:
+	$(MAKE) -C UserUtils
 
-sampleDataModule:
-	printf "This is sample data." > 0001-sampleDataModule.bin
-	dd if=/dev/zero bs=1 count=1 >> 0001-sampleDataModule.bin
+# luego compilamos las aplicaciones (Terminal, PongisGolf)
+UserApps: UserUtils
+	$(MAKE) -C UserApps
+
+shellDataModule:
+	printf "Shell data section." > 0001-shellData.bin
+	dd if=/dev/zero bs=1 count=1 >> 0001-shellData.bin
 
 clean:
-	$(MAKE) -C SampleCodeModule/UserLib clean
-	$(MAKE) -C SampleCodeModule clean
-	rm -f 0001-sampleDataModule.bin
+	$(MAKE) -C UserUtils clean
+	$(MAKE) -C UserApps clean
+	rm -f 0001-shellData.bin 0000-shell.bin

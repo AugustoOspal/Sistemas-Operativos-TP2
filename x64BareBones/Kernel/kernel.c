@@ -1,13 +1,13 @@
-#include <lib.h>
+#include "lib.h"
 #include <stdint.h>
 #include <string.h>
-#include <fonts.h>
-#include <videoDriver.h>
-#include <keyboardDriver.h>
-#include <moduleLoader.h>
-#include <idtLoader.h>
-#include <timeLib.h>
-#include <soundDriver.h>
+#include "fonts.h"
+#include "videoDriver.h"
+#include "keyboardDriver.h"
+#include "moduleLoader.h"
+#include "idtLoader.h"
+#include "timeLib.h"
+#include "soundDriver.h"
 
 extern uint8_t text;
 extern uint8_t rodata;
@@ -18,8 +18,8 @@ extern uint8_t endOfKernel;
 
 static const uint64_t PageSize = 0x1000;
 
-static void * const sampleCodeModuleAddress = (void*)0x400000;
-static void * const sampleDataModuleAddress = (void*)0x500000;
+static void * const shellAddress = (void*)0x400000;
+static void * const shellDataAddress = (void*)0x500000;
 
 typedef int (*EntryPoint)();
 
@@ -41,8 +41,8 @@ void * getStackBase()
 void * initializeKernelBinary()
 {
 	void * moduleAddresses[] = {
-		sampleCodeModuleAddress,
-		sampleDataModuleAddress
+		shellAddress,
+		shellDataAddress
 	};
 
 	loadModules(&endOfKernelBinary, moduleAddresses);
@@ -55,5 +55,5 @@ int main()
 {	
 	load_idt();
 	play_boot_sound();
-	return ((EntryPoint)sampleCodeModuleAddress)();
+	return ((EntryPoint)shellAddress)();
 }

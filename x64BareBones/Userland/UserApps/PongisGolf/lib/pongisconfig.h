@@ -1,7 +1,7 @@
 #ifndef _PONGISCONFIG_H_
 #define _PONGISCONFIG_H_
  
-#include <color.h>
+#include "color.h"
 
 #define BACKGROUND_COLOR            GREEN
 
