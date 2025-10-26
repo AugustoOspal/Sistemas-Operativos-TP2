@@ -145,7 +145,13 @@ Código específico de plataforma aislado de la lógica central del kernel.
 - Punto de entrada en assembly y manejadores de interrupciones
 - Script del linker
 
-Esta estructura permite portar el kernel a otras arquitecturas (ARM, RISC-V) implementando solo esta capa.
+**Nota sobre portabilidad:** Aunque la estructura intenta aislarlo, el kernel tiene acoplamiento x86-64 en otros lugares:
+- **Drivers:** soundDriver (PIT 0x40-0x43), keyboardDriver (PS/2 puerto 0x60), videoDriver (VBE BIOS), timeLib (RTC 0x70-0x71)
+- **Syscalls:** Usan `int 0x80` (instrucción x86)
+- **Linker script:** Carga kernel en 0x100000 (esquema de memoria x86)
+- **Calling convention:** Argumentos en rax/rdi/rsi/rdx/rcx/r8/r9 (System V AMD64 ABI)
+
+Portar a otra arquitectura (ARM, RISC-V) requeriría reescribir: bootloader, drivers, syscall mechanism, linker script y todo el assembly. No es solo implementar `arch/arm64/`.
 
 ### core/
 Inicialización del kernel y carga de módulos.
