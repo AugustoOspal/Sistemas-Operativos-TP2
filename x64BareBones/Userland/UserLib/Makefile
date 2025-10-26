@@ -1,4 +1,4 @@
-include ../../Makefile.inc
+include ../Makefile.inc
 
 ASM_SRCS := $(wildcard asm/*.asm)
 ASM_OBJS := $(ASM_SRCS:.asm=.o)

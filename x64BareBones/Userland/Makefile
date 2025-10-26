@@ -1,15 +1,15 @@
 include Makefile.inc
 
-.PHONY: all clean UserUtils UserApps shellDataModule
+.PHONY: all clean UserLib UserApps shellDataModule
 
-all: UserUtils UserApps shellDataModule
+all: UserLib UserApps shellDataModule
 
-# primero compilamos las utilidades (librerías)
-UserUtils:
-	$(MAKE) -C UserUtils
+# primero compilamos la librería de utilidades
+UserLib:
+	$(MAKE) -C UserLib
 
 # luego compilamos las aplicaciones (Terminal, PongisGolf)
-UserApps: UserUtils
+UserApps: UserLib
 	$(MAKE) -C UserApps
 
 shellDataModule:
@@ -17,6 +17,6 @@ shellDataModule:
 	dd if=/dev/zero bs=1 count=1 >> 0001-shellData.bin
 
 clean:
-	$(MAKE) -C UserUtils clean
+	$(MAKE) -C UserLib clean
 	$(MAKE) -C UserApps clean
 	rm -f 0001-shellData.bin 0000-shell.bin

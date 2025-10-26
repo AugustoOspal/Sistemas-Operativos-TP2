@@ -5,7 +5,7 @@ LDSCRIPT   := shell.ld
 
 MY_CFLAGS  := $(GCCFLAGS) \
                -Ilib \
-               -I../../UserUtils/UserLib/include \
+               -I../../UserLib/include \
                -I../PongisGolf/lib
 
 CSOURCES   := $(wildcard [^_]*.c)
@@ -28,10 +28,10 @@ $(LOADER_O): _loader.c
 	$(ASM) $(ASMFLAGS) $< -o $@
 
 $(MODULE): $(LOADER_O) $(COBJECTS) $(ASMOBJS) \
-            ../../UserUtils/UserLib/libuserland.a \
+            ../../UserLib/libuserland.a \
             ../PongisGolf/libpongisgolf.a
 	$(GCC) $(MY_CFLAGS) -T $(LDSCRIPT) \
-          $(LOADER_O) $(COBJECTS) $(ASMOBJS) ../PongisGolf/libpongisgolf.a ../../UserUtils/UserLib/libuserland.a \
+          $(LOADER_O) $(COBJECTS) $(ASMOBJS) ../PongisGolf/libpongisgolf.a ../../UserLib/libuserland.a \
           -o ../../$(MODULE) $(LDFLAGS)
 
 clean:
