@@ -1,30 +1,60 @@
 include Makefile.inc
 
 KERNEL=kernel.bin
-SOURCES=$(wildcard *.c)
-SOURCES_ASM=$(wildcard asm/*.asm)
+
+# Find all C source files in subsystems
+SOURCES=$(wildcard core/*.c) \
+         $(wildcard interrupt/*.c) \
+         $(wildcard drivers/*/*.c) \
+         $(wildcard lib/*/*.c) \
+         $(wildcard syscall/*.c)
+
+# Loader (entry point) - must be first
+LOADER=arch/x86_64/asm/loader.asm
+LOADER_OBJ=$(LOADER:.asm=.o)
+
+# Find all other ASM files in architecture directory (excluding loader)
+SOURCES_ASM=$(filter-out $(LOADER),$(wildcard arch/x86_64/asm/*.asm))
+
+# Convert to object files
 OBJECTS=$(SOURCES:.c=.o)
 OBJECTS_ASM=$(SOURCES_ASM:.asm=.o)
-LOADERSRC=loader.asm
 
-LOADEROBJECT=$(LOADERSRC:.asm=.o)
-STATICLIBS=
+# Linker script
+LDSCRIPT=arch/x86_64/boot/kernel.ld
+
+# Include directories
+INCLUDE_DIRS=-I./arch/x86_64/include \
+             -I./core/include \
+             -I./interrupt/include \
+             -I./drivers/include \
+             -I./drivers/video \
+             -I./drivers/keyboard \
+             -I./drivers/sound \
+             -I./drivers/timer \
+             -I./lib/include \
+             -I./lib/console \
+             -I./lib/string \
+             -I./syscall/include \
+             -I./arch/x86_64/asm
+
+# Updated GCCFLAGS with include directories
+GCC_WITH_INCLUDES=$(GCCFLAGS) $(INCLUDE_DIRS)
+
+.PHONY: all clean
 
 all: $(KERNEL)
 
-$(KERNEL): $(LOADEROBJECT) $(OBJECTS) $(STATICLIBS) $(OBJECTS_ASM)
-	$(LD) $(LDFLAGS) -T kernel.ld -o $(KERNEL) $(LOADEROBJECT) $(OBJECTS) $(OBJECTS_ASM) $(STATICLIBS)
+$(KERNEL): $(LOADER_OBJ) $(OBJECTS) $(OBJECTS_ASM)
+	$(LD) $(LDFLAGS) -T $(LDSCRIPT) -o $(KERNEL) $(LOADER_OBJ) $(OBJECTS) $(OBJECTS_ASM)
 
 %.o: %.c
-	$(GCC) $(GCCFLAGS) -I./include -c $< -o $@
+	$(GCC) $(GCC_WITH_INCLUDES) -c $< -o $@
 
-%.o : %.asm
+%.o: %.asm
 	$(ASM) $(ASMFLAGS) $< -o $@
 
-$(LOADEROBJECT):
-	$(ASM) $(ASMFLAGS) $(LOADERSRC) -o $(LOADEROBJECT)
-
 clean:
-	rm -rf asm/*.o *.o *.bin
+	find . -name "*.o" -delete
+	rm -f $(KERNEL)
 
-.PHONY: all clean

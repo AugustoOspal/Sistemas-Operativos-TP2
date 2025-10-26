@@ -1,4 +1,6 @@
 #include "exceptions.h"
+#include "fonts.h"
+#include "syscalls.h"
 
 #define CANT_REGS 20
 
