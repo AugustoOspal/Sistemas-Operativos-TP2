@@ -8,6 +8,7 @@
 #include "idtLoader.h"
 #include "timeLib.h"
 #include "soundDriver.h"
+#include "pmem.h"
 
 extern uint8_t text;
 extern uint8_t rodata;
@@ -62,8 +63,10 @@ static void kernel_memory_init(void) {
 int main()
 {
 	kernel_memory_init();
-	proc_init();
-	scheduler_init();
+
+	// proc_init();
+	// scheduler_init();
+
 	//crear proceso idle y agregar al scheduler
 	//para crear un proceso nuevo proc_create() y scheduler_add()
 	//en vez de ejecutar la funcion de userland directamente lo debo hacer asi

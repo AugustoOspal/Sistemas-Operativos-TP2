@@ -1,11 +1,11 @@
 #ifndef _KEYBOARDDRIVER_H_
 #define _KEYBOARDDRIVER_H_
 
-#include <lib.h>
-#include <color.h>
+#include "lib.h"
+#include "color.h"
 #include <stdint.h>
 #include <stdbool.h>
-#include <syscalls.h>
+#include "syscalls.h"
 
 // Función de ASM para leer el scancode raw del puerto del teclado
 extern unsigned int getKeyCode();
@@ -16,7 +16,7 @@ void loadCharToBuffer(char c);
 
 // Función que se llama desde el IRQ dispatcher
 // Devuelve el char
-void keyboard_handler(); 
+void keyboard_handler(Registers_t *regs);
 
 // Función para que las aplicaciones/kernel obtengan un carácter del buffer
 // Retorna 0 si el buffer está vacío.

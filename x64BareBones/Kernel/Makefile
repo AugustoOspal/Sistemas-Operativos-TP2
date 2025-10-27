@@ -7,7 +7,10 @@ SOURCES=$(wildcard core/*.c) \
          $(wildcard interrupt/*.c) \
          $(wildcard drivers/*/*.c) \
          $(wildcard lib/*/*.c) \
-         $(wildcard syscall/*.c)
+         $(wildcard syscall/*.c) \
+         $(wildcard mem/*.c) \
+         $(wildcard sched/*.c) \
+         $(wildcard proc/*.c)
 
 # Loader (entry point) - must be first
 LOADER=arch/x86_64/asm/loader.asm
@@ -36,7 +39,10 @@ INCLUDE_DIRS=-I./arch/x86_64/include \
              -I./lib/console \
              -I./lib/string \
              -I./syscall/include \
-             -I./arch/x86_64/asm
+             -I./arch/x86_64/asm \
+             -I./mem/include \
+             -I./sched/include \
+             -I./proc/include
 
 # Updated GCCFLAGS with include directories
 GCC_WITH_INCLUDES=$(GCCFLAGS) $(INCLUDE_DIRS)

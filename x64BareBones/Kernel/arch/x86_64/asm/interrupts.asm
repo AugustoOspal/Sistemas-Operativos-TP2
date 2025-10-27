@@ -71,7 +71,7 @@ SECTION .text
     ; rdi = &TrapFrame (base del snapshot que acabamos de pushear)
     mov rdi, rsp
 
-    ; rsi = número de IRQ (el parámetro de la macro)
+    ; rsi = número de IRQ
     mov rsi, %1
 
     call irqDispatcher

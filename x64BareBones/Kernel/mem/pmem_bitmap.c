@@ -1,4 +1,4 @@
-#include <pmem.h>
+#include "pmem.h"
 
 #define ALIGN_UP(x,a) (((x) + ((a)-1)) & ~((a)-1)) //sirve para redondear a siguiente multiplo de a (4096 para las paginas que definimos)
 
@@ -36,7 +36,7 @@ static inline int  page_is_used(size_t i){
 }
 
 
-int mem_init(void *pool_start, size_t pool_length) {
+int pm_init(void *pool_start, size_t pool_length) {
     //inicializa variables globales
     pool_base = (uint8_t*)pool_start;
     pool_len = pool_length;
