@@ -62,6 +62,11 @@ static void kernel_memory_init(void) {
 int main()
 {
 	kernel_memory_init();
+	proc_init();
+	scheduler_init();
+	//crear proceso idle y agregar al scheduler
+	//para crear un proceso nuevo proc_create() y scheduler_add()
+	//en vez de ejecutar la funcion de userland directamente lo debo hacer asi
 	load_idt();
 	play_boot_sound();
 	return ((EntryPoint)shellAddress)();

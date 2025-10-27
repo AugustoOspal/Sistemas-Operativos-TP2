@@ -66,17 +66,22 @@ SECTION .text
 %endmacro
 
 %macro irqHandlerMaster 1
-	pushState
+    pushState
 
-	mov rdi, %1
-	call irqDispatcher
+    ; rdi = &TrapFrame (base del snapshot que acabamos de pushear)
+    mov rdi, rsp
 
-	; signal pic EOI (End of Interrupt)
-	mov al, 20h
-	out 20h, al
+    ; rsi = número de IRQ (el parámetro de la macro)
+    mov rsi, %1
 
-	popState
-	iretq
+    call irqDispatcher
+
+    ; EOI al PIC maestro
+    mov al, 20h
+    out 20h, al
+
+    popState
+    iretq
 %endmacro
 
 
