@@ -147,3 +147,4 @@ void mem_get_stats(pm_stats_t *out) {
 	out->used = (uint64_t) used_pages * PM_PAGE_SIZE;
 	out->free = (uint64_t) free_pages * PM_PAGE_SIZE;
 }
+
