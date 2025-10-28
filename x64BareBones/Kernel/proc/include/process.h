@@ -45,6 +45,7 @@ typedef struct proc {
     pid_t pid;
     const char *name;
     proc_state_t state;
+    int time_slice_left;
 
     void *kernel_stack_base; 
     size_t kernel_stack_size;
