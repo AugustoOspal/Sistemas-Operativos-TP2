@@ -1,6 +1,6 @@
 #include <stdint.h>
-#include "scheduler.h"
-#include "process.h"
+#include "../include/scheduler.h"
+
 
 #define QUANTUM 5  // ticks por proceso
 

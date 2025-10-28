@@ -49,10 +49,12 @@ GCC_WITH_INCLUDES=$(GCCFLAGS) $(INCLUDE_DIRS)
 
 .PHONY: all clean
 
-all: $(KERNEL)
+all: $(KERNEL) 
 
 $(KERNEL): $(LOADER_OBJ) $(OBJECTS) $(OBJECTS_ASM)
 	$(LD) $(LDFLAGS) -T $(LDSCRIPT) -o $(KERNEL) $(LOADER_OBJ) $(OBJECTS) $(OBJECTS_ASM)
+#     $(LD) $(LDFLAGS) -T $(LDSCRIPT) --oformat=elf64-x86-64 -o kernel.elf $(KERNEL) $(LOADER_OBJ) $(OBJECTS) $(OBJECTS_ASM) 
+
 
 %.o: %.c
 	$(GCC) $(GCC_WITH_INCLUDES) -c $< -o $@
