@@ -13,12 +13,12 @@ static proc_t *current = 0;
 static proc_t *idle = 0;
 
 static inline void enqueue(proc_t *p){ //agrega al final
-    p->next = 0;
+    p->ready_next = 0;
     if (!ready_tail){ // cola vacia
         ready_head = p;
         ready_tail = p;
     }else{ 
-        ready_tail->next = p;
+        ready_tail->ready_next = p;
         ready_tail = p;
     }
 }
@@ -26,9 +26,9 @@ static inline void enqueue(proc_t *p){ //agrega al final
 static inline proc_t* dequeue(){
     proc_t *p = ready_head;
     if (!p) return 0;
-    ready_head = p->next;
+    ready_head = p->ready_next;
     if (!ready_head) ready_tail = 0;
-    p->next = 0;
+    p->ready_next = 0;
     return p;
 }
 
@@ -41,24 +41,31 @@ static inline void switch_to(proc_t *next) {
     if (next == current){
         return;
     }
+
     proc_t *prev = current;
     current = next;
-    current->state = PROCESS_RUNNING;
-    current->time_slice_left = QUANTUM;
 
-    // el que estaba corriendo vuelve a ready (si no es idle)
-    if (prev && prev != idle && prev->state == PROCESS_RUNNING){ //el proceso idle no se encola ni tiene estado
+    // reencolar al anterior si no es idle y estaba corriendo
+    if (prev && prev != idle && prev->state == PROCESS_RUNNING) {
         prev->state = PROCESS_READY;
         enqueue(prev);
     }
-    //context_switch(&prev->rsp, current->rsp);
+
+    // preparo el nuevo
+    current->state = PROCESS_RUNNING;
+    current->time_slice_left = QUANTUM;
+    proc_set_current(current);
+    context_switch((uint64_t*)&prev->stack_pointer, (uint64_t)current->stack_pointer);
 }
 
 void scheduler_init(void) {
-    ready_head = ready_tail = 0;
-    idle = idle_init();
-    idle->time_slice_left = QUANTUM;
-    current = idle;
+  ready_head = 0;
+  ready_tail = 0;
+  idle = idle_init();
+  current = idle;
+  current->state = PROCESS_RUNNING;
+  current->time_slice_left = QUANTUM;
+  proc_set_current(current); 
 }
 
 void scheduler_add(proc_t *p) {
@@ -72,14 +79,17 @@ proc_t* scheduler_current(void) {
 }
 
 void schedule(TrapFrame *tf) {
-    // sin trap frame por ahora
+    if (tf){
+        current->stack_pointer = (void*)tf;
+    }
     proc_t *next = pick_next();
     if (next != current)
         switch_to(next);
 }
 
 void scheduler_on_tick(TrapFrame *tf) {
-    // sin trap frame por ahora
+    current->stack_pointer = (void*)tf;
+
     if (current == idle){
         proc_t *n = dequeue();
         if (n){
@@ -91,8 +101,6 @@ void scheduler_on_tick(TrapFrame *tf) {
         return;
     }else{
         // quantum terminó -> cambio a otro
-        current->state = PROCESS_READY;
-        enqueue(current);
         switch_to(pick_next());
     }
 }

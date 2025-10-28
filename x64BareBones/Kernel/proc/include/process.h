@@ -53,7 +53,10 @@ typedef struct proc {
     TrapFrame *trap_frame;
 
     void *page_directory;
-    struct proc *next; 
+
+    struct proc *next; // lista global
+    struct proc *ready_next; // ready queue
+
 } proc_t;
 
 void proc_init(void);

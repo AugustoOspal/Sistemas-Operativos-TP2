@@ -27,7 +27,7 @@ void irqDispatcher(TrapFrame * tf, uint64_t irq) {
 
 void int_20(TrapFrame * tf) {
 	timer_handler();
-	// scheduler_on_tick(tf);  // TODO: Implement scheduler
+	scheduler_on_tick(tf);
 }
 
 void int_21(TrapFrame * tf){

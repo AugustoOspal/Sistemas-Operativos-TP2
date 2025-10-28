@@ -8,7 +8,7 @@ extern void _hlt(void);
 static proc_t *idle_proc = NULL;
 
 // Crea el proceso idle
-void idle_init(void) {
+proc_t* idle_init(void) {
     char *name = "idle";
     idle_proc = proc_create(idle_main, NULL);
 
@@ -17,6 +17,7 @@ void idle_init(void) {
             _hlt(); // 
         }
     }
+    return idle_proc;
 }
 
 static void idle_main(void *args) {
