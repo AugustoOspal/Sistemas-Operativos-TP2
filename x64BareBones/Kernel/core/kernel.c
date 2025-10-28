@@ -64,7 +64,10 @@ int main()
 {
 	kernel_memory_init();
 
-	// proc_init();
+	//proc_init();
+
+	//idle_init(); 
+	
 	// scheduler_init();
 
 	//crear proceso idle y agregar al scheduler

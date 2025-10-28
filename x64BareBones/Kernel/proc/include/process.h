@@ -36,20 +36,23 @@ typedef enum {
     PROCESS_READY,
     PROCESS_RUNNING,
     PROCESS_BLOCKED,
-    PROCESS_TERMINATED
+    PROCESS_TERMINATED,
+    PROCESS_ZOMBIE
 } proc_state_t;
 
+//Estructura que representa un proceso en el sistema
 typedef struct proc {
     pid_t pid;
+    const char *name;
     proc_state_t state;
 
-    void *kernel_stack_base;
+    void *kernel_stack_base; 
     size_t kernel_stack_size;
     void *stack_pointer;
     TrapFrame *trap_frame;
 
     void *page_directory;
-    struct proc *next;
+    struct proc *next; 
 } proc_t;
 
 void proc_init(void);
@@ -57,5 +60,6 @@ proc_t* proc_create(void (*entry_point)(void *), void *args);
 void proc_exit(void);
 pid_t proc_get_current_pid(void);
 proc_t* proc_get_current(void);
+void proc_set_current(proc_t *p);
 
 #endif // PROCESS_H
