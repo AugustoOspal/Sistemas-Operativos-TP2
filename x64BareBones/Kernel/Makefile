@@ -1,6 +1,10 @@
 include Makefile.inc
 
-KERNEL=kernel.bin
+# TODO: Ver si se puede emprolijar pasando cosas al Makefile.inc
+# TODO: Aca no hizo falta poner -no-pie en LDFLAGS porque usamos LD directamente, ver si se puede cambiar en el makefile de la terminal
+
+KERNEL_ELF=kernel.elf
+KERNEL_BIN=kernel.bin
 
 # Find all C source files in subsystems (excluding test files)
 SOURCES=$(wildcard core/*.c) \
@@ -49,12 +53,13 @@ GCC_WITH_INCLUDES=$(GCCFLAGS) $(INCLUDE_DIRS)
 
 .PHONY: all clean
 
-all: $(KERNEL) 
+all: $(KERNEL_BIN)
 
-$(KERNEL): $(LOADER_OBJ) $(OBJECTS) $(OBJECTS_ASM)
-	$(LD) $(LDFLAGS) -T $(LDSCRIPT) -o $(KERNEL) $(LOADER_OBJ) $(OBJECTS) $(OBJECTS_ASM)
-#     $(LD) $(LDFLAGS) -T $(LDSCRIPT) --oformat=elf64-x86-64 -o kernel.elf $(KERNEL) $(LOADER_OBJ) $(OBJECTS) $(OBJECTS_ASM) 
+$(KERNEL_ELF): $(LOADER_OBJ) $(OBJECTS) $(OBJECTS_ASM)
+	$(LD) $(LDFLAGS) -T $(LDSCRIPT) -o $(KERNEL_ELF) $(LOADER_OBJ) $(OBJECTS) $(OBJECTS_ASM)
 
+$(KERNEL_BIN): $(KERNEL_ELF)
+	objcopy -O binary $(KERNEL_ELF) $(KERNEL_BIN)
 
 %.o: %.c
 	$(GCC) $(GCC_WITH_INCLUDES) -c $< -o $@
@@ -64,5 +69,5 @@ $(KERNEL): $(LOADER_OBJ) $(OBJECTS) $(OBJECTS_ASM)
 
 clean:
 	find . -name "*.o" -delete
-	rm -f $(KERNEL)
+	rm -f $(KERNEL_ELF) $(KERNEL_BIN)
 

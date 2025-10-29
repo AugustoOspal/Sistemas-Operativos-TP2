@@ -20,7 +20,7 @@ Una vez ubicado en el directorio deseado, desde la terminal ejecutar los siguien
 docker pull agodio/itba-so-multi-platform:3.0
 git clone https://github.com/AugustoOspal/Sistemas-Operativos-TP2.git
 cd Sistemas-Operativos-TP2/x64BareBones
-docker run -d -v ${PWD}:/root --security-opt seccomp:unconfined -it --name Sistemas-Operativos-TP2 agodio/itba-so-multi-platform:3.0
+docker run -d -v ${PWD}:/root --security-opt seccomp:unconfined --add-host=host.docker.internal:host-gateway -it --name Sistemas-Operativos-TP2 agodio/itba-so-multi-platform:3.0
 ```
 
 ### Compilación

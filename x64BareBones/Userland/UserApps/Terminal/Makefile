@@ -1,7 +1,9 @@
 include ../../Makefile.inc
 
-MODULE     := 0000-shell.bin
+MODULE_ELF := shell.elf
+MODULE_BIN := 0000-shell.bin
 LDSCRIPT   := shell.ld
+OUTPUT_DIR := ../..
 
 MY_CFLAGS  := $(GCCFLAGS) \
                -Ilib \
@@ -16,7 +18,7 @@ LOADER_O   := _loader.o
 
 .PHONY: all clean
 
-all: $(MODULE)
+all: $(OUTPUT_DIR)/$(MODULE_BIN)
 
 $(LOADER_O): _loader.c
 	$(GCC) $(MY_CFLAGS) -c $< -o $@
@@ -27,12 +29,19 @@ $(LOADER_O): _loader.c
 %.o: %.asm
 	$(ASM) $(ASMFLAGS) $< -o $@
 
-$(MODULE): $(LOADER_O) $(COBJECTS) $(ASMOBJS) \
-            ../../UserLib/libuserland.a \
-            ../PongisGolf/libpongisgolf.a
-	$(GCC) $(MY_CFLAGS) -T $(LDSCRIPT) \
+# El -no-pie tiene que estar si o si porque el linker está tratando de generar un objeto
+#  PIE (Position Independent Executable), pero nuestro código tiene referencias absolutas
+# que no son compatibles
+
+$(OUTPUT_DIR)/$(MODULE_ELF): $(LOADER_O) $(COBJECTS) $(ASMOBJS) \
+                              ../../UserLib/libuserland.a \
+                              ../PongisGolf/libpongisgolf.a
+	$(GCC) $(MY_CFLAGS) -no-pie -T $(LDSCRIPT) \
           $(LOADER_O) $(COBJECTS) $(ASMOBJS) ../PongisGolf/libpongisgolf.a ../../UserLib/libuserland.a \
-          -o ../../$(MODULE) $(LDFLAGS)
+          -o $@ $(LDFLAGS)
+
+$(OUTPUT_DIR)/$(MODULE_BIN): $(OUTPUT_DIR)/$(MODULE_ELF)
+	objcopy -O binary $< $@
 
 clean:
-	rm -f $(LOADER_O) $(COBJECTS) $(ASMOBJS) ../../$(MODULE)
+	rm -f $(LOADER_O) $(COBJECTS) $(ASMOBJS) $(OUTPUT_DIR)/$(MODULE_ELF) $(OUTPUT_DIR)/$(MODULE_BIN)
