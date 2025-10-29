@@ -1,11 +1,11 @@
 #ifndef _KEYBOARDDRIVER_H_
 #define _KEYBOARDDRIVER_H_
 
-#include "lib.h"
 #include "color.h"
-#include <stdint.h>
-#include <stdbool.h>
+#include "lib.h"
 #include "syscalls.h"
+#include <stdbool.h>
+#include <stdint.h>
 
 // Función de ASM para leer el scancode raw del puerto del teclado
 extern unsigned int getKeyCode();

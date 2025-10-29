@@ -29,42 +29,40 @@ void sleep(uint64_t milliseconds) {
 	uint64_t target_ticks = (milliseconds * 18) / 1000;
 	uint64_t start_ticks = ticks;
 
-
 	// Habilito los interrupts
 	_sti();
-	while ((ticks - start_ticks) < target_ticks);
+	while ((ticks - start_ticks) < target_ticks)
+		;
 	// Deshabilito los interrupts
-
 
 	// TODO: Si dejaba esto no me andaba el teclado
 	// _cli();
 }
 
-uint16_t getSec(){
+uint16_t getSec() {
 	return getSysSeconds();
 }
-uint16_t getMin(){
+uint16_t getMin() {
 	return getSysMinutes();
 }
-uint16_t  getHour(){
+uint16_t getHour() {
 	return getSysHours();
 }
-uint16_t getDay(){
+uint16_t getDay() {
 	return getSysDayOfMonth();
 }
-uint16_t  getMonth(){
+uint16_t getMonth() {
 	return getSysMonth();
 }
-uint16_t getYear(){
+uint16_t getYear() {
 	return getSysYear();
 }
 
 void getTime(dateTime *dt) {
-		dt->sec = getSec();
-		dt->min = getMin();
-		dt->hour = getHour();
-		dt->day = getDay();
-		dt->month = getMonth();
-		dt->year = getYear();
+	dt->sec = getSec();
+	dt->min = getMin();
+	dt->hour = getHour();
+	dt->day = getDay();
+	dt->month = getMonth();
+	dt->year = getYear();
 }
-

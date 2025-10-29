@@ -1,9 +1,9 @@
-#include <stdlib.h>
 #include <stdint.h>
+#include <stdlib.h>
 
 #include "CuTest.h"
-#include "pmem.h"
 #include "TestMemoryManager.h"
+#include "pmem.h"
 
 #define TEST_POOL_SIZE (1024 * 1024)
 #define PAGE_SIZE 4096

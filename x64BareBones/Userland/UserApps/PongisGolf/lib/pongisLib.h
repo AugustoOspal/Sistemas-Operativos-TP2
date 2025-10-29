@@ -1,65 +1,61 @@
 #ifndef _PONGISLIB_H_
 #define _PONGISLIB_H_
 
-#include "usrio.h"
 #include "color.h"
-#include "shell.h"
-#include <stdint.h>
-#include "soundLib.h"
-#include "videoLib.h"
-#include "pongisconfig.h"
 #include "pongisLevels.h"
+#include "pongisconfig.h"
+#include "shell.h"
+#include "soundLib.h"
+#include "usrio.h"
+#include "videoLib.h"
+#include <stdint.h>
 
 /*
-    Estaria bueno hacer un ADT pero no podemos porque
-    no tenemos malloc
+	Estaria bueno hacer un ADT pero no podemos porque
+	no tenemos malloc
 */
 
-typedef struct MipT
-{
-    uint64_t x;
-    uint64_t y;
-    uint64_t speed;
-    uint64_t radius;
-    uint32_t color;
-    int16_t degree; // 0 arriba, 1 derecha, 2 abajo, 3 izquierda  
-}MipT;
+typedef struct MipT {
+	uint64_t x;
+	uint64_t y;
+	uint64_t speed;
+	uint64_t radius;
+	uint32_t color;
+	int16_t degree; // 0 arriba, 1 derecha, 2 abajo, 3 izquierda
+} MipT;
 
-typedef struct BallT
-{
-    uint64_t x;
-    uint64_t y;
-    uint64_t speed;
-    uint64_t radius;
-    uint32_t color;
-}BallT;
+typedef struct BallT {
+	uint64_t x;
+	uint64_t y;
+	uint64_t speed;
+	uint64_t radius;
+	uint32_t color;
+} BallT;
 
-typedef struct HoleT
-{
-    uint64_t x;
-    uint64_t y;
-    uint64_t radius;
-    uint32_t color;
-}HoleT;
+typedef struct HoleT {
+	uint64_t x;
+	uint64_t y;
+	uint64_t radius;
+	uint32_t color;
+} HoleT;
 
-typedef MipT* MipP;
-typedef BallT* BallP;
-typedef HoleT* HoleP;
+typedef MipT *MipP;
+typedef BallT *BallP;
+typedef HoleT *HoleP;
 
 /*
-    Esto al final no lo usamos, pero lo dejamos porque es lo que vamos a usar
-    cuando implementemos malloc en SO.
+	Esto al final no lo usamos, pero lo dejamos porque es lo que vamos a usar
+	cuando implementemos malloc en SO.
 */
-typedef struct LevelT
-{
-    uint16_t level;
-    MipP mip1;
-    MipP mip2;
-    BallP ball;
-    HoleP hole;
-}LevelT;
+typedef struct LevelT {
+	uint16_t level;
+	MipP mip1;
+	MipP mip2;
+	BallP ball;
+	HoleP hole;
+} LevelT;
 
-typedef LevelT* LevelP;
+typedef LevelT *LevelP;
 
 // Helpers
 void drawLevel(uint16_t level, MipP mip1, MipP mip2, BallP ball, HoleP hole);

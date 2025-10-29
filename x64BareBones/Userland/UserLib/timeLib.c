@@ -2,9 +2,9 @@
 #include "syscallLib.h"
 
 void getDateTime(dateTime *dt) {
-    sys_getDateTime(dt); 
+	sys_getDateTime(dt);
 }
 
-extern void sleepMilli(uint64_t milliseconds){
-    sys_sleepMilli(milliseconds);
+extern void sleepMilli(uint64_t milliseconds) {
+	sys_sleepMilli(milliseconds);
 }

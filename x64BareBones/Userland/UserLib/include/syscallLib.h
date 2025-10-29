@@ -1,8 +1,8 @@
 #ifndef _SYSCALL_LIB_H
 #define _SYSCALL_LIB_H
 
-#include <stdint.h>
 #include "timeLib.h"
+#include <stdint.h>
 
 // Video
 extern void sys_clearScreen(void);
@@ -17,8 +17,7 @@ extern void sys_drawBin(uint64_t value, uint32_t hexColor, uint64_t x, uint64_t 
 extern uint16_t sys_getScreenWidth(void);
 extern uint16_t sys_getScreenHeight(void);
 
-
-// Teclado. 
+// Teclado.
 // TODO: Esto habria que sacarlo creo porque ya tenemos sys_read
 extern char sys_kbdGetChar(void);
 

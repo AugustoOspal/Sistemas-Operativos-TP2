@@ -1,17 +1,15 @@
 #include <stdint.h>
 
-#include "time.h"
 #include "keyboardDriver.h"
-#include "scheduler.h"
 #include "process.h"
+#include "scheduler.h"
+#include "time.h"
 
-static void int_20(TrapFrame * tf);
-static void int_21(TrapFrame * tf);
+static void int_20(TrapFrame *tf);
+static void int_21(TrapFrame *tf);
 
-void irqDispatcher(TrapFrame * tf, uint64_t irq) {
-
+void irqDispatcher(TrapFrame *tf, uint64_t irq) {
 	switch (irq) {
-
 		// Timer Tick
 		case 0:
 			int_20(tf);
@@ -25,11 +23,11 @@ void irqDispatcher(TrapFrame * tf, uint64_t irq) {
 	return;
 }
 
-void int_20(TrapFrame * tf) {
+void int_20(TrapFrame *tf) {
 	timer_handler();
 	scheduler_on_tick(tf);
 }
 
-void int_21(TrapFrame * tf){
+void int_21(TrapFrame *tf) {
 	keyboard_handler(tf);
 }

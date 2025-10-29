@@ -1,20 +1,33 @@
 #ifndef _SHELL_H_
 #define _SHELL_H_
 
-#include "usrio.h"
-#include <stdint.h>
+#include "pongisLib.h"
+#include "stringLib.h"
 #include "timeLib.h"
+#include "usrio.h"
+#include "videoLib.h"
 #include <stdbool.h>
 #include <stddef.h>
-#include "stringLib.h"
-#include "pongisLib.h"
-#include "videoLib.h"
+#include <stdint.h>
 
-typedef enum {HELP = 0, EXC_1, EXC_2, PONGISGOLF, ZOOM_IN, ZOOM_OUT, CLEAR, DATE, REGISTERS, BUSY_WAIT, BUSY_WAIT_KERNEL, EXIT} command_id;
+typedef enum {
+	HELP = 0,
+	EXC_1,
+	EXC_2,
+	PONGISGOLF,
+	ZOOM_IN,
+	ZOOM_OUT,
+	CLEAR,
+	DATE,
+	REGISTERS,
+	BUSY_WAIT,
+	BUSY_WAIT_KERNEL,
+	EXIT
+} command_id;
 
 void startShell();
 void readInput();
-command_id processInput(char* input);
+command_id processInput(char *input);
 void help();
 void printDateTime();
 void notACommand();
