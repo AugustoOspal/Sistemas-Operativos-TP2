@@ -3,6 +3,7 @@
 /.idea/*
 !/.idea/runConfigurations
 
+/.claude
 /CLAUDE.md
 /AGENTS.md
 /docs/Claude Chats/

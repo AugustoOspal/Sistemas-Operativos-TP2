@@ -2,13 +2,13 @@ include Makefile.inc
 
 KERNEL=kernel.bin
 
-# Find all C source files in subsystems
+# Find all C source files in subsystems (excluding test files)
 SOURCES=$(wildcard core/*.c) \
          $(wildcard interrupt/*.c) \
          $(wildcard drivers/*/*.c) \
          $(wildcard lib/*/*.c) \
          $(wildcard syscall/*.c) \
-         $(wildcard mem/*.c) \
+         $(filter-out mem/Test%.c,$(wildcard mem/*.c)) \
          $(wildcard sched/*.c) \
          $(wildcard proc/*.c)
 
