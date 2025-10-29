@@ -1,6 +1,7 @@
 #!/bin/bash
 
-./run.sh gdb &
+# > /dev/null 2>&1 & Para que no tilde al gdb cuando esta corriendo
+./run.sh gdb > /dev/null 2>&1 &
 QEMU_PID=$!
 
 sleep 2
