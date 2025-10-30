@@ -9,6 +9,10 @@
 #include "timeLib.h"
 #include "soundDriver.h"
 #include "pmem.h"
+#include "switch_context.h"
+#include "process.h"
+#include "scheduler.h"
+#include "syscalls.h"
 
 extern uint8_t text;
 extern uint8_t rodata;
@@ -60,17 +64,33 @@ static void kernel_memory_init(void) {
     pm_init(pool_start, pool_len);
 }
 
+
+
+static void procA(void *arg) {
+    (void)arg;
+    for (;;) {
+		sys_write(1, "A", 1);
+    }
+}
+
+static void procB(void *arg) {
+    (void)arg;
+    for (;;) {
+        sys_write(1, "B", 1);
+    }
+}
+
+
 int main()
 {
-	kernel_memory_init();
-
-	// proc_init();
-	// scheduler_init();
-
-	//crear proceso idle y agregar al scheduler
-	//para crear un proceso nuevo proc_create() y scheduler_add()
-	//en vez de ejecutar la funcion de userland directamente lo debo hacer asi
 	load_idt();
+	kernel_memory_init();
 	play_boot_sound();
-	return ((EntryPoint)shellAddress)();
+	scheduler_init();
+	proc_t *p1 = proc_create(procA, 0);
+    proc_t *p2 = proc_create(procB, 0);
+	scheduler_add(p1);
+    scheduler_add(p2);
+	for(;;) { __asm__ __volatile__("hlt"); }
+	//return ((EntryPoint)shellAddress)();
 }

@@ -15,6 +15,7 @@ void irqDispatcher(TrapFrame * tf, uint64_t irq) {
 		// Timer Tick
 		case 0:
 			int_20(tf);
+			scheduler_on_tick((uint64_t*)tf);
 			break;
 
 		// Teclado

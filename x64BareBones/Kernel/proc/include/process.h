@@ -6,56 +6,30 @@
 #include <stdbool.h>
 
 typedef struct TrapFrame {
-    // guardados por pushState mismo orden
-    uint64_t rax;
-    uint64_t rbx;
-    uint64_t rcx;
-    uint64_t rdx;
-    uint64_t rbp;
-    uint64_t rdi;
-    uint64_t rsi;
-    uint64_t r8;
-    uint64_t r9;
-    uint64_t r10;
-    uint64_t r11;
-    uint64_t r12;
-    uint64_t r13;
-    uint64_t r14;
-    uint64_t r15;
-    // iret frame que ya estaba en la pila abajo de los pushes
-    uint64_t rip;
-    uint64_t cs;
-    uint64_t rflags;
-    uint64_t rsp;
-    uint64_t ss;
+    uint64_t r15, r14, r13, r12, r11, r10, r9, r8;
+    uint64_t rsi, rdi, rbp, rdx, rcx, rbx, rax;
+    // Lo que iretq espera encontrar después de popState:
+    uint64_t rip, cs, rflags;
+    // Para IRQ en ring 0 no se apilan SS/RSP.
 } TrapFrame;
-
-typedef int pid_t;
 
 typedef enum {
     PROCESS_READY,
     PROCESS_RUNNING,
-    PROCESS_BLOCKED,
-    PROCESS_TERMINATED
+    PROCESS_ZOMBIE,
 } proc_state_t;
 
 typedef struct proc {
-    pid_t pid;
+    int pid;
     proc_state_t state;
-
-    void *kernel_stack_base;
-    size_t kernel_stack_size;
-    void *stack_pointer;
-    TrapFrame *trap_frame;
-
-    void *page_directory;
-    struct proc *next;
+    uint8_t *kernel_stack_base; //puntero a la base del bloque de memoria que reservamos para su pila de kernel
+    size_t kernel_stack_size; //tamaño de la pila de kernel para validaciones y liberaciones
+    uint64_t     saved_rsp; //el rsp apunta al trapframe y con eso recupero contexto
 } proc_t;
 
-void proc_init(void);
-proc_t* proc_create(void (*entry_point)(void *), void *args);
-void proc_exit(void);
-pid_t proc_get_current_pid(void);
-proc_t* proc_get_current(void);
+proc_t *proc_create(void (*entry_point)(void *), void *arg); //el primer parametro es un puntero a funcion que recibe void * (lo que sea) y no devuelve nada
+void proc_destroy(proc_t *p);
+void proc_set_state(proc_t *p, proc_state_t new_state);
+void proc_yield(void);
 
 #endif // PROCESS_H
