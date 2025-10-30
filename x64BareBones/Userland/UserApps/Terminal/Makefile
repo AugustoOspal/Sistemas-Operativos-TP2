@@ -18,7 +18,7 @@ LOADER_O   := _loader.o
 
 .PHONY: all clean
 
-all: $(OUTPUT_DIR)/$(MODULE_BIN)
+all: $(OUTPUT_DIR)/$(MODULE_BIN) $(OUTPUT_DIR)/$(MODULE_ELF)
 
 $(LOADER_O): _loader.c
 	$(GCC) $(MY_CFLAGS) -c $< -o $@
@@ -33,15 +33,21 @@ $(LOADER_O): _loader.c
 #  PIE (Position Independent Executable), pero nuestro código tiene referencias absolutas
 # que no son compatibles
 
-$(OUTPUT_DIR)/$(MODULE_ELF): $(LOADER_O) $(COBJECTS) $(ASMOBJS) \
+# Linkeo para binario (usa OUTPUT_FORMAT del linker script)
+$(OUTPUT_DIR)/$(MODULE_BIN): $(LOADER_O) $(COBJECTS) $(ASMOBJS) \
                               ../../UserLib/libuserland.a \
                               ../PongisGolf/libpongisgolf.a
 	$(GCC) $(MY_CFLAGS) -no-pie -T $(LDSCRIPT) \
           $(LOADER_O) $(COBJECTS) $(ASMOBJS) ../PongisGolf/libpongisgolf.a ../../UserLib/libuserland.a \
           -o $@ $(LDFLAGS)
 
-$(OUTPUT_DIR)/$(MODULE_BIN): $(OUTPUT_DIR)/$(MODULE_ELF)
-	objcopy -O binary $< $@
+# Linkeo para ELF (ignora OUTPUT_FORMAT del linker script con -Wl,--oformat)
+$(OUTPUT_DIR)/$(MODULE_ELF): $(LOADER_O) $(COBJECTS) $(ASMOBJS) \
+                              ../../UserLib/libuserland.a \
+                              ../PongisGolf/libpongisgolf.a
+	$(GCC) $(MY_CFLAGS) -no-pie -T $(LDSCRIPT) -Wl,--oformat=elf64-x86-64 \
+          $(LOADER_O) $(COBJECTS) $(ASMOBJS) ../PongisGolf/libpongisgolf.a ../../UserLib/libuserland.a \
+          -o $@ $(LDFLAGS)
 
 clean:
 	rm -f $(LOADER_O) $(COBJECTS) $(ASMOBJS) $(OUTPUT_DIR)/$(MODULE_ELF) $(OUTPUT_DIR)/$(MODULE_BIN)

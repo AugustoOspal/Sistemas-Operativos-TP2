@@ -53,13 +53,15 @@ GCC_WITH_INCLUDES=$(GCCFLAGS) $(INCLUDE_DIRS)
 
 .PHONY: all clean
 
-all: $(KERNEL_BIN)
+all: $(KERNEL_BIN) $(KERNEL_ELF)
 
+# Linkeo para binario (usa OUTPUT_FORMAT del linker script)
+$(KERNEL_BIN): $(LOADER_OBJ) $(OBJECTS) $(OBJECTS_ASM)
+	$(LD) $(LDFLAGS) -T $(LDSCRIPT) -o $(KERNEL_BIN) $(LOADER_OBJ) $(OBJECTS) $(OBJECTS_ASM)
+
+# Linkeo para ELF (ignora OUTPUT_FORMAT del linker script con --oformat)
 $(KERNEL_ELF): $(LOADER_OBJ) $(OBJECTS) $(OBJECTS_ASM)
-	$(LD) $(LDFLAGS) -T $(LDSCRIPT) -o $(KERNEL_ELF) $(LOADER_OBJ) $(OBJECTS) $(OBJECTS_ASM)
-
-$(KERNEL_BIN): $(KERNEL_ELF)
-	objcopy -O binary $(KERNEL_ELF) $(KERNEL_BIN)
+	$(LD) $(LDFLAGS) -T $(LDSCRIPT) --oformat=elf64-x86-64 -o $(KERNEL_ELF) $(LOADER_OBJ) $(OBJECTS) $(OBJECTS_ASM)
 
 %.o: %.c
 	$(GCC) $(GCC_WITH_INCLUDES) -c $< -o $@
