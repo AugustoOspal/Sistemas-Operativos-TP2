@@ -86,11 +86,15 @@ int main()
 	load_idt();
 	kernel_memory_init();
 	play_boot_sound();
-	scheduler_init();
-	proc_t *p1 = proc_create(procA, 0);
-    proc_t *p2 = proc_create(procB, 0);
-	scheduler_add(p1);
-    scheduler_add(p2);
-	for(;;) { __asm__ __volatile__("hlt"); }
+    sys_write(1, "Lanzando proceso...\n", 21);
+
+    proc_t *p1 = proc_create(procA, 0);
+    if (!p1) { sys_write(1, "proc_create fallo\n", 18); for(;;); }
+
+    start_process(p1->saved_rsp);
+
+    // Si vuelve, algo falló:
+    sys_write(1, "No deberia volver\n", 18);
+    for(;;);
 	//return ((EntryPoint)shellAddress)();
 }

@@ -1,6 +1,7 @@
 #include "process.h"
 #include "pmem.h"
 #include <string.h>
+#include "cpu_helpers.h"
 
 #define KERNEL_STACK_SIZE (16 * 4096)
 #define KERNEL_CODE_SELECTOR 0x08
@@ -21,22 +22,24 @@ proc_t *proc_create(void (*entry_point)(void *), void *arg){
         return NULL;
     }
 
-    // inicializo el trapframe
+    // inicializo el trapframe (queda al tope de la pila)
     TrapFrame *tf = (TrapFrame *)(stack + KERNEL_STACK_SIZE - sizeof(TrapFrame));
     memset(tf, 0, sizeof(TrapFrame));
 
-    tf->rip = (uint64_t)entry_point; // donde empieza el proceso
-    tf->rdi = (uint64_t)arg; // primer argumento
-    tf->cs  = KERNEL_CODE_SELECTOR;
-    tf->rflags = INITIAL_RFLAGS;
+    tf->rip    = (uint64_t)entry_point;   // donde empieza el proceso
+    tf->rdi    = (uint64_t)arg;           // primer argumento (ABI SysV)
+    tf->cs     = (uint64_t)read_cs();     // selector real de código del kernel
+    uint64_t rf = read_rflags();          // flags actuales del kernel
+    rf |= (1ULL << 9);                    // IF=1 para permitir IRQ tras iretq
+    tf->rflags = rf;
 
     // inicializo estructura proc
     memset(p, 0, sizeof(proc_t));
     p->kernel_stack_base = stack;
     p->kernel_stack_size = KERNEL_STACK_SIZE;
-    p->state = PROCESS_READY;
+    p->state = PROCESS_READY;             // o PROC_READY si ya usás ese prefijo
     p->pid = next_pid++;
-    p->saved_rsp = (uint64_t)tf;
+    p->saved_rsp = (uint64_t)tf;          // rsp apunta al inicio del frame (r15)
     return p;
 }
 

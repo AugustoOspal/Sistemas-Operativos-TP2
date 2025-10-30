@@ -23,7 +23,10 @@ start_process:
     pop     rbx
     pop     rax
 
-    ; Ahora el tope de la pila es RIP, luego CS, luego RFLAGS.
+//o comento esto
     pop     rax           ; rax = RIP (entry_point)
     add     rsp, 16       ; descartar CS y RFLAGS (no los usamos en esta prueba)
-    jmp     rax    
+    jmp     rax  
+
+//o comento esto
+//    iretq
