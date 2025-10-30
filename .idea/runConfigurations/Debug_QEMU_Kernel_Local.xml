@@ -1,0 +1,10 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Debug QEMU Kernel Local" type="CLion_Remote" version="1" remoteCommand="localhost:1234" symbolFile="$ProjectFileDir$/x64BareBones/Kernel/kernel.elf" sysroot="$ProjectFileDir$/x64BareBones">
+    <debugger toolchainName="Default" />
+    <pathMapping remote=":/root/Userland" local="$PROJECT_DIR$/x64BareBones/Userland" />
+    <pathMapping remote=":/root/Kernel" local="$PROJECT_DIR$/x64BareBones/Kernel" />
+    <method v="2">
+      <option name="ToolBeforeRunTask" enabled="true" actionId="Tool_External Tools_Run QEMU Debug" />
+    </method>
+  </configuration>
+</component>
