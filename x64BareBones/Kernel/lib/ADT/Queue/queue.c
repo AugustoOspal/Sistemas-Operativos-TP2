@@ -19,52 +19,72 @@ typedef struct nodeT *nodeP;
 
 QueueADT NewQueue(void)
 {
-    QueueADT queue = mem_alloc(sizeof(QueueCDT));
-    queue->head = NULL;
-    queue->tail = NULL;
-    queue->length = 0;
-    return queue;
-}
+    const QueueADT queue = mem_alloc(sizeof(QueueCDT));
 
-void FreeQueue(QueueADT queue)
-{
-    // TODO: Aca tendriamos que ver como manejar el error
-    if (!queue || !queue->length)
-    {
-        return;
+    if (queue) {
+        queue->head = NULL;
+        queue->tail = NULL;
+        queue->length = 0;
+        return queue;
     }
 
-    mem_free(queue);
+    return NULL;
 }
 
-void Enqueue(QueueADT queue, void *obj)
+void FreeQueue(const QueueADT queue)
 {
-    nodeP newNode = mem_alloc(sizeof(nodeT));
-    newNode->obj = obj;
-    newNode->next = queue->tail;
+    if (queue)
+    {
+        nodeP current = queue->head;
+        while (current != NULL)
+        {
+            const nodeP next = current->next;
+            mem_free(current);
+            current = next;
+        }
 
-    queue->tail = newNode;
+        mem_free(queue);
+    }
+}
+
+void Enqueue(const QueueADT queue, void *obj)
+{
+    const nodeP newNode = mem_alloc(sizeof(nodeT));
+    newNode->obj = obj;
+    newNode->next = NULL;
+
+    if (queue->tail == NULL) {
+        queue->head = newNode;
+        queue->tail = newNode;
+    } else {
+        queue->tail->next = newNode;
+        queue->tail = newNode;
+    }
     queue->length++;
 }
 
-void *Dequeue(QueueADT queue)
+void *Dequeue(const QueueADT queue)
 {
     if (queue->length == 0)
         return NULL;
 
-    nodeP node = queue->tail;
-    for (; node->next != queue->head; node = node->next);
-    queue->head = node;
+    const nodeP toRemove = queue->head;
+    void *obj = toRemove->obj;
 
-    nodeP tmp = node->next;
-    node->next = NULL;
-    return tmp->obj;
+    queue->head = queue->head->next;
+    if (queue->head == NULL) {
+        queue->tail = NULL;
+    }
+
+    queue->length--;
+    mem_free(toRemove);
+    return obj;
 }
 
-int QueueLength(QueueADT queue) {
+int QueueLength(const QueueADT queue) {
     return queue->length;
 }
 
-bool IsQueueEmpty(QueueADT queue) {
+bool IsQueueEmpty(const QueueADT queue) {
     return !queue->length;
 }

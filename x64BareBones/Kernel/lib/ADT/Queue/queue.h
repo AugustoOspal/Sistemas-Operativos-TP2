@@ -3,15 +3,15 @@
 
 #include <stdbool.h>
 #include <stddef.h>
-#include "pmem.h"
+#include "../../../mem/include/pmem.h"
 
 typedef struct QueueCDT *QueueADT;
 
 QueueADT NewQueue(void);
 void FreeQueue(QueueADT queue);
-void Enqueue(QueueADT queue, void *obj);
-void *Dequeue(QueueADT queue);
-int QueueLength(QueueADT queue);
-bool IsQueueEmpty(QueueADT queue);
+void Enqueue(const QueueADT queue, void *obj);
+void *Dequeue(const QueueADT queue);
+int QueueLength(const QueueADT queue);
+bool IsQueueEmpty(const QueueADT queue);
 
 #endif
