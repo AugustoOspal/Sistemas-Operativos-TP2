@@ -9,7 +9,6 @@
 #include "timeLib.h"
 #include "soundDriver.h"
 #include "pmem.h"
-#include "switch_context.h"
 #include "process.h"
 #include "scheduler.h"
 #include "syscalls.h"
@@ -69,14 +68,14 @@ static void kernel_memory_init(void) {
 static void procA(void *arg) {
     (void)arg;
     for (;;) {
-		sys_write(1, "A", 1);
+		drawChar('A', 0xFFFFFF, 10, 10);
     }
 }
 
 static void procB(void *arg) {
     (void)arg;
     for (;;) {
-        sys_write(1, "B", 1);
+        drawChar('B', 0x00FF00, 10, 11); //color verde
     }
 }
 
@@ -85,16 +84,16 @@ int main()
 {
 	load_idt();
 	kernel_memory_init();
-	play_boot_sound();
-    sys_write(1, "Lanzando proceso...\n", 21);
+	scheduler_init();
 
     proc_t *p1 = proc_create(procA, 0);
-    if (!p1) { sys_write(1, "proc_create fallo\n", 18); for(;;); }
+    proc_t *p2 = proc_create(procB, 0);
+    if (!p1 || !p2) { sys_write(1, "proc_create fallo\n", 18); for(;;); }
 
-    start_process(p1->saved_rsp);
+	scheduler_add(p1);
+	scheduler_add(p2);
 
-    // Si vuelve, algo falló:
-    sys_write(1, "No deberia volver\n", 18);
+	__asm__ __volatile__("int $0x20");
     for(;;);
 	//return ((EntryPoint)shellAddress)();
 }

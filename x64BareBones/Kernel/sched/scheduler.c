@@ -1,5 +1,4 @@
 #include "scheduler.h"
-#include "switch_context.h"
 #include <stdint.h>
 #include "process.h"
 #include "syscalls.h"
@@ -33,7 +32,6 @@ void scheduler_init(void) { //ya son inicializados pero en ejecucion se podria r
 }
 
 int scheduler_add(proc_t *p) {
-        sys_write(1, ".", 1); // Indicador visual de tick
     if (p == NULL || run_queue_len >= MAX_PROCS){
         return -1;
     }
@@ -42,30 +40,30 @@ int scheduler_add(proc_t *p) {
     return 0;
 }
 
-void scheduler_on_tick(uint64_t *current_rsp_addr) {
+uint64_t schedule(uint64_t current_rsp){
     if (run_queue_len == 0){
-        return;
+        return 0;
     }
 
     if (current_proc < 0) { //primer tick
         current_proc = 0;
         run_queue[current_proc]->state = PROCESS_RUNNING;
-        switch_context(current_rsp_addr, run_queue[current_proc]->saved_rsp);
-        return;
+        return run_queue[current_proc]->saved_rsp;
     }
 
+    proc_t * current_process_aux = run_queue[current_proc];
+    current_process_aux->saved_rsp = current_rsp;
+    if(current_process_aux->state == PROCESS_RUNNING){
+        current_process_aux->state = PROCESS_READY;
+    }
     int next = pick_next();
     if (next < 0 || next == current_proc){ //no tengo que cambiar de proc
-        return;
+        current_process_aux->state = PROCESS_RUNNING;
+        return 0; //se sigue en el mismo
     }
 
-    proc_t *current_process_aux = run_queue[current_proc];
-    proc_t *next_process = run_queue[next];
-
-    current_process_aux->state  = PROCESS_READY;
+    proc_t * next_process = run_queue[next];
     next_process->state = PROCESS_RUNNING;
     current_proc = next;
-
-    // guarda RSP actual en current_process_aux->saved_rsp y carga next_process->saved_rsp
-    switch_context(&current_process_aux->saved_rsp, next_process->saved_rsp);
+    return next_process->saved_rsp;
 }

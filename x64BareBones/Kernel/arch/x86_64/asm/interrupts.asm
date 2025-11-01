@@ -76,6 +76,16 @@ SECTION .text
 
     call irqDispatcher
 
+
+	mov rdi, rsp              ; rdi = rsp actual (TrapFrame del saliente)
+	extern schedule
+	call schedule             ; rax = next_rsp (0 si no hay switch)
+	test rax, rax
+	jz .no_switch
+	mov rsp, rax              ; cargar pila del entrante
+	
+	.no_switch:
+
     ; EOI al PIC maestro
     mov al, 20h
     out 20h, al

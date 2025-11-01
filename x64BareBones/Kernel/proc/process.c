@@ -3,14 +3,10 @@
 #include <string.h>
 #include "cpu_helpers.h"
 
-/* constants */
 #define KERNEL_STACK_SIZE (16 * 4096)
 #define INITIAL_RFLAGS 0x202
 
 static int next_pid = 1;
-
-/* forward: scheduler.c debe proveer schedule() */
-//extern void schedule(void);
 
 proc_t *proc_create(void (*entry_point)(void *), void *arg){
     /* reservar pila kernel */

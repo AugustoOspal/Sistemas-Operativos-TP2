@@ -15,7 +15,6 @@ void irqDispatcher(TrapFrame * tf, uint64_t irq) {
 		// Timer Tick
 		case 0:
 			int_20(tf);
-			//scheduler_on_tick((uint64_t*)tf);
 			break;
 
 		// Teclado
@@ -28,7 +27,6 @@ void irqDispatcher(TrapFrame * tf, uint64_t irq) {
 
 void int_20(TrapFrame * tf) {
 	timer_handler();
-	// scheduler_on_tick(tf);  // TODO: Implement scheduler
 }
 
 void int_21(TrapFrame * tf){
