@@ -23,10 +23,10 @@ start_process:
     pop     rbx
     pop     rax
 
-//o comento esto
+;o comento esto
     pop     rax           ; rax = RIP (entry_point)
     add     rsp, 16       ; descartar CS y RFLAGS (no los usamos en esta prueba)
     jmp     rax  
 
-//o comento esto
-//    iretq
+;o comento esto
+    iretq
