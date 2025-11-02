@@ -2,11 +2,13 @@
 
 int currentFont = 1; // 0=small,1=medium,2=large
 
-void zoomInFont(void) {
+void zoomInFont(void)
+{
 	if (currentFont < FONTS - 1)
 		currentFont++;
 }
-void zoomOutFont(void) {
+void zoomOutFont(void)
+{
 	if (currentFont > 0)
 		currentFont--;
 }
@@ -210,15 +212,18 @@ static const int font_heights[FONTS] = {FONT_CHAR_HEIGHT_BYTES, FONT_CHAR_HEIGHT
 										FONT_CHAR_HEIGHT_LARGE_BYTES};
 static const uint32_t font_masks[FONTS] = {FONT_MASK_SMALL, FONT_MASK_SMALL, FONT_MASK_SMALL};
 
-int getCurrentFontWidth(void) {
+int getCurrentFontWidth(void)
+{
 	return font_widths[currentFont];
 }
 
-int getCurrentFontHeight(void) {
+int getCurrentFontHeight(void)
+{
 	return font_heights[currentFont];
 }
 
-FontChar getCharBitMap(char c) {
+FontChar getCharBitMap(char c)
+{
 	FontChar r = {0};
 	if (c < FIRST_PRINTABLE_CHAR || c > LAST_PRINTABLE_CHAR)
 		return r;
@@ -230,9 +235,11 @@ FontChar getCharBitMap(char c) {
 	return r;
 }
 
-int getWidth(void) {
+int getWidth(void)
+{
 	return font_widths[currentFont];
 }
-int getHeight(void) {
+int getHeight(void)
+{
 	return font_heights[currentFont];
 }

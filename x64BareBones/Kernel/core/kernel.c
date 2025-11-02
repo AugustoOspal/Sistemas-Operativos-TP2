@@ -12,6 +12,9 @@
 #include <stdint.h>
 #include <string.h>
 
+// TODO: Despues borrar esto
+#include "test_processes.h"
+
 extern uint8_t text;
 extern uint8_t rodata;
 extern uint8_t data;
@@ -28,17 +31,20 @@ static void *const shellDataAddress = (void *) 0x500000;
 
 typedef int (*EntryPoint)();
 
-void clearBSS(void *bssAddress, uint64_t bssSize) {
+void clearBSS(void *bssAddress, uint64_t bssSize)
+{
 	memset(bssAddress, 0, bssSize);
 }
 
-void *getStackBase() {
+void *getStackBase()
+{
 	return (void *) ((uint64_t) &endOfKernel + PageSize * 8 // The size of the stack itself, 32KiB
 					 - sizeof(uint64_t)						// Begin at the top of the stack
 	);
 }
 
-void *initializeKernelBinary() {
+void *initializeKernelBinary()
+{
 	void *moduleAddresses[] = {shellAddress, shellDataAddress};
 
 	loadModules(&endOfKernelBinary, moduleAddresses);
@@ -47,18 +53,28 @@ void *initializeKernelBinary() {
 	return getStackBase();
 }
 
-static void kernel_memory_init(void) {
+static void kernel_memory_init(void)
+{
 	void *pool_start = (void *) &_pm_pool_start;
 	size_t pool_len = (size_t) ((char *) &_pm_pool_end - (char *) &_pm_pool_start);
 	pm_init(pool_start, pool_len);
 }
 
-int main() {
+int main()
+{
 	kernel_memory_init();
 	initializeScheduler();
 	load_idt();
 
+	createProcess(processA, 0, NULL);
+	createProcess(processB, 0, NULL);
+	createProcess(processC, 0, NULL);
 
+	_sti();
+	while (1)
+	{
+		_hlt();
+	}
 
 	play_boot_sound();
 	return ((EntryPoint) shellAddress)();

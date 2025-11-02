@@ -28,7 +28,8 @@ extern int currentFont;
 
 typedef const uint8_t font_char_t[FONT_CHAR_HEIGHT_BYTES];
 
-typedef struct {
+typedef struct
+{
 	const uint8_t *bitmap; // &font_small[idx]
 	int width;			   // 8,16 o 24
 	int height;			   // 16,32 o 48

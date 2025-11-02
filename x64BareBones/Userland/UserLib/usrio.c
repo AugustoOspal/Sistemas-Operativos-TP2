@@ -3,20 +3,23 @@
 #define STDIN 0
 #define STDOUT 1
 
-extern char getchar(void) {
+extern char getchar(void)
+{
 	char c;
 	while (!sys_read(STDIN, &c, 1))
 		;
 	return c;
 }
 
-int putchar(char c) {
+int putchar(char c)
+{
 	sys_write(STDOUT, &c, 1);
 	return c;
 }
 
 // Devuelve la len + 1 por la \n
-int puts(const char *s) {
+int puts(const char *s)
+{
 	uint64_t len;
 	for (len = 0; s[len]; len++)
 		putchar(s[len]);
@@ -30,14 +33,17 @@ int puts(const char *s) {
 	Revisar todo devuelta si se puede cambiar
 */
 
-static void printUnsigned(unsigned int u) {
+static void printUnsigned(unsigned int u)
+{
 	if (u >= 10)
 		printUnsigned(u / 10);
 	putchar('0' + (u % 10));
 }
 
-static void printInt(int d) {
-	if (d < 0) {
+static void printInt(int d)
+{
+	if (d < 0)
+	{
 		putchar('-');
 		d = -d;
 	}
@@ -45,14 +51,17 @@ static void printInt(int d) {
 	printUnsigned((unsigned) d);
 }
 
-static void printHex(unsigned int x) {
+static void printHex(unsigned int x)
+{
 	char buf[8];
 	int i = 0;
-	if (x == 0) {
+	if (x == 0)
+	{
 		putchar('0');
 		return;
 	}
-	while (x) {
+	while (x)
+	{
 		int d = x & 0xF;
 		buf[i++] = d < 10 ? '0' + d : 'a' + (d - 10);
 		x >>= 4;
@@ -61,15 +70,19 @@ static void printHex(unsigned int x) {
 		putchar(buf[i]);
 }
 
-int printf(const char *fmt, ...) {
+int printf(const char *fmt, ...)
+{
 	va_list ap;
 	va_start(ap, fmt);
-	for (const char *p = fmt; *p; p++) {
-		if (*p != '%') {
+	for (const char *p = fmt; *p; p++)
+	{
+		if (*p != '%')
+		{
 			putchar(*p);
 			continue;
 		}
-		switch (*++p) {
+		switch (*++p)
+		{
 			case 'd':
 				printInt(va_arg(ap, int));
 				break;
@@ -82,7 +95,8 @@ int printf(const char *fmt, ...) {
 			case 'c':
 				putchar((char) va_arg(ap, int));
 				break;
-			case 's': {
+			case 's':
+			{
 				char *s = va_arg(ap, char *);
 				while (*s)
 					putchar(*s++);
@@ -98,20 +112,24 @@ int printf(const char *fmt, ...) {
 }
 
 // TODO: Revisar esto devuelta para ver si se puede mejorar
-int scanf(const char *fmt, ...) {
+int scanf(const char *fmt, ...)
+{
 	va_list ap;
 	va_start(ap, fmt);
 	int cnt = 0;
-	for (const char *p = fmt; *p; p++) {
+	for (const char *p = fmt; *p; p++)
+	{
 		if (*p != '%')
 			continue;
 		char c, spec = *++p;
-		if (spec == 'd') {
+		if (spec == 'd')
+		{
 			int *ip = va_arg(ap, int *);
 			int neg = 0, v = 0;
 			while ((c = getchar()) <= ' ')
 				;
-			if (c == '-') {
+			if (c == '-')
+			{
 				neg = 1;
 				c = getchar();
 			}
@@ -120,7 +138,8 @@ int scanf(const char *fmt, ...) {
 			*ip = neg ? -v : v;
 			cnt++;
 		}
-		else if (spec == 's') {
+		else if (spec == 's')
+		{
 			char *s = va_arg(ap, char *);
 			while ((c = getchar()) <= ' ')
 				;
@@ -134,14 +153,18 @@ int scanf(const char *fmt, ...) {
 	return cnt;
 }
 
-void to_lower(char *str) {
-	for (int i = 0; str[i] != 0; i++) {
-		if ('A' <= str[i] && str[i] <= 'Z') {
+void to_lower(char *str)
+{
+	for (int i = 0; str[i] != 0; i++)
+	{
+		if ('A' <= str[i] && str[i] <= 'Z')
+		{
 			str[i] += ('a' - 'A');
 		}
 	}
 }
 
-uint64_t get_regist(uint64_t *registers) {
+uint64_t get_regist(uint64_t *registers)
+{
 	return sys_getRegisters(registers);
 }

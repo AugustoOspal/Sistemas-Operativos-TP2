@@ -4,7 +4,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
-struct vbe_mode_info_structure {
+struct vbe_mode_info_structure
+{
 	uint16_t attributes;  // deprecated, only bit 7 should be of interest to you, and it indicates the mode supports a
 						  // linear frame buffer.
 	uint8_t window_a;	  // deprecated
@@ -47,7 +48,8 @@ typedef struct vbe_mode_info_structure *VBEInfoPtr;
 
 VBEInfoPtr VBE_mode_info = (VBEInfoPtr) 0x0000000000005C00;
 
-void putPixel(uint32_t hexColor, uint64_t x, uint64_t y) {
+void putPixel(uint32_t hexColor, uint64_t x, uint64_t y)
+{
 	uint8_t *framebuffer = (uint8_t *) VBE_mode_info->framebuffer;
 	uint64_t offset = (x * ((VBE_mode_info->bpp) / 8)) + (y * VBE_mode_info->pitch);
 	framebuffer[offset] = (hexColor) & 0xFF;
@@ -61,15 +63,18 @@ void putPixel(uint32_t hexColor, uint64_t x, uint64_t y) {
 
 // TODO: Ninguna de estas funciones cheuqea el ancho y largo de la pantalla
 
-uint16_t getScreenWidth() {
+uint16_t getScreenWidth()
+{
 	return VBE_mode_info->width;
 }
 
-uint16_t getScreenHeight() {
+uint16_t getScreenHeight()
+{
 	return VBE_mode_info->height;
 }
 
-uint8_t isValidScreenCoordinate(uint16_t x, uint16_t y) {
+uint8_t isValidScreenCoordinate(uint16_t x, uint16_t y)
+{
 	uint16_t width = getScreenWidth();
 	uint16_t height = getScreenHeight();
 
@@ -85,21 +90,25 @@ uint8_t isValidScreenCoordinate(uint16_t x, uint16_t y) {
 	pero si lo agrego al char, cuando quiero imprimir un string lo tengo que chequear
 	para cada caracter, asi que tendria que modificar mas las cosas para chequearlo
 */
-uint8_t isValidScreenPrint(uint16_t x, uint16_t y, uint16_t width, uint16_t height) {
+uint8_t isValidScreenPrint(uint16_t x, uint16_t y, uint16_t width, uint16_t height)
+{
 	return isValidScreenCoordinate(x, y) && isValidScreenCoordinate(x + width - 1, y + height - 1);
 }
 
-uint16_t getRemainingScreenWidth(uint16_t x_coord) {
+uint16_t getRemainingScreenWidth(uint16_t x_coord)
+{
 	return getScreenWidth() - (x_coord);
 }
 
-static void putPixelIfValid(uint32_t color, int64_t x, int64_t y) {
+static void putPixelIfValid(uint32_t color, int64_t x, int64_t y)
+{
 	uint16_t w = getScreenWidth(), h = getScreenHeight();
 	if (x >= 0 && x < w && y >= 0 && y < h)
 		putPixel(color, x, y);
 }
 
-void drawChar(char c, uint32_t color, uint64_t x, uint64_t y) {
+void drawChar(char c, uint32_t color, uint64_t x, uint64_t y)
+{
 	FontChar f = getCharBitMap(c);
 	if (!f.bitmap)
 		return;
@@ -109,10 +118,13 @@ void drawChar(char c, uint32_t color, uint64_t x, uint64_t y) {
 	if (!isValidScreenPrint(x, y, f.width, f.height))
 		return;
 
-	for (int row = 0; row < baseH; row++) {
+	for (int row = 0; row < baseH; row++)
+	{
 		uint8_t bits = f.bitmap[row];
-		for (int col = 0; col < baseW; col++) {
-			if (bits & (f.bitMask >> col)) {
+		for (int col = 0; col < baseW; col++)
+		{
+			if (bits & (f.bitMask >> col))
+			{
 				for (int dy = 0; dy < scale; dy++)
 					for (int dx = 0; dx < scale; dx++)
 						putPixelIfValid(color, x + col * scale + dx, y + row * scale + dy);
@@ -121,10 +133,13 @@ void drawChar(char c, uint32_t color, uint64_t x, uint64_t y) {
 	}
 }
 
-void drawString(const char *s, uint32_t hexColor, uint64_t x, uint64_t y) {
+void drawString(const char *s, uint32_t hexColor, uint64_t x, uint64_t y)
+{
 	int w = getWidth(), h = getHeight();
-	for (const char *p = s; *p; p++) {
-		if (!isValidScreenPrint(x, y, w, h)) {
+	for (const char *p = s; *p; p++)
+	{
+		if (!isValidScreenPrint(x, y, w, h))
+		{
 			x = 0;
 			y += h + FONT_CHAR_GAP;
 			if (!isValidScreenPrint(x, y, w, h))
@@ -135,18 +150,22 @@ void drawString(const char *s, uint32_t hexColor, uint64_t x, uint64_t y) {
 	}
 }
 
-void drawRectangle(uint64_t width, uint64_t heigth, uint32_t hexColor, uint64_t x, uint64_t y) {
+void drawRectangle(uint64_t width, uint64_t heigth, uint32_t hexColor, uint64_t x, uint64_t y)
+{
 	if (!isValidScreenPrint(x, y, width, heigth))
 		return;
 
-	for (uint64_t i = x; i < x + width; i++) {
-		for (uint64_t j = y; j < y + heigth; j++) {
+	for (uint64_t i = x; i < x + width; i++)
+	{
+		for (uint64_t j = y; j < y + heigth; j++)
+		{
 			putPixel(hexColor, i, j);
 		}
 	}
 }
 
-static void plotCircleOctants(uint32_t hexColor, int64_t xc, int64_t yc, int64_t dx, int64_t dy) {
+static void plotCircleOctants(uint32_t hexColor, int64_t xc, int64_t yc, int64_t dx, int64_t dy)
+{
 	putPixelIfValid(hexColor, xc + dx, yc + dy);
 	putPixelIfValid(hexColor, xc - dx, yc + dy);
 	putPixelIfValid(hexColor, xc + dx, yc - dy);
@@ -157,20 +176,24 @@ static void plotCircleOctants(uint32_t hexColor, int64_t xc, int64_t yc, int64_t
 	putPixelIfValid(hexColor, xc - dy, yc - dx);
 }
 
-static void drawHLine(uint32_t hexColor, int64_t x1, int64_t x2, int64_t y) {
-	if (x1 > x2) {
+static void drawHLine(uint32_t hexColor, int64_t x1, int64_t x2, int64_t y)
+{
+	if (x1 > x2)
+	{
 		int64_t t = x1;
 		x1 = x2;
 		x2 = t;
 	}
-	for (int64_t x = x1; x <= x2; x++) {
+	for (int64_t x = x1; x <= x2; x++)
+	{
 		putPixelIfValid(hexColor, x, y);
 	}
 }
 
 // Dibuja los segmentos horizontales correspondientes a los 8 octantes,
 // rellenando el círculo
-static void fillCircleOctants(uint32_t hexColor, int64_t xc, int64_t yc, int64_t dx, int64_t dy) {
+static void fillCircleOctants(uint32_t hexColor, int64_t xc, int64_t yc, int64_t dx, int64_t dy)
+{
 	// Octantes “superiores” e “inferiores”
 	drawHLine(hexColor, xc - dx, xc + dx, yc + dy);
 	drawHLine(hexColor, xc - dx, xc + dx, yc - dy);
@@ -179,12 +202,14 @@ static void fillCircleOctants(uint32_t hexColor, int64_t xc, int64_t yc, int64_t
 	drawHLine(hexColor, xc - dy, xc + dy, yc - dx);
 }
 
-void drawCircle(uint64_t radius, uint32_t hexColor, uint64_t x_center, uint64_t y_center) {
+void drawCircle(uint64_t radius, uint32_t hexColor, uint64_t x_center, uint64_t y_center)
+{
 	int64_t xc = (int64_t) x_center;
 	int64_t yc = (int64_t) y_center;
 	int64_t r = (int64_t) radius;
 
-	if (r <= 0) {
+	if (r <= 0)
+	{
 		putPixelIfValid(hexColor, xc, yc);
 		return;
 	}
@@ -196,12 +221,15 @@ void drawCircle(uint64_t radius, uint32_t hexColor, uint64_t x_center, uint64_t 
 	// Dibuja la línea central y sus simétricas
 	fillCircleOctants(hexColor, xc, yc, x, y);
 
-	while (x < y) {
+	while (x < y)
+	{
 		x++;
-		if (p < 0) {
+		if (p < 0)
+		{
 			p += 2 * x + 1;
 		}
-		else {
+		else
+		{
 			y--;
 			p += 2 * x + 1 - 2 * y;
 		}
@@ -210,13 +238,15 @@ void drawCircle(uint64_t radius, uint32_t hexColor, uint64_t x_center, uint64_t 
 }
 
 // Para estas funciones, la que chequa si entran en la pantalla es drawString
-void drawDecimal(uint64_t value, uint32_t hexColor, uint64_t x, uint64_t y) {
+void drawDecimal(uint64_t value, uint32_t hexColor, uint64_t x, uint64_t y)
+{
 	char buffer[21];
 	uint64ToString(value, buffer, 10);
 	drawString(buffer, hexColor, x, y);
 }
 
-void drawHexa(uint64_t value, uint32_t hexColor, uint64_t x, uint64_t y) {
+void drawHexa(uint64_t value, uint32_t hexColor, uint64_t x, uint64_t y)
+{
 	char buffer[19];
 	buffer[0] = '0';
 	buffer[1] = 'x';
@@ -224,7 +254,8 @@ void drawHexa(uint64_t value, uint32_t hexColor, uint64_t x, uint64_t y) {
 	drawString(buffer, hexColor, x, y);
 }
 
-void drawBin(uint64_t value, uint32_t hexColor, uint64_t x, uint64_t y) {
+void drawBin(uint64_t value, uint32_t hexColor, uint64_t x, uint64_t y)
+{
 	char buffer[67];
 	buffer[0] = '0';
 	buffer[1] = 'b';
@@ -236,6 +267,7 @@ void drawBin(uint64_t value, uint32_t hexColor, uint64_t x, uint64_t y) {
 	TODO: Esto no se si esta bien asi o habria que borrar todo el buffer
 */
 
-void clearScreen(void) {
+void clearScreen(void)
+{
 	drawRectangle(getScreenWidth(), getScreenHeight(), 0x00000000, 0, 0);
 }

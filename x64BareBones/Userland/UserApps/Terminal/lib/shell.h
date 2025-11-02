@@ -10,7 +10,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
-typedef enum {
+typedef enum
+{
 	HELP = 0,
 	EXC_1,
 	EXC_2,

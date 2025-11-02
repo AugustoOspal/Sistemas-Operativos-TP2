@@ -15,7 +15,8 @@
 #define SC_ALT_RELEASE (SC_ALT_PRESS | 0x80)
 
 // Estructura para el estado de las teclas Modificadoras
-typedef struct {
+typedef struct
+{
 	uint8_t lshift : 1;
 	uint8_t rshift : 1;
 	uint8_t caps_lock_on : 1;
@@ -53,8 +54,10 @@ static unsigned int buffer_write_idx = 0;
 static unsigned int buffer_read_idx = 0;
 static unsigned int buffer_count = 0;
 
-char procesScanCode(unsigned int scancode) {
-	if (scancode == 0) {
+char procesScanCode(unsigned int scancode)
+{
+	if (scancode == 0)
+	{
 		return;
 	}
 
@@ -68,7 +71,8 @@ char procesScanCode(unsigned int scancode) {
 	unsigned int make_code = scancode & 0x7F;
 
 	// 1. Actualizar estado de teclas modificadoras
-	switch (make_code) {
+	switch (make_code)
+	{
 		case SC_LSHIFT_PRESS:
 			kbd_modifier_state.lshift = is_press;
 			return;
@@ -76,7 +80,8 @@ char procesScanCode(unsigned int scancode) {
 			kbd_modifier_state.rshift = is_press;
 			return;
 		case SC_CAPSLOCK_PRESS:
-			if (is_press) { // CapsLock es un toggle, actúa solo al apretar
+			if (is_press)
+			{ // CapsLock es un toggle, actúa solo al apretar
 				kbd_modifier_state.caps_lock_on = !kbd_modifier_state.caps_lock_on;
 			}
 			return;
@@ -90,17 +95,20 @@ char procesScanCode(unsigned int scancode) {
 
 	// 2. Si es un "press" de una tecla no modificadora, procesar para agarrar el carácter
 	char final_char = 0;
-	if (is_press) {
+	if (is_press)
+	{
 		char char_normal = 0;
 		char char_shifted = 0;
 
-		if (make_code < 128) {
+		if (make_code < 128)
+		{
 			char_normal = scancode_to_ascii_map_normal[make_code];
 			char_shifted = scancode_to_ascii_map_shifted[make_code];
 		}
 
 		// Si es no imprimible o no esta mapeada
-		if (char_normal == 0) {
+		if (char_normal == 0)
+		{
 			return;
 		}
 
@@ -108,17 +116,22 @@ char procesScanCode(unsigned int scancode) {
 		int any_shift_pressed = kbd_modifier_state.lshift || kbd_modifier_state.rshift;
 
 		// Esto esta asi en vez de un final_char ? mas simple para el manejo del Caps
-		if (any_shift_pressed) {
+		if (any_shift_pressed)
+		{
 			final_char = char_shifted;
-			if (kbd_modifier_state.caps_lock_on && is_alpha_lower) {
-				if (char_shifted >= 'A' && char_shifted <= 'Z' && (char_shifted - 'A' == char_normal - 'a')) {
+			if (kbd_modifier_state.caps_lock_on && is_alpha_lower)
+			{
+				if (char_shifted >= 'A' && char_shifted <= 'Z' && (char_shifted - 'A' == char_normal - 'a'))
+				{
 					final_char = char_normal;
 				}
 			}
 		}
-		else {
+		else
+		{
 			final_char = char_normal;
-			if (kbd_modifier_state.caps_lock_on && is_alpha_lower) {
+			if (kbd_modifier_state.caps_lock_on && is_alpha_lower)
+			{
 				final_char = char_shifted;
 			}
 		}
@@ -126,28 +139,34 @@ char procesScanCode(unsigned int scancode) {
 	return final_char;
 }
 
-void loadCharToBuffer(char c) {
-	if (c != 0 && buffer_count < KEYBOARD_BUFFER_SIZE) {
+void loadCharToBuffer(char c)
+{
+	if (c != 0 && buffer_count < KEYBOARD_BUFFER_SIZE)
+	{
 		keyboard_buffer[buffer_write_idx] = c;
 		buffer_write_idx = (buffer_write_idx + 1) % KEYBOARD_BUFFER_SIZE;
 		buffer_count++;
 	}
 }
 
-void keyboard_handler(Registers_t *regs) {
+void keyboard_handler(Registers_t *regs)
+{
 	uint8_t scanCode = getKeyCode();
 	char c = procesScanCode(scanCode);
 
-	if (kbd_modifier_state.ctrl && (c == 'r' || c == 'R')) {
+	if (kbd_modifier_state.ctrl && (c == 'r' || c == 'R'))
+	{
 		loadSnapshot(regs);
 	}
 
-	else if (c != 0) {
+	else if (c != 0)
+	{
 		loadCharToBuffer(c);
 	}
 }
 
-char kbd_get_char() {
+char kbd_get_char()
+{
 	if (buffer_count == 0)
 		return 0; // Buffer vacío
 

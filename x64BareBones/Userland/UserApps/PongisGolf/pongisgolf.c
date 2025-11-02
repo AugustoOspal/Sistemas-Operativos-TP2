@@ -5,7 +5,8 @@
 static uint8_t playersCounter = 1;
 static uint8_t winner;
 
-void startPongisGolf() {
+void startPongisGolf()
+{
 	MipT mip1 = {.x = MIP_INITIAL_X,
 				 .y = MIP_INITIAL_Y,
 				 .speed = MIP_INITIAL_SPEED,
@@ -37,19 +38,23 @@ void startPongisGolf() {
 
 	char c;
 	int active = 1;
-	while (active) {
+	while (active)
+	{
 		c = getchar();
-		switch (c) {
+		switch (c)
+		{
 			// Jugador 1
 			case 'w': // Arriba
 				walkMip(&mip1);
-				if (checkColisionMipBall(&mip1, &ball)) {
+				if (checkColisionMipBall(&mip1, &ball))
+				{
 					moveBall(&ball, &mip1);
 					drawMip(&mip1);
 					playHitSound();
 				}
 
-				if (checkHoleCollision(&ball, &hole)) {
+				if (checkHoleCollision(&ball, &hole))
+				{
 					winner = 1;
 					endMenu(winner);
 					active = 0;
@@ -64,17 +69,21 @@ void startPongisGolf() {
 				break;
 		}
 
-		if (playersCounter == 2) {
-			switch (c) {
+		if (playersCounter == 2)
+		{
+			switch (c)
+			{
 				// Jugador 2
 				case 'i': // Arriba
 					walkMip(&mip2);
-					if (checkColisionMipBall(&mip2, &ball)) {
+					if (checkColisionMipBall(&mip2, &ball))
+					{
 						moveBall(&ball, &mip2);
 						drawMip(&mip2);
 						playHitSound();
 					}
-					if (checkHoleCollision(&ball, &hole)) {
+					if (checkHoleCollision(&ball, &hole))
+					{
 						winner = 2;
 						endMenu(winner);
 						active = 0;

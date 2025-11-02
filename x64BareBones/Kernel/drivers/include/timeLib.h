@@ -1,11 +1,12 @@
 #ifndef TIME_H_
 #define TIME_H_
 
+#include "scheduler.h"
 #include <interrupts.h>
 #include <stdint.h>
-#include "scheduler.h"
 
-typedef struct {
+typedef struct
+{
 	uint8_t sec;
 	uint8_t min;
 	uint8_t hour;

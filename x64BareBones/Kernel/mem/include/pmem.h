@@ -8,7 +8,8 @@
 
 #define PM_PAGE_SIZE 4096
 
-typedef struct {
+typedef struct
+{
 	uint64_t total;
 	uint64_t used;
 	uint64_t free;

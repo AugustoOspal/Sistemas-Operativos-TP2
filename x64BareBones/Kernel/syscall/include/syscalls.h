@@ -12,7 +12,8 @@
 
 // Estructura para acceder a los registros guardados por pushState
 // El orden tiene que coincidir con el de la macro pushState en interrupts.asm
-typedef struct {
+typedef struct
+{
 	uint64_t r15;
 	uint64_t r14;
 	uint64_t r13;

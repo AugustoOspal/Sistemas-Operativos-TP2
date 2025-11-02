@@ -18,13 +18,16 @@ static uint16_t y_coord = 0;
 Registers_t snapshot = {0};
 bool snapshotReady = false;
 
-void resetCursorCoord() {
+void resetCursorCoord()
+{
 	x_coord = 0;
 	y_coord = 0;
 }
 
-void loadSnapshot(Registers_t *regs) {
-	if (regs == NULL) {
+void loadSnapshot(Registers_t *regs)
+{
+	if (regs == NULL)
+	{
 		return;
 	}
 
@@ -32,11 +35,13 @@ void loadSnapshot(Registers_t *regs) {
 	snapshotReady = true;
 }
 
-uint8_t isSpecialChar(char c) {
+uint8_t isSpecialChar(char c)
+{
 	return (c == '\n' || c == '\r' || c == '\t' || c == '\b');
 }
 
-uint64_t sys_write(uint8_t fd, const char *str, uint64_t count) {
+uint64_t sys_write(uint8_t fd, const char *str, uint64_t count)
+{
 	// Solo se soporta escritura en STDOUT
 	if (fd != STDOUT)
 		return 0;
@@ -44,9 +49,12 @@ uint64_t sys_write(uint8_t fd, const char *str, uint64_t count) {
 	int width = getWidth();
 	int height = getHeight();
 
-	for (uint64_t i = 0; i < count; i++) {
-		if (isSpecialChar(str[i])) {
-			switch (str[i]) {
+	for (uint64_t i = 0; i < count; i++)
+	{
+		if (isSpecialChar(str[i]))
+		{
+			switch (str[i])
+			{
 				case '\n':
 					y_coord += height + FONT_CHAR_GAP;
 
@@ -56,7 +64,8 @@ uint64_t sys_write(uint8_t fd, const char *str, uint64_t count) {
 
 				case '\t':
 					x_coord += (TAB_SPACES * (width + FONT_CHAR_GAP));
-					if (x_coord >= getScreenWidth()) {
+					if (x_coord >= getScreenWidth())
+					{
 						x_coord = x_coord % getScreenWidth();
 						y_coord += height + FONT_CHAR_GAP;
 					}
@@ -64,15 +73,19 @@ uint64_t sys_write(uint8_t fd, const char *str, uint64_t count) {
 
 				case '\b':
 
-					if (x_coord > width + FONT_CHAR_GAP) {
+					if (x_coord > width + FONT_CHAR_GAP)
+					{
 						x_coord -= (width + FONT_CHAR_GAP);
 					}
-					else {
-						if (y_coord > 0) {
+					else
+					{
+						if (y_coord > 0)
+						{
 							y_coord -= (height + FONT_CHAR_GAP);
 							x_coord = getScreenWidth() - TAB_SPACES * (width + FONT_CHAR_GAP) + x_coord;
 						}
-						else {
+						else
+						{
 							x_coord = 0;
 						}
 					}
@@ -85,11 +98,13 @@ uint64_t sys_write(uint8_t fd, const char *str, uint64_t count) {
 		}
 
 		// TODO: Aca se podria optimizar con getRemainingScreenWidth
-		else if (isValidScreenPrint(x_coord, y_coord, width, height)) {
+		else if (isValidScreenPrint(x_coord, y_coord, width, height))
+		{
 			drawChar(str[i], BLANCO, x_coord, y_coord);
 			x_coord += width + FONT_CHAR_GAP;
 		}
-		else {
+		else
+		{
 			x_coord = 0;
 			y_coord += height + FONT_CHAR_GAP;
 		}
@@ -98,11 +113,14 @@ uint64_t sys_write(uint8_t fd, const char *str, uint64_t count) {
 	return count;
 }
 
-uint64_t sys_read(uint8_t fd, char *buffer, uint64_t count) {
-	if (fd == STDIN) {
+uint64_t sys_read(uint8_t fd, char *buffer, uint64_t count)
+{
+	if (fd == STDIN)
+	{
 		char c;
 
-		for (uint64_t i = 0; i < count; i++) {
+		for (uint64_t i = 0; i < count; i++)
+		{
 			if (!(c = kbd_get_char()))
 				return i;
 
@@ -115,7 +133,8 @@ uint64_t sys_read(uint8_t fd, char *buffer, uint64_t count) {
 	return 0;
 }
 
-void syscallDispatcher(Registers_t *regs) {
+void syscallDispatcher(Registers_t *regs)
+{
 	// El número de la syscall generalmente se pasa en RAX
 	uint64_t syscall_id = regs->rax;
 
@@ -131,7 +150,8 @@ void syscallDispatcher(Registers_t *regs) {
 		Las que son 0x1... son syscalls de video
 	*/
 
-	switch (syscall_id) {
+	switch (syscall_id)
+	{
 		case 0x1:
 			sys_write(arg1, (const char *) arg2, arg3);
 			regs->rax = arg1;
@@ -142,10 +162,12 @@ void syscallDispatcher(Registers_t *regs) {
 			break;
 
 		case 0x04:
-			if (!snapshotReady) {
+			if (!snapshotReady)
+			{
 				regs->rax = 1; // error: no hay snapshot
 			}
-			else {
+			else
+			{
 				uint64_t *out = (uint64_t *) arg1;
 				memcpy(out, &snapshot, sizeof(Registers_t));
 				regs->rax = 0;

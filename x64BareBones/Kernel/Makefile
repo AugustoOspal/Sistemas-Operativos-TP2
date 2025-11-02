@@ -11,6 +11,7 @@ SOURCES=$(wildcard core/*.c) \
          $(wildcard interrupt/*.c) \
          $(wildcard drivers/*/*.c) \
          $(wildcard lib/*/*.c) \
+         $(wildcard lib/*/*/*.c) \
          $(wildcard syscall/*.c) \
          $(filter-out mem/Test%.c,$(wildcard mem/*.c)) \
          $(wildcard sched/*.c) \

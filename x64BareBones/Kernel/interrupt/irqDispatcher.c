@@ -11,8 +11,10 @@
 static void *int_20(void *stackPointer);
 static void int_21(Registers_t *regs);
 
-void *irqDispatcher(void *stackPointer, const uint64_t irq) {
-	switch (irq) {
+void *irqDispatcher(void *stackPointer, const uint64_t irq)
+{
+	switch (irq)
+	{
 		// Timer Tick
 		case 0:
 			stackPointer = int_20(stackPointer);
@@ -27,10 +29,12 @@ void *irqDispatcher(void *stackPointer, const uint64_t irq) {
 	return stackPointer;
 }
 
-static void *int_20(void *stackPointer) {
+static void *int_20(void *stackPointer)
+{
 	return timer_handler(stackPointer);
 }
 
-static void int_21(Registers_t *regs) {
+static void int_21(Registers_t *regs)
+{
 	keyboard_handler(regs);
 }

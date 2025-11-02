@@ -1,13 +1,13 @@
 #ifndef SCHEDULER_H
 #define SCHEDULER_H
 
-#include <stdint.h>
-#include <stdbool.h>
-#include "../ADT/Queue/queue.h"
 #include "../ADT/DoubleLinkedList/doubleLinkedList.h"
+#include "../ADT/Queue/queue.h"
+#include "idle.h"
 #include "pmem.h"
 #include "process.h"
-#include "idle.h"
+#include <stdbool.h>
+#include <stdint.h>
 
 #define QUANTUM 5
 

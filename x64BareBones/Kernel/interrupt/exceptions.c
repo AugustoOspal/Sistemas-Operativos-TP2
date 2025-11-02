@@ -12,13 +12,16 @@ static const char *exception_messages[] = {"Exception: Division by Zero", "Excep
 
 static void printRegisters(const Registers_t *regs);
 
-void exceptionDispatcher(Registers_t *regs, int exception) {
+void exceptionDispatcher(Registers_t *regs, int exception)
+{
 	clearScreen();
 	// Imprimir mensaje de la excepcion
-	if (exception == ZERO_EXCEPTION_ID) {
+	if (exception == ZERO_EXCEPTION_ID)
+	{
 		drawString(exception_messages[0], RED, 0, 0);
 	}
-	else if (exception == INVALID_OPERATION_CODE_ID) {
+	else if (exception == INVALID_OPERATION_CODE_ID)
+	{
 		drawString(exception_messages[1], RED, 0, 0);
 	}
 
@@ -29,12 +32,14 @@ void exceptionDispatcher(Registers_t *regs, int exception) {
 	clearScreen();
 }
 
-static void printRegisters(const Registers_t *regs) {
+static void printRegisters(const Registers_t *regs)
+{
 	uint64_t *regs_array = (uint64_t *) regs;
 	unsigned int linesPrinted = 2; // Empezar a imprimir debajo del mensaje de excepcion
 	unsigned int currentY = 0;
 
-	for (int i = 0; i < CANT_REGS; i++) {
+	for (int i = 0; i < CANT_REGS; i++)
+	{
 		currentY = (getCurrentFontHeight() + FONT_CHAR_GAP) * linesPrinted++;
 		drawString(regs_strings[i], RED, 0, currentY);
 		drawHexa(regs_array[i], RED, 10 * (getCurrentFontWidth() + FONT_CHAR_GAP), currentY);

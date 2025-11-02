@@ -15,7 +15,8 @@
 	no tenemos malloc
 */
 
-typedef struct MipT {
+typedef struct MipT
+{
 	uint64_t x;
 	uint64_t y;
 	uint64_t speed;
@@ -24,7 +25,8 @@ typedef struct MipT {
 	int16_t degree; // 0 arriba, 1 derecha, 2 abajo, 3 izquierda
 } MipT;
 
-typedef struct BallT {
+typedef struct BallT
+{
 	uint64_t x;
 	uint64_t y;
 	uint64_t speed;
@@ -32,7 +34,8 @@ typedef struct BallT {
 	uint32_t color;
 } BallT;
 
-typedef struct HoleT {
+typedef struct HoleT
+{
 	uint64_t x;
 	uint64_t y;
 	uint64_t radius;
@@ -47,7 +50,8 @@ typedef HoleT *HoleP;
 	Esto al final no lo usamos, pero lo dejamos porque es lo que vamos a usar
 	cuando implementemos malloc en SO.
 */
-typedef struct LevelT {
+typedef struct LevelT
+{
 	uint16_t level;
 	MipP mip1;
 	MipP mip2;

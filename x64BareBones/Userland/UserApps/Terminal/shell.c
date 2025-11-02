@@ -14,46 +14,57 @@ static ShellCommand commands[] = {help,			exception_1,   exception_2,	 startPong
 char *registers[] = {" RAX: ", " RBX: ", " RCX: ", " RDX: ", " RSI: ", " RDI: ", " RBP: ", " RSP: ", " R8: ",
 					 " R9: ",  " R10: ", " R11: ", " R12: ", " R13: ", " R14: ", " R15: ", " RIP: "};
 
-void show_prompt() {
+void show_prompt()
+{
 	printf("user@itba:> ");
 }
 
 static uint8_t active = 1;
 
-void startShell() {
+void startShell()
+{
 	char input_buffer[BUFFER];
-	while (active) {
+	while (active)
+	{
 		show_prompt();
 		readInput(input_buffer);
 		to_lower(input_buffer);
 		command_id command = processInput(input_buffer);
-		if (command != -1) {
+		if (command != -1)
+		{
 			commands[command]();
 		}
-		else {
+		else
+		{
 			notACommand(input_buffer);
 		}
 	}
 }
 
 // Falta implementar la syscall read
-void readInput(char *buffer) {
+void readInput(char *buffer)
+{
 	char *c = buffer;
 	int limit_count = 0;
 
-	do {
+	do
+	{
 		*c = getchar();
-		if (*c <= SPECIAL_KEY_MAX_VALUE) {
+		if (*c <= SPECIAL_KEY_MAX_VALUE)
+		{
 			c--;
 		}
-		else if (*c == '\b') {
-			if (c > buffer) {
+		else if (*c == '\b')
+		{
+			if (c > buffer)
+			{
 				putchar(*c);
 				c--;
 			}
 			c--;
 		}
-		else {
+		else
+		{
 			putchar(*c);
 			limit_count++;
 			if (limit_count > BUFFER)
@@ -63,10 +74,13 @@ void readInput(char *buffer) {
 	*(c - 1) = '\0';
 }
 
-command_id processInput(char *input) {
+command_id processInput(char *input)
+{
 	int index = -1;
-	for (int i = 0; i < COMMAND_SIZE && (index == -1); i++) {
-		if (strcmp(input, commands_str[i]) == 0) {
+	for (int i = 0; i < COMMAND_SIZE && (index == -1); i++)
+	{
+		if (strcmp(input, commands_str[i]) == 0)
+		{
 			index = i;
 		}
 	}
@@ -74,15 +88,18 @@ command_id processInput(char *input) {
 }
 
 // Imprime todos los comandos disponibles
-void help() {
+void help()
+{
 	printf("Commands:\n");
-	for (int i = 0; i < COMMAND_SIZE; i++) {
+	for (int i = 0; i < COMMAND_SIZE; i++)
+	{
 		printf("\t- %s\n", commands_str[i]);
 	}
 }
 
 // Faltan las syscals del dateTime
-void printDateTime() {
+void printDateTime()
+{
 	dateTime dt;
 	getDateTime(&dt);
 	printf(" %d/%d/%d %d:%d:%d\n", dt.day, dt.month, dt.year, dt.hour, dt.min, dt.sec);
@@ -93,42 +110,52 @@ void printDateTime() {
 static const char *register_names[] = {"R15", "R14", "R13", "R12", "R11", "R10", "R9 ", "R8 ", "RSI", "RDI",
 									   "RBP", "RDX", "RCX", "RBX", "RAX", "RIP", "CS ", "FLG", "RSP", "SS "};
 
-void getRegisters() {
+void getRegisters()
+{
 	uint64_t registers[20];
-	if (get_regist(registers) != 0) {
+	if (get_regist(registers) != 0)
+	{
 		printf("No snapshot available. Press Ctrl+R first.\n");
 	}
-	else {
+	else
+	{
 		printf("Register snapshot:\n");
-		for (int i = 0; i < 20; i++) {
+		for (int i = 0; i < 20; i++)
+		{
 			printf("  %s: %x\n", register_names[i], registers[i]);
 		}
 	}
 }
 
-void startPongis() {
+void startPongis()
+{
 	printf("Starting Pongis Golf...\n");
 	startPongisGolf();
 	clear_screen();
 }
 
-void notACommand(char *input) {
+void notACommand(char *input)
+{
 	printf("Command \"%s\" not found. Type 'help' for a list of commands.\n", input);
 }
 
-void clear_screen() {
+void clear_screen()
+{
 	clearScreen();
 }
 
-void zoom_in() {
+void zoom_in()
+{
 	zoomIn();
 }
 
-void zoom_out() {
+void zoom_out()
+{
 	zoomOut();
 }
 
-void exitShell() {
+void exitShell()
+{
 	printf("\n");
 	printf("Exiting...\n");
 
@@ -136,10 +163,12 @@ void exitShell() {
 	active = 0;
 }
 
-void exception_1() {
+void exception_1()
+{
 	int a = 1 / 0;
 }
-void exception_2() {
+void exception_2()
+{
 	opCodeException();
 }
 
@@ -151,19 +180,22 @@ void exception_2() {
 	el kernel esperando una tecla, y con sleep tambien
 	lo mismo.
 */
-void busy_wait() {
+void busy_wait()
+{
 	printf("Running userland busy-wait. Press Ctrl+R now.\n");
 
 	// El volatile es para que el compilador no lo optimice
 	volatile uint64_t counter = 0;
-	for (uint64_t i = 0; i < 1000000000; i++) {
+	for (uint64_t i = 0; i < 1000000000; i++)
+	{
 		counter += i;
 	}
 
 	printf("Userland busy-wait finished.\n");
 }
 
-void busy_wait_kernel() {
+void busy_wait_kernel()
+{
 	printf("Running kernel busy-wait. Press Ctrl+R now.\n");
 
 	sleepMilli(5000);
@@ -171,7 +203,8 @@ void busy_wait_kernel() {
 	printf("Kernel busy-wait finished.\n");
 }
 
-int main() {
+int main()
+{
 	startShell();
 	return 0;
 }
