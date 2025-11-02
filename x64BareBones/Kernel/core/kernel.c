@@ -55,11 +55,11 @@ static void kernel_memory_init(void) {
 
 int main() {
 	kernel_memory_init();
-
-	proc_init();
-	// scheduler_init();
-
+	initializeScheduler();
 	load_idt();
+
+
+
 	play_boot_sound();
 	return ((EntryPoint) shellAddress)();
 }

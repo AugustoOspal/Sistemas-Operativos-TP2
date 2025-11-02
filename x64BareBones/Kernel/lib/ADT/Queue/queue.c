@@ -49,6 +49,10 @@ void FreeQueue(const QueueADT queue)
 
 void Enqueue(const QueueADT queue, void *obj)
 {
+    if (!queue || !obj)
+        return;
+
+    // TODO: Validar memoria
     const nodeP newNode = mem_alloc(sizeof(nodeT));
     newNode->obj = obj;
     newNode->next = NULL;
@@ -65,7 +69,7 @@ void Enqueue(const QueueADT queue, void *obj)
 
 void *Dequeue(const QueueADT queue)
 {
-    if (queue->length == 0)
+    if (!queue || queue->length == 0)
         return NULL;
 
     const nodeP toRemove = queue->head;
@@ -82,9 +86,27 @@ void *Dequeue(const QueueADT queue)
 }
 
 int QueueLength(const QueueADT queue) {
+    if (!queue) return -1;
     return queue->length;
 }
 
 bool IsQueueEmpty(const QueueADT queue) {
+    // TODO: validar si la cola no existe
+    if (!queue) return true;
     return !queue->length;
+}
+
+void *FindInQueue(const QueueADT queue, bool (*predicate)(void *elem, void *data), void *data)
+{
+    if (!queue) return NULL;
+
+    nodeP current = queue->head;
+    while (current != NULL) {
+        if (predicate(current->obj, data)) {
+            return current->obj;
+        }
+        current = current->next;
+    }
+
+    return NULL;
 }

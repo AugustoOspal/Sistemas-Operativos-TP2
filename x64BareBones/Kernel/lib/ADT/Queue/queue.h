@@ -9,9 +9,10 @@ typedef struct QueueCDT *QueueADT;
 
 QueueADT NewQueue(void);
 void FreeQueue(QueueADT queue);
-void Enqueue(const QueueADT queue, void *obj);
-void *Dequeue(const QueueADT queue);
-int QueueLength(const QueueADT queue);
-bool IsQueueEmpty(const QueueADT queue);
+void Enqueue( QueueADT queue, void *obj);
+void *Dequeue( QueueADT queue);
+int QueueLength( QueueADT queue);
+bool IsQueueEmpty( QueueADT queue);
+void *FindInQueue(const QueueADT queue, bool (*predicate)(void *elem, void *data), void *data);
 
 #endif

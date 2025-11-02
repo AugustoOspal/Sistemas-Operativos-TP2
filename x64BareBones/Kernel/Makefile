@@ -42,11 +42,14 @@ INCLUDE_DIRS=-I./arch/x86_64/include \
              -I./lib/include \
              -I./lib/console \
              -I./lib/string \
+             -I./lib/ADT/Queue \
+             -I./lib/ADT/DoubleLinkedList \
              -I./syscall/include \
              -I./arch/x86_64/asm \
              -I./mem/include \
              -I./sched/include \
-             -I./proc/include
+             -I./proc/include \
+             -I./proc
 
 # Updated GCCFLAGS with include directories
 GCC_WITH_INCLUDES=$(GCCFLAGS) $(INCLUDE_DIRS)

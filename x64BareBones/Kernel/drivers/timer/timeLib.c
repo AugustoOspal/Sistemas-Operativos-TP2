@@ -4,8 +4,9 @@
 
 static unsigned long ticks = 0;
 
-void timer_handler() {
+void *timer_handler(void *stackPointer) {
 	ticks++;
+	return schedule(stackPointer);
 }
 
 int ticks_elapsed() {

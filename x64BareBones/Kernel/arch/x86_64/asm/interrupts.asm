@@ -68,20 +68,22 @@ SECTION .text
 %macro irqHandlerMaster 1
     pushState
 
-    ; rdi = &TrapFrame (base del snapshot que acabamos de pushear)
-    mov rdi, rsp
-
-    ; rsi = número de IRQ
-    mov rsi, %1
+    mov rdi, rsp    ; Donde quedo el stack despues de haber pusheadolos registros
+    mov rsi, %1     ; Numero de IRQ
 
     call irqDispatcher
 
-    ; EOI al PIC maestro
-    mov al, 20h
+    mov rsp, rax    ; Si irqDispatcher entro a el int 20, devuelve el stack del
+                    ; proceso que tiene que correr ahora.
+                    ; Si no paso por la int 20, devuelve el mismo stack que mando
+                    ; asi que es como si no hubiera pasado nada.
+
+    mov al, 20h     ; EOI al PIC maestro
     out 20h, al
 
-    popState
-    iretq
+    popState        ; Si irqDispatcher cambio de proceso, este popState
+    iretq           ; va a restaurar los registros del otro proceso.
+                    ; Y el iretq tambien le va poner cosas del otro proceso (RIP, RSP, RFLAGS, etc..)
 %endmacro
 
 

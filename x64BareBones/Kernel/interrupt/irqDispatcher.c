@@ -3,31 +3,34 @@
 #include "keyboardDriver.h"
 #include "process.h"
 #include "scheduler.h"
+#include "syscalls.h"
 #include "time.h"
 
-static void int_20(TrapFrame *tf);
-static void int_21(TrapFrame *tf);
+// TODO: Cambiar los nuemeros del switch por defines
 
-void irqDispatcher(TrapFrame *tf, uint64_t irq) {
+static void *int_20(void *stackPointer);
+static void int_21(Registers_t *regs);
+
+void *irqDispatcher(void *stackPointer, const uint64_t irq) {
 	switch (irq) {
 		// Timer Tick
 		case 0:
-			int_20(tf);
+			stackPointer = int_20(stackPointer);
 			break;
 
 		// Teclado
 		case 1:
-			int_21(tf);
+			int_21(stackPointer);
 			break;
 	}
-	return;
+
+	return stackPointer;
 }
 
-void int_20(TrapFrame *tf) {
-	timer_handler();
-	scheduler_on_tick(tf);
+static void *int_20(void *stackPointer) {
+	return timer_handler(stackPointer);
 }
 
-void int_21(TrapFrame *tf) {
-	keyboard_handler(tf);
+static void int_21(Registers_t *regs) {
+	keyboard_handler(regs);
 }

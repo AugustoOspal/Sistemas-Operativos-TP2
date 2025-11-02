@@ -1,8 +1,9 @@
-#ifndef _TIME_H_
-#define _TIME_H_
+#ifndef TIME_H_
+#define TIME_H_
 
 #include <interrupts.h>
 #include <stdint.h>
+#include "scheduler.h"
 
 typedef struct {
 	uint8_t sec;
@@ -13,7 +14,7 @@ typedef struct {
 	uint8_t year;
 } dateTime;
 
-void timer_handler();
+void *timer_handler(void *stackPointer);
 int ticks_elapsed();
 int seconds_elapsed();
 uint64_t ms_elapsed();
