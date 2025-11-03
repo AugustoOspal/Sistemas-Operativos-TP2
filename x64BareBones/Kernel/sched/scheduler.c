@@ -22,7 +22,6 @@ typedef struct ProcessCDT
 } ProcessCDT;
 
 // switchProcess();
-// selectNextProcess();
 
 typedef struct schedulerT
 {
@@ -121,4 +120,18 @@ void *schedule(void *stackPointer)
 	}
 
 	return pickNextProcess();
+}
+
+void changeProcessPriority(uint64_t pid, uint8_t newPriority)
+{
+	for(int i = 0; i < PRIO; i++){
+		ProcessADT proc = FindInQueue(globalScheduler.priorityQueues[i], matchPid, &pid);
+
+		if (proc) {
+			proc->priority = newPriority;
+			Dequeue(globalScheduler.priorityQueues[i]);
+			Enqueue(globalScheduler.priorityQueues[newPriority], proc);
+			return;
+		}
+	}
 }
