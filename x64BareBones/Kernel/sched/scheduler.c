@@ -26,7 +26,7 @@ typedef struct ProcessCDT
 
 typedef struct schedulerT
 {
-	QueueADT queue;
+	QueueADT priorityQueues[PRIO];
 	ProcessADT currentProcess;
 } schedulerT;
 
@@ -39,11 +39,14 @@ ProcessADT idleProcess;
 static uint64_t lastPid = 0;
 
 void initializeScheduler()
-{
-	globalScheduler.queue = NewQueue();
+{	
+	for(int i = 0; i < 1; i++)
+	{
+		globalScheduler.priorityQueues[i] = NewQueue();
+	}
 	globalScheduler.currentProcess = NULL;
 	createProcess(idleMain, 0, NULL);
-	idleProcess = Dequeue(globalScheduler.queue);
+	idleProcess = Dequeue(globalScheduler.priorityQueues[0]);
 }
 
 ProcessADT addProcess(void *stackPointer)
@@ -55,7 +58,7 @@ ProcessADT addProcess(void *stackPointer)
 	newProcess->stack = stackPointer;
 	newProcess->state = READY;
 	newProcess->quantumLeft = QUANTUM;
-	Enqueue(globalScheduler.queue, newProcess);
+	Enqueue(globalScheduler.priorityQueues[0], newProcess);
 	return newProcess;
 }
 
@@ -68,15 +71,37 @@ static bool matchPid(void *elem, void *data)
 
 void addProcessInfo(uint64_t pid, char *name, uint8_t priority, void *basePointer, bool foreground)
 {
-	ProcessADT proc = FindInQueue(globalScheduler.queue, matchPid, &pid);
+	for(int i = 0; i < PRIO; i++){
+		ProcessADT proc = FindInQueue(globalScheduler.priorityQueues[i], matchPid, &pid);
 
-	if (proc)
-	{
-		proc->nombre = name;
-		proc->priority = priority;
-		proc->basePointer = basePointer;
-		proc->foreground = foreground;
+		if (proc) {
+			proc->nombre = name;
+			proc->priority = priority;
+			proc->basePointer = basePointer;
+			proc->foreground = foreground;
+			return;
+		}
 	}
+}
+
+static int anyReadyProcess(){ 
+	for(int i = 0; i < PRIO; i++){
+		if (!IsQueueEmpty(globalScheduler.priorityQueues[i])){ return 1; }
+	}
+	return 0;
+}
+
+static void *pickNextProcess()
+{
+	if (!anyReadyProcess())
+	{
+		globalScheduler.currentProcess = idleProcess;
+		return idleProcess->stack;
+	}
+
+	globalScheduler.currentProcess = (ProcessADT) Dequeue(globalScheduler.priorityQueues[0]);
+	globalScheduler.currentProcess->quantumLeft = QUANTUM;
+	return globalScheduler.currentProcess->stack;
 }
 
 void *schedule(void *stackPointer)
@@ -91,17 +116,9 @@ void *schedule(void *stackPointer)
 			{
 				return stackPointer;
 			}
-			Enqueue(globalScheduler.queue, globalScheduler.currentProcess);
+			Enqueue(globalScheduler.priorityQueues[0], globalScheduler.currentProcess);
 		}
 	}
 
-	if (IsQueueEmpty(globalScheduler.queue))
-	{
-		globalScheduler.currentProcess = idleProcess;
-		return idleProcess->stack;
-	}
-
-	globalScheduler.currentProcess = (ProcessADT) Dequeue(globalScheduler.queue);
-	globalScheduler.currentProcess->quantumLeft = QUANTUM;
-	return globalScheduler.currentProcess->stack;
+	return pickNextProcess();
 }

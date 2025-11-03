@@ -10,6 +10,7 @@
 #include <stdint.h>
 
 #define QUANTUM 10
+#define PRIO 4
 
 typedef struct ProcessCDT *ProcessADT;
 
