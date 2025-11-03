@@ -4,7 +4,8 @@ section .rodata
 
 section .text
 
-; Macro para guardar todos los registros en el stack
+; No podemos usar la macro de pushState que esta en interrupts.asm
+; porque no se pueden exportar macros entre archivos asm.
 %macro pushState 0
 	push rax
 	push rbx

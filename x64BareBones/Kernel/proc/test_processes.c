@@ -1,21 +1,31 @@
-// TODO: Despues borrar todo esto
-
 #include "./include/test_processes.h"
 
 #include "../drivers/include/videoDriver.h"
 
-/*
- *  El volatile es para que el compilador no lo optimice. Asi se cuelga ahi
- */
+#define CIRCLE_RADIUS 50
+#define BOX_SIZE 120
 
 int processA(int argc, char *argv[])
 {
-	int counter = 0;
+	int radius = 5;
+	int growing = 1;
 	while (1)
 	{
-		drawRectangle(50, 50, 0xFF0000, 10, 10);
-		drawString("A:", 0xFFFFFF, 20, 20);
-		drawDecimal(counter++, 0xFFFFFF, 40, 20);
+		drawRectangle(BOX_SIZE, BOX_SIZE, 0x000000, 40, 40);
+		drawCircle(radius, 0xFF0000, 100, 100);
+
+		if (growing)
+		{
+			radius += 2;
+			if (radius >= CIRCLE_RADIUS)
+				growing = 0;
+		}
+		else
+		{
+			radius -= 2;
+			if (radius <= 5)
+				growing = 1;
+		}
 
 		for (volatile int i = 0; i < 5000000; i++)
 			;
@@ -25,12 +35,25 @@ int processA(int argc, char *argv[])
 
 int processB(int argc, char *argv[])
 {
-	int counter = 0;
+	int radius = 5;
+	int growing = 1;
 	while (1)
 	{
-		drawRectangle(50, 50, 0x00FF00, 70, 10);
-		drawString("B:", 0xFFFFFF, 80, 20);
-		drawDecimal(counter++, 0xFFFFFF, 100, 20);
+		drawRectangle(BOX_SIZE, BOX_SIZE, 0x000000, 240, 40);
+		drawCircle(radius, 0x00FF00, 300, 100);
+
+		if (growing)
+		{
+			radius += 2;
+			if (radius >= CIRCLE_RADIUS)
+				growing = 0;
+		}
+		else
+		{
+			radius -= 2;
+			if (radius <= 5)
+				growing = 1;
+		}
 
 		for (volatile int i = 0; i < 5000000; i++)
 			;
@@ -40,12 +63,25 @@ int processB(int argc, char *argv[])
 
 int processC(int argc, char *argv[])
 {
-	int counter = 0;
+	int radius = 5;
+	int growing = 1;
 	while (1)
 	{
-		drawRectangle(50, 50, 0x0000FF, 130, 10);
-		drawString("C:", 0xFFFFFF, 140, 20);
-		drawDecimal(counter++, 0xFFFFFF, 160, 20);
+		drawRectangle(BOX_SIZE, BOX_SIZE, 0x000000, 440, 40);
+		drawCircle(radius, 0x0000FF, 500, 100);
+
+		if (growing)
+		{
+			radius += 2;
+			if (radius >= CIRCLE_RADIUS)
+				growing = 0;
+		}
+		else
+		{
+			radius -= 2;
+			if (radius <= 5)
+				growing = 1;
+		}
 
 		for (volatile int i = 0; i < 5000000; i++)
 			;

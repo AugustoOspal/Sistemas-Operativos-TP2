@@ -9,7 +9,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#define QUANTUM 5
+#define QUANTUM 10
 
 typedef struct ProcessCDT *ProcessADT;
 

@@ -65,9 +65,11 @@ int main()
 	kernel_memory_init();
 	initializeScheduler();
 
+	_cli();
 	createProcess(processA, 0, NULL);
 	createProcess(processB, 0, NULL);
 	createProcess(processC, 0, NULL);
+	_sti();
 
 	load_idt();
 
