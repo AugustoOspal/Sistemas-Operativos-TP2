@@ -1,5 +1,6 @@
 #ifndef SISTEMAS_OPERATIVOS_TP2_DOUBLELINKEDLIST_H
 #define SISTEMAS_OPERATIVOS_TP2_DOUBLELINKEDLIST_H
+#include "../../../mem/include/pmem.h"
 #include <stdbool.h>
 #include <stddef.h>
 
