@@ -27,6 +27,8 @@ typedef struct schedulerT
 {
 	QueueADT priorityQueues[PRIO];
 	ProcessADT currentProcess;
+	uint8_t   weights[PRIO];
+    uint8_t   credits[PRIO];
 } schedulerT;
 
 schedulerT globalScheduler;
@@ -37,15 +39,26 @@ ProcessADT idleProcess;
 // Este PID es el proximo a crear
 static uint64_t lastPid = 0;
 
+static void refill_credits(void) {
+    for (int i = 0; i < PRIO; i++) globalScheduler.credits[i] = globalScheduler.weights[i];
+}
+
 void initializeScheduler()
 {	
-	for(int i = 0; i < 1; i++)
+	for(int i = 0; i < PRIO; i++)
 	{
 		globalScheduler.priorityQueues[i] = NewQueue();
 	}
 	globalScheduler.currentProcess = NULL;
+
+	//ver que si cambia PRIO no haya que cambiar el codigo -> hacerlo mejor
+    globalScheduler.weights[0] = 3;
+    globalScheduler.weights[1] = 2;
+    globalScheduler.weights[2] = 1;
+    refill_credits();
+
 	createProcess(idleMain, 0, NULL);
-	idleProcess = Dequeue(globalScheduler.priorityQueues[0]);
+	idleProcess = Dequeue(globalScheduler.priorityQueues[DEFAULT_PRIORITY]);
 }
 
 ProcessADT addProcess(void *stackPointer)
@@ -57,7 +70,8 @@ ProcessADT addProcess(void *stackPointer)
 	newProcess->stack = stackPointer;
 	newProcess->state = READY;
 	newProcess->quantumLeft = QUANTUM;
-	Enqueue(globalScheduler.priorityQueues[0], newProcess);
+	newProcess->priority = DEFAULT_PRIORITY;
+	Enqueue(globalScheduler.priorityQueues[DEFAULT_PRIORITY], newProcess);
 	return newProcess;
 }
 
@@ -75,7 +89,6 @@ void addProcessInfo(uint64_t pid, char *name, uint8_t priority, void *basePointe
 
 		if (proc) {
 			proc->nombre = name;
-			proc->priority = priority;
 			proc->basePointer = basePointer;
 			proc->foreground = foreground;
 			return;
@@ -83,22 +96,32 @@ void addProcessInfo(uint64_t pid, char *name, uint8_t priority, void *basePointe
 	}
 }
 
-static int anyReadyProcess(){ 
-	for(int i = 0; i < PRIO; i++){
-		if (!IsQueueEmpty(globalScheduler.priorityQueues[i])){ return 1; }
-	}
-	return 0;
+static int pickNextQueue(void) {
+    int sum = 0;
+    for (int i = 0; i < PRIO; i++)
+        if (!IsQueueEmpty(globalScheduler.priorityQueues[i]))
+            sum += globalScheduler.credits[i];
+
+    if (sum == 0) refill_credits();
+
+    for (int p = 0; p < PRIO; p++){
+        if (globalScheduler.credits[p] > 0 &&
+            !IsQueueEmpty(globalScheduler.priorityQueues[p])){
+            globalScheduler.credits[p]--;
+            return p;
+        }
+    }
+    return -1;
 }
 
 static void *pickNextProcess()
 {
-	if (!anyReadyProcess())
-	{
-		globalScheduler.currentProcess = idleProcess;
-		return idleProcess->stack;
-	}
-
-	globalScheduler.currentProcess = (ProcessADT) Dequeue(globalScheduler.priorityQueues[0]);
+	int queue = pickNextQueue();
+	if (queue < 0) {
+        globalScheduler.currentProcess = idleProcess;
+        return idleProcess->stack;
+    }
+	globalScheduler.currentProcess = (ProcessADT) Dequeue(globalScheduler.priorityQueues[queue]);
 	globalScheduler.currentProcess->quantumLeft = QUANTUM;
 	return globalScheduler.currentProcess->stack;
 }
@@ -115,7 +138,8 @@ void *schedule(void *stackPointer)
 			{
 				return stackPointer;
 			}
-			Enqueue(globalScheduler.priorityQueues[0], globalScheduler.currentProcess);
+			uint8_t pr = globalScheduler.currentProcess->priority;
+			Enqueue(globalScheduler.priorityQueues[pr], globalScheduler.currentProcess);
 		}
 	}
 

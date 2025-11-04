@@ -67,12 +67,12 @@ int main()
 
 	// Test de procesos
 	// _cli();
-	// createProcess(processA, 0, NULL);
-	// createProcess(processB, 0, NULL);
-	// createProcess(processC, 0, NULL);
+	createProcess(processA, 0, NULL);
+	createProcess(processB, 0, NULL);
+	createProcess(processC, 0, NULL);
 	// _sti();
 
-	createProcess(shellAddress, 0, NULL);
+	//createProcess(shellAddress, 0, NULL);
 	load_idt();
 	// play_boot_sound();
 	return 0;
