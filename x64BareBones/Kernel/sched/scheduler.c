@@ -175,7 +175,7 @@ void changeProcessPriority(uint64_t pid, uint8_t newPriority)
 	ProcessADT proc = getProcessByPid(pid);
 	if (!proc) return;
 	proc->priority = newPriority;
-	removeFromQueue(globalScheduler.priorityQueues[proc->priority], proc);
+	RemoveFromQueue(globalScheduler.priorityQueues[proc->priority], proc);
 	Enqueue(globalScheduler.priorityQueues[newPriority], proc);
 }
 
