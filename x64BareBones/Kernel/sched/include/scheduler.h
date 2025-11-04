@@ -20,7 +20,7 @@ void *schedule(void *stackPointer);
 ProcessADT addProcess(void *stackPointer);
 void addProcessInfo(uint64_t pid, char *name, uint8_t priority, void *basePointer, bool foreground);
 void changeProcessPriority(uint64_t pid, uint8_t newPriority);
-// removeProcess();
+void removeProcess(ProcessADT p);
 // blockProcess();
 // unblockProcess();
 // getProcessInfo();

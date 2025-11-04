@@ -1,4 +1,5 @@
 #include "scheduler.h"
+#include "../lib/ADT/DoubleLinkedList/doubleLinkedList.h"
 
 typedef enum ProcessState
 {
@@ -29,6 +30,7 @@ typedef struct schedulerT
 	ProcessADT currentProcess;
 	uint8_t   weights[PRIO];
     uint8_t   credits[PRIO];
+	doubleLinkedListADT processTable;
 } schedulerT;
 
 schedulerT globalScheduler;
@@ -45,6 +47,7 @@ static void refill_credits(void) {
 
 void initializeScheduler()
 {	
+	globalScheduler.processTable = newDoubleLinkedListCDT();
 	for(int i = 0; i < PRIO; i++)
 	{
 		globalScheduler.priorityQueues[i] = NewQueue();
@@ -71,6 +74,8 @@ ProcessADT addProcess(void *stackPointer)
 	newProcess->state = READY;
 	newProcess->quantumLeft = QUANTUM;
 	newProcess->priority = DEFAULT_PRIORITY;
+
+	addToDoubleLinkedList(globalScheduler.processTable, newProcess);
 	Enqueue(globalScheduler.priorityQueues[DEFAULT_PRIORITY], newProcess);
 	return newProcess;
 }
@@ -158,4 +163,18 @@ void changeProcessPriority(uint64_t pid, uint8_t newPriority)
 			return;
 		}
 	}
+}
+
+void removeProcess(ProcessADT p) {
+    if (!p) return;
+
+    // sacar de la tabla global
+    removeFromDoubleLinkedList(globalScheduler.processTable, p);
+
+    // sacar de cualquier cola en la que este (si sigue en alguna)
+    RemoveFromQueue(globalScheduler.priorityQueues[p->priority], p);
+
+    // liberar memoria del stack y del PCB
+    mem_free(p->stack);
+    mem_free(p);
 }
