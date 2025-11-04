@@ -1,4 +1,5 @@
 #include "./include/test_processes.h"
+#include "../sched/include/scheduler.h"
 
 #include "../drivers/include/videoDriver.h"
 
@@ -11,6 +12,7 @@ int processA(int argc, char *argv[])
 	int growing = 1;
 	while (1)
 	{
+		yield();
 		drawRectangle(BOX_SIZE, BOX_SIZE, 0x000000, 40, 40);
 		drawCircle(radius, 0xFF0000, 100, 100);
 
@@ -39,6 +41,7 @@ int processB(int argc, char *argv[])
 	int growing = 1;
 	while (1)
 	{
+		blockProcess(getPid());
 		drawRectangle(BOX_SIZE, BOX_SIZE, 0x000000, 240, 40);
 		drawCircle(radius, 0x00FF00, 300, 100);
 

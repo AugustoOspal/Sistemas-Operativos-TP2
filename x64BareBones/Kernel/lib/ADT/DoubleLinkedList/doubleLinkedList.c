@@ -4,8 +4,6 @@
 
 #include "doubleLinkedList.h"
 
-static doubleLinkedListADT processTable = NULL;
-
 typedef struct nodeT
 {
 	void *elem;

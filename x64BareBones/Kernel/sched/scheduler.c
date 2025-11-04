@@ -22,15 +22,14 @@ typedef struct ProcessCDT
 	bool foreground;
 } ProcessCDT;
 
-// switchProcess();
-
 typedef struct schedulerT
 {
-	QueueADT priorityQueues[PRIO];
 	ProcessADT currentProcess;
+	doubleLinkedListADT processTable;
+	QueueADT priorityQueues[PRIO];
 	uint8_t   weights[PRIO];
     uint8_t   credits[PRIO];
-	doubleLinkedListADT processTable;
+	QueueADT blockedQueue;
 } schedulerT;
 
 schedulerT globalScheduler;
@@ -55,10 +54,12 @@ void initializeScheduler()
 	globalScheduler.currentProcess = NULL;
 
 	//ver que si cambia PRIO no haya que cambiar el codigo -> hacerlo mejor
-    globalScheduler.weights[0] = 3;
-    globalScheduler.weights[1] = 2;
-    globalScheduler.weights[2] = 1;
+	for(int i = 0; i < PRIO; i++){
+		globalScheduler.weights[i] = PRIO - i;
+	}
     refill_credits();
+
+	globalScheduler.blockedQueue = NewQueue();
 
 	createProcess(idleMain, 0, NULL);
 	idleProcess = Dequeue(globalScheduler.priorityQueues[DEFAULT_PRIORITY]);
@@ -124,9 +125,11 @@ static void *pickNextProcess()
 	int queue = pickNextQueue();
 	if (queue < 0) {
         globalScheduler.currentProcess = idleProcess;
+		idleProcess->state = RUNNING;
         return idleProcess->stack;
     }
 	globalScheduler.currentProcess = (ProcessADT) Dequeue(globalScheduler.priorityQueues[queue]);
+	globalScheduler.currentProcess->state = RUNNING;
 	globalScheduler.currentProcess->quantumLeft = QUANTUM;
 	return globalScheduler.currentProcess->stack;
 }
@@ -139,10 +142,15 @@ void *schedule(void *stackPointer)
 
 		if (globalScheduler.currentProcess != idleProcess)
 		{
+			if (globalScheduler.currentProcess->state == BLOCKED)
+			{
+				return pickNextProcess();
+			}
 			if (--globalScheduler.currentProcess->quantumLeft)
 			{
 				return stackPointer;
 			}
+			globalScheduler.currentProcess->state = READY;
 			uint8_t pr = globalScheduler.currentProcess->priority;
 			Enqueue(globalScheduler.priorityQueues[pr], globalScheduler.currentProcess);
 		}
@@ -151,21 +159,28 @@ void *schedule(void *stackPointer)
 	return pickNextProcess();
 }
 
-void changeProcessPriority(uint64_t pid, uint8_t newPriority)
-{
+static ProcessADT getProcessByPid(uint64_t pid){
 	for(int i = 0; i < PRIO; i++){
 		ProcessADT proc = FindInQueue(globalScheduler.priorityQueues[i], matchPid, &pid);
 
 		if (proc) {
-			proc->priority = newPriority;
-			Dequeue(globalScheduler.priorityQueues[i]);
-			Enqueue(globalScheduler.priorityQueues[newPriority], proc);
-			return;
+			return proc;
 		}
 	}
+	return NULL;
 }
 
-void removeProcess(ProcessADT p) {
+void changeProcessPriority(uint64_t pid, uint8_t newPriority)
+{
+	ProcessADT proc = getProcessByPid(pid);
+	if (!proc) return;
+	proc->priority = newPriority;
+	removeFromQueue(globalScheduler.priorityQueues[proc->priority], proc);
+	Enqueue(globalScheduler.priorityQueues[newPriority], proc);
+}
+
+void removeProcess(uint64_t pid){
+	ProcessADT p = getProcessByPid(pid);
     if (!p) return;
 
     // sacar de la tabla global
@@ -177,4 +192,47 @@ void removeProcess(ProcessADT p) {
     // liberar memoria del stack y del PCB
     mem_free(p->stack);
     mem_free(p);
+}
+
+static inline void forceTimerInterrupt(void) { //hacer prolijo en asm
+    __asm__ __volatile__ ("int $0x20");
+}
+
+void blockProcess(uint64_t pid){
+	if (globalScheduler.currentProcess && globalScheduler.currentProcess->pid == pid){
+		ProcessADT running = globalScheduler.currentProcess;
+		if (running->state == BLOCKED)
+			return;
+		running->state = BLOCKED;
+		Enqueue(globalScheduler.blockedQueue, running);
+		forceTimerInterrupt();
+		return;
+	}
+
+	ProcessADT p = getProcessByPid(pid);
+	if (!p) return;
+
+	RemoveFromQueue(globalScheduler.priorityQueues[p->priority], p);
+	p->state = BLOCKED;
+
+	Enqueue(globalScheduler.blockedQueue, p);
+}
+
+void unblockProcess(uint64_t pid){
+	ProcessADT p = FindInQueue(globalScheduler.blockedQueue, matchPid, &pid);
+	if (!p) return;
+
+	RemoveFromQueue(globalScheduler.blockedQueue, p);
+	p->state = READY;
+
+	Enqueue(globalScheduler.priorityQueues[p->priority], p);
+}
+
+void yield() {
+    globalScheduler.currentProcess->quantumLeft = 1;
+    forceTimerInterrupt();
+}
+
+uint64_t getPid(){
+	return globalScheduler.currentProcess->pid;
 }
