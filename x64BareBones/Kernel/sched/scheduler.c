@@ -173,9 +173,11 @@ static ProcessADT getProcessByPid(uint64_t pid){
 void changeProcessPriority(uint64_t pid, uint8_t newPriority)
 {
 	ProcessADT proc = getProcessByPid(pid);
+	if (newPriority >= PRIO) return;
 	if (!proc) return;
-	proc->priority = newPriority;
+	if (proc->priority == newPriority) return;
 	RemoveFromQueue(globalScheduler.priorityQueues[proc->priority], proc);
+	proc->priority = newPriority;
 	Enqueue(globalScheduler.priorityQueues[newPriority], proc);
 }
 
