@@ -65,20 +65,15 @@ int main()
 	kernel_memory_init();
 	initializeScheduler();
 
-	_cli();
-	createProcess(processA, 0, NULL);
-	createProcess(processB, 0, NULL);
-	createProcess(processC, 0, NULL);
-	_sti();
+	// Test de procesos
+	// _cli();
+	// createProcess(processA, 0, NULL);
+	// createProcess(processB, 0, NULL);
+	// createProcess(processC, 0, NULL);
+	// _sti();
 
+	createProcess(shellAddress, 0, NULL);
 	load_idt();
-
-	_sti();
-	while (1)
-	{
-		_hlt();
-	}
-
-	play_boot_sound();
-	return ((EntryPoint) shellAddress)();
+	// play_boot_sound();
+	return 0;
 }
