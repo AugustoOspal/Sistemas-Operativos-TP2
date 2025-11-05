@@ -66,13 +66,12 @@ int main()
 	initializeScheduler();
 
 	// Test de procesos
-	// _cli();
-	createProcess(processA, 0, NULL);
-	createProcess(processB, 0, NULL);
-	createProcess(processC, 0, NULL);
-	// _sti();
+	// createProcess("Proceso A", processA, 0, NULL);
+	// createProcess("Proceso B", processB, 0, NULL);
+	// createProcess("Proceso C", processC, 0, NULL);
+	// drawString(getProcessInfo(1), 0xFFFFFF, 10, 10);
 
-	//createProcess(shellAddress, 0, NULL);
+	changeProcessPriority(createProcess("shell", shellAddress, 0, NULL), 3);
 	load_idt();
 	// play_boot_sound();
 	return 0;

@@ -1,12 +1,11 @@
 #include "./include/test_processes.h"
-#include "../sched/include/scheduler.h"
-
-#include "../drivers/include/videoDriver.h"
+#include "./include/processes.h"
+#include "./include/videoLib.h"
 
 #define CIRCLE_RADIUS 50
 #define BOX_SIZE 120
 
-int processA(int argc, char *argv[])
+int test_processA(int argc, char *argv[])
 {
 	int radius = 5;
 	int growing = 1;
@@ -34,12 +33,13 @@ int processA(int argc, char *argv[])
 	return 0;
 }
 
-int processB(int argc, char *argv[])
+int test_processB(int argc, char *argv[])
 {
 	int radius = 5;
 	int growing = 1;
 	while (1)
 	{
+		// blockProcess(getPID());
 		drawRectangle(BOX_SIZE, BOX_SIZE, 0x000000, 240, 40);
 		drawCircle(radius, 0x00FF00, 300, 100);
 
@@ -62,7 +62,7 @@ int processB(int argc, char *argv[])
 	return 0;
 }
 
-int processC(int argc, char *argv[])
+int test_processC(int argc, char *argv[])
 {
 	int radius = 5;
 	int growing = 1;

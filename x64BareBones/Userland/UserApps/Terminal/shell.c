@@ -1,5 +1,7 @@
 #include "shell.h"
 
+#include "processes.h"
+
 #define BUFFER 500
 #define COMMAND_SIZE 12
 #define SPECIAL_KEY_MAX_VALUE 5
@@ -26,6 +28,11 @@ void startShell()
 	char input_buffer[BUFFER];
 	while (active)
 	{
+		// TODO: Acordarse de sacar esto
+		createProcess("Process A", test_processA, 0, NULL);
+		createProcess("Process B", test_processB, 0, NULL);
+		createProcess("Process C", test_processC, 0, NULL);
+
 		show_prompt();
 		readInput(input_buffer);
 		to_lower(input_buffer);

@@ -24,6 +24,15 @@ GLOBAL sys_zoomOut
 GLOBAL sys_playSound
 GLOBAL sys_sleepMilli
 
+GLOBAL sys_createProcess
+GLOBAL sys_deleteProcess
+GLOBAL sys_getPid
+GLOBAL sys_listProcesses
+GLOBAL sys_changeProcessPriority
+GLOBAL sys_blockProcess
+GLOBAL sys_unblockProcess
+GLOBAL sys_yield
+
 GLOBAL opCodeException
 
 section .text
@@ -65,6 +74,18 @@ sys_playSound:          syscall 0x30
 ; Tiempo
 sys_sleepMilli:          syscall 0x40
 
+; Procesos
+sys_createProcess:          syscall 0x50
+sys_deleteProcess:          syscall 0x51
+sys_getPid:                 syscall 0x52
+sys_listProcesses:          syscall 0x53
+sys_changeProcessPriority:  syscall 0x55
+sys_blockProcess:           syscall 0x56
+sys_unblockProcess:         syscall 0x57
+sys_yield:                  syscall 0x58
+
+
+; Ecceptions
 opCodeException:
 	ud2
 	ret

@@ -266,6 +266,52 @@ void syscallDispatcher(Registers_t *regs)
 			regs->rax = 0;
 			break;
 
+		case 0x50:
+			regs->rax = createProcess((char *) arg1, (mainFuncPtr) arg2, (int) arg3, (char **) arg4);
+			break;
+
+		case 0x51:
+			deleteProcess((uint64_t) arg1);
+			regs->rax = 0;
+			break;
+
+		case 0x52:
+			regs->rax = getPid();
+			break;
+
+		case 0x53:
+			// TODO: Este ahora esta devolviendo la info de un solo proceso y tendria que devolver el de todos
+			regs->rax = (uint64_t) getProcessInfo((uint64_t) arg1);
+			break;
+
+			// case 0x54:
+			// TODO: Falta implementar este, tendria que matar a un proceso
+
+		case 0x55:
+			changeProcessPriority((uint64_t) arg1, (uint8_t) arg2);
+			regs->rax = 0;
+			;
+			break;
+
+		case 0x56:
+			blockProcess((uint64_t) arg1);
+			regs->rax = 0;
+			break;
+
+		case 0x57:
+			unblockProcess((uint64_t) arg1);
+			regs->rax = 0;
+			break;
+
+		case 0x58:
+			yield();
+			regs->rax = 0;
+			;
+			break;
+
+			// case 0x59:
+			// TODO: Falta implementar este, tendria que esperar a los hijos
+
 		default:
 			// Syscall desconocida o no implementada
 			// Se imprime un error o se establece un código de error en rax

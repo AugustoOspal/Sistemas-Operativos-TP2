@@ -17,8 +17,3 @@ int idleMain(int argc, char *argv[])
 
 	return 0;
 }
-
-void createIdleProcess()
-{
-	createProcess(idleMain, 0, NULL);
-}

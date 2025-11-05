@@ -1,5 +1,5 @@
 #include "scheduler.h"
-#include "../lib/ADT/DoubleLinkedList/doubleLinkedList.h"
+#include "../lib/string/strings.h"
 
 typedef enum ProcessState
 {
@@ -27,45 +27,43 @@ typedef struct schedulerT
 	ProcessADT currentProcess;
 	doubleLinkedListADT processTable;
 	QueueADT priorityQueues[PRIO];
-	uint8_t   weights[PRIO];
-    uint8_t   credits[PRIO];
+	uint8_t weights[PRIO];
+	uint8_t credits[PRIO];
 	QueueADT blockedQueue;
 } schedulerT;
 
 schedulerT globalScheduler;
+ProcessADT idleProcess;		 // Esta también puede ir adentro del schedulerT
+static uint64_t lastPid = 0; // Este PID es el proximo a crear
 
-// A lo mejor este podria ir adentro de schedulerT
-ProcessADT idleProcess;
-
-// Este PID es el proximo a crear
-static uint64_t lastPid = 0;
-
-static void refill_credits(void) {
-    for (int i = 0; i < PRIO; i++) globalScheduler.credits[i] = globalScheduler.weights[i];
+static void refill_credits(void)
+{
+	for (int i = 0; i < PRIO; i++)
+		globalScheduler.credits[i] = globalScheduler.weights[i];
 }
 
 void initializeScheduler()
-{	
+{
 	globalScheduler.processTable = newDoubleLinkedListCDT();
-	for(int i = 0; i < PRIO; i++)
+	for (int i = 0; i < PRIO; i++)
 	{
 		globalScheduler.priorityQueues[i] = NewQueue();
 	}
 	globalScheduler.currentProcess = NULL;
 
-	//ver que si cambia PRIO no haya que cambiar el codigo -> hacerlo mejor
-	for(int i = 0; i < PRIO; i++){
+	for (int i = 0; i < PRIO; i++)
+	{
 		globalScheduler.weights[i] = PRIO - i;
 	}
-    refill_credits();
+	refill_credits();
 
 	globalScheduler.blockedQueue = NewQueue();
 
-	createProcess(idleMain, 0, NULL);
+	createProcess("idle", idleMain, 0, NULL);
 	idleProcess = Dequeue(globalScheduler.priorityQueues[DEFAULT_PRIORITY]);
 }
 
-ProcessADT addProcess(void *stackPointer)
+uint64_t addProcess(void *stackPointer)
 {
 	// No estaria chequeando que existe scheduler
 
@@ -78,7 +76,7 @@ ProcessADT addProcess(void *stackPointer)
 
 	addToDoubleLinkedList(globalScheduler.processTable, newProcess);
 	Enqueue(globalScheduler.priorityQueues[DEFAULT_PRIORITY], newProcess);
-	return newProcess;
+	return newProcess->pid;
 }
 
 static bool matchPid(void *elem, void *data)
@@ -88,46 +86,52 @@ static bool matchPid(void *elem, void *data)
 	return proc->pid == *targetPid;
 }
 
-void addProcessInfo(uint64_t pid, char *name, uint8_t priority, void *basePointer, bool foreground)
+void addProcessInfo(uint64_t pid, const char *name, void *basePointer)
 {
-	for(int i = 0; i < PRIO; i++){
+	for (int i = 0; i < PRIO; i++)
+	{
 		ProcessADT proc = FindInQueue(globalScheduler.priorityQueues[i], matchPid, &pid);
 
-		if (proc) {
+		if (proc)
+		{
 			proc->nombre = name;
 			proc->basePointer = basePointer;
-			proc->foreground = foreground;
+			proc->foreground = DEFAULT_FOREGROUND;
 			return;
 		}
 	}
 }
 
-static int pickNextQueue(void) {
-    int sum = 0;
-    for (int i = 0; i < PRIO; i++)
-        if (!IsQueueEmpty(globalScheduler.priorityQueues[i]))
-            sum += globalScheduler.credits[i];
+static int pickNextQueue(void)
+{
+	int sum = 0;
+	for (int i = 0; i < PRIO; i++)
+		if (!IsQueueEmpty(globalScheduler.priorityQueues[i]))
+			sum += globalScheduler.credits[i];
 
-    if (sum == 0) refill_credits();
+	if (sum == 0)
+		refill_credits();
 
-    for (int p = 0; p < PRIO; p++){
-        if (globalScheduler.credits[p] > 0 &&
-            !IsQueueEmpty(globalScheduler.priorityQueues[p])){
-            globalScheduler.credits[p]--;
-            return p;
-        }
-    }
-    return -1;
+	for (int p = 0; p < PRIO; p++)
+	{
+		if (globalScheduler.credits[p] > 0 && !IsQueueEmpty(globalScheduler.priorityQueues[p]))
+		{
+			globalScheduler.credits[p]--;
+			return p;
+		}
+	}
+	return -1;
 }
 
 static void *pickNextProcess()
 {
 	int queue = pickNextQueue();
-	if (queue < 0) {
-        globalScheduler.currentProcess = idleProcess;
+	if (queue < 0)
+	{
+		globalScheduler.currentProcess = idleProcess;
 		idleProcess->state = RUNNING;
-        return idleProcess->stack;
-    }
+		return idleProcess->stack;
+	}
 	globalScheduler.currentProcess = (ProcessADT) Dequeue(globalScheduler.priorityQueues[queue]);
 	globalScheduler.currentProcess->state = RUNNING;
 	globalScheduler.currentProcess->quantumLeft = QUANTUM;
@@ -159,11 +163,14 @@ void *schedule(void *stackPointer)
 	return pickNextProcess();
 }
 
-static ProcessADT getProcessByPid(uint64_t pid){
-	for(int i = 0; i < PRIO; i++){
+static ProcessADT getProcessByPid(uint64_t pid)
+{
+	for (int i = 0; i < PRIO; i++)
+	{
 		ProcessADT proc = FindInQueue(globalScheduler.priorityQueues[i], matchPid, &pid);
 
-		if (proc) {
+		if (proc)
+		{
 			return proc;
 		}
 	}
@@ -173,35 +180,43 @@ static ProcessADT getProcessByPid(uint64_t pid){
 void changeProcessPriority(uint64_t pid, uint8_t newPriority)
 {
 	ProcessADT proc = getProcessByPid(pid);
-	if (newPriority >= PRIO) return;
-	if (!proc) return;
-	if (proc->priority == newPriority) return;
+	if (newPriority >= PRIO)
+		return;
+	if (!proc)
+		return;
+	if (proc->priority == newPriority)
+		return;
 	RemoveFromQueue(globalScheduler.priorityQueues[proc->priority], proc);
 	proc->priority = newPriority;
 	Enqueue(globalScheduler.priorityQueues[newPriority], proc);
 }
 
-void removeProcess(uint64_t pid){
+void removeProcess(uint64_t pid)
+{
 	ProcessADT p = getProcessByPid(pid);
-    if (!p) return;
+	if (!p)
+		return;
 
-    // sacar de la tabla global
-    removeFromDoubleLinkedList(globalScheduler.processTable, p);
+	// sacar de la tabla global
+	removeFromDoubleLinkedList(globalScheduler.processTable, p);
 
-    // sacar de cualquier cola en la que este (si sigue en alguna)
-    RemoveFromQueue(globalScheduler.priorityQueues[p->priority], p);
+	// sacar de cualquier cola en la que este (si sigue en alguna)
+	RemoveFromQueue(globalScheduler.priorityQueues[p->priority], p);
 
-    // liberar memoria del stack y del PCB
-    mem_free(p->stack);
-    mem_free(p);
+	// liberar memoria del stack y del PCB
+	mem_free(p->stack);
+	mem_free(p);
 }
 
-static inline void forceTimerInterrupt(void) { //hacer prolijo en asm
-    __asm__ __volatile__ ("int $0x20");
+static inline void forceTimerInterrupt(void)
+{ // TODO: hacer prolijo en asm
+	__asm__ __volatile__("int $0x20");
 }
 
-void blockProcess(uint64_t pid){
-	if (globalScheduler.currentProcess && globalScheduler.currentProcess->pid == pid){
+void blockProcess(uint64_t pid)
+{
+	if (globalScheduler.currentProcess && globalScheduler.currentProcess->pid == pid)
+	{
 		ProcessADT running = globalScheduler.currentProcess;
 		if (running->state == BLOCKED)
 			return;
@@ -212,7 +227,8 @@ void blockProcess(uint64_t pid){
 	}
 
 	ProcessADT p = getProcessByPid(pid);
-	if (!p) return;
+	if (!p)
+		return;
 
 	RemoveFromQueue(globalScheduler.priorityQueues[p->priority], p);
 	p->state = BLOCKED;
@@ -220,9 +236,11 @@ void blockProcess(uint64_t pid){
 	Enqueue(globalScheduler.blockedQueue, p);
 }
 
-void unblockProcess(uint64_t pid){
+void unblockProcess(uint64_t pid)
+{
 	ProcessADT p = FindInQueue(globalScheduler.blockedQueue, matchPid, &pid);
-	if (!p) return;
+	if (!p)
+		return;
 
 	RemoveFromQueue(globalScheduler.blockedQueue, p);
 	p->state = READY;
@@ -230,11 +248,52 @@ void unblockProcess(uint64_t pid){
 	Enqueue(globalScheduler.priorityQueues[p->priority], p);
 }
 
-void yield() {
-    globalScheduler.currentProcess->quantumLeft = 1;
-    forceTimerInterrupt();
+void yield()
+{
+	globalScheduler.currentProcess->quantumLeft = 1;
+	forceTimerInterrupt();
 }
 
-uint64_t getPid(){
+uint64_t getPid()
+{
 	return globalScheduler.currentProcess->pid;
 }
+
+char *getProcessInfo(uint64_t pid)
+{
+	static char buffer[256];
+	ProcessADT p = getProcessByPid(pid);
+
+	if (!p)
+	{
+		buffer[0] = '\0';
+		return buffer;
+	}
+
+	const char *state_str;
+	switch (p->state)
+	{
+		case READY:
+			state_str = "READY";
+			break;
+		case RUNNING:
+			state_str = "RUNNING";
+			break;
+		case BLOCKED:
+			state_str = "BLOCKED";
+			break;
+		case TERMINATED:
+			state_str = "TERMINATED";
+			break;
+		default:
+			state_str = "UNKNOWN";
+			break;
+	}
+
+	ksprintf(buffer, "PID: %lu | Name: %s | Priority: %u | State: %s | Foreground: %s | Stack: 0x%lx | BP: 0x%lx",
+			 p->pid, p->nombre ? p->nombre : "(unnamed)", p->priority, state_str, p->foreground ? "Yes" : "No",
+			 (unsigned long) p->stack, (unsigned long) p->basePointer);
+
+	return buffer;
+}
+
