@@ -20,5 +20,5 @@ void createProcess(const mainFuncPtr main, const int argc, char *argv[])
 }
 
 void deleteProcess(uint64_t pid){
-	removeProcess(pid);
+	terminateProcess(pid);
 }

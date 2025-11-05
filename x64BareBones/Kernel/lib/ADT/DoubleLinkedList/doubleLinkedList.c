@@ -95,6 +95,54 @@ void removeFromDoubleLinkedList(doubleLinkedListCDT *list, void *elem)
 	}
 }
 
+void *findInDoubleLinkedList(doubleLinkedListADT list, bool (*equals)(void *elem, void *target), void *target)
+{
+	if (!list || !equals)
+		return NULL;
+
+	node_t *cur = list->head;
+	while (cur)
+	{
+		if (equals(cur->elem, target))
+		{
+			return cur->elem;
+		}
+		cur = cur->next;
+	}
+	return NULL;
+}
+
+void removeFromDoubleLinkedListIf(doubleLinkedListADT list, bool (*equals)(void *elem, void *target), void *target)
+{
+	if (!list || !equals)
+		return;
+
+	node_t *cur = list->head;
+	while (cur)
+	{
+		if (equals(cur->elem, target))
+		{
+			if (cur->prev)
+			{
+				cur->prev->next = cur->next;
+			}
+			else
+			{
+				list->head = cur->next;
+			}
+			if (cur->next)
+			{
+				cur->next->prev = cur->prev;
+			}
+
+			mem_free(cur);
+			list->length--;
+			return;
+		}
+		cur = cur->next;
+	}
+}
+
 size_t getDoubleLinkedListLength(doubleLinkedListADT list)
 {
 	return list->length;
