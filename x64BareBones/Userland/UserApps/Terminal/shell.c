@@ -1,5 +1,7 @@
 #include "shell.h"
 
+#include <stdlib.h>
+
 #include "processes.h"
 
 #define BUFFER 500
@@ -32,6 +34,10 @@ void startShell()
 		createProcess("Process A", test_processA, 0, NULL);
 		createProcess("Process B", test_processB, 0, NULL);
 		createProcess("Process C", test_processC, 0, NULL);
+
+		char buffer[2000];
+		getProcessesInfo(buffer, 2000);
+		printf("%s", buffer);
 
 		show_prompt();
 		readInput(input_buffer);

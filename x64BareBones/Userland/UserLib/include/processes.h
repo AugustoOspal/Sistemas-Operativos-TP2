@@ -25,8 +25,13 @@ void deleteProcess(uint64_t pid);
  */
 uint64_t getPID();
 
-
-char *listProcesses(uint64_t pid);
+/*
+ *  @brief Gets information of all processes in CSV format
+ *  @param buffer Buffer to write the information to
+ *  @param bufferSize Size of the buffer
+ *  @return Number of processes written
+ */
+uint64_t getProcessesInfo(char *buffer, uint64_t bufferSize);
 
 /*
  *  @brief Changes the priority of a process

@@ -69,7 +69,6 @@ int main()
 	// createProcess("Proceso A", processA, 0, NULL);
 	// createProcess("Proceso B", processB, 0, NULL);
 	// createProcess("Proceso C", processC, 0, NULL);
-	// drawString(getProcessInfo(1), 0xFFFFFF, 10, 10);
 
 	changeProcessPriority(createProcess("shell", shellAddress, 0, NULL), 3);
 	load_idt();

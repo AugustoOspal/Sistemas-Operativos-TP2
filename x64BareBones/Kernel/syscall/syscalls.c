@@ -280,8 +280,8 @@ void syscallDispatcher(Registers_t *regs)
 			break;
 
 		case 0x53:
-			// TODO: Este ahora esta devolviendo la info de un solo proceso y tendria que devolver el de todos
-			regs->rax = (uint64_t) getProcessInfo((uint64_t) arg1);
+			// arg1 = buffer, arg2 = bufferSize
+			regs->rax = getAllProcessesInfo((char *) arg1, (uint64_t) arg2);
 			break;
 
 			// case 0x54:

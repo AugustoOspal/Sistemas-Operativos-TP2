@@ -27,7 +27,7 @@ GLOBAL sys_sleepMilli
 GLOBAL sys_createProcess
 GLOBAL sys_deleteProcess
 GLOBAL sys_getPid
-GLOBAL sys_listProcesses
+GLOBAL sys_getAllProcessesInfo
 GLOBAL sys_changeProcessPriority
 GLOBAL sys_blockProcess
 GLOBAL sys_unblockProcess
@@ -78,7 +78,7 @@ sys_sleepMilli:          syscall 0x40
 sys_createProcess:          syscall 0x50
 sys_deleteProcess:          syscall 0x51
 sys_getPid:                 syscall 0x52
-sys_listProcesses:          syscall 0x53
+sys_getAllProcessesInfo:    syscall 0x53
 sys_changeProcessPriority:  syscall 0x55
 sys_blockProcess:           syscall 0x56
 sys_unblockProcess:         syscall 0x57

@@ -64,7 +64,6 @@ void blockProcess(uint64_t pid);
  */
 void unblockProcess(uint64_t pid);
 
-
 /*
  *  @brief Fuerza un timmer interrupt y decrece el quantum del proceso actual
  */
@@ -76,12 +75,22 @@ void yield();
 uint64_t getPid();
 
 /*
- *  @brief Devuelve un string con toda la información del proceso pedido
- *  @param pid del proceso a imprimir la información
- *  @return string con toda la información
- *  @note No hace falta hacer un free de ese string
+ *  @brief Escribe la información del proceso en formato CSV en el buffer
+ *  @param pid PID del proceso
+ *  @param buffer Buffer donde escribir la información
+ *  @param bufferSize Tamaño del buffer
+ *  @return Cantidad de caracteres escritos (sin contar el '\0'), o -1 si el proceso no existe
  */
-char *getProcessInfo(uint64_t pid);
+int getProcessInfo(uint64_t pid, char *buffer, uint64_t bufferSize);
+
+/*
+ *  @brief Escribe la información de todos los procesos en formato CSV en el buffer
+ *  @param buffer Buffer donde escribir la información (incluye header CSV)
+ *  @param bufferSize Tamaño del buffer
+ *  @return Cantidad de procesos escritos (sin contar el header)
+ */
+uint64_t getAllProcessesInfo(char *buffer, uint64_t bufferSize);
+
 // resignTimeWindow(); // usa yield
 
 #endif

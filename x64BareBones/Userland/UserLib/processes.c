@@ -19,9 +19,9 @@ uint64_t getPID()
 	return sys_getPid();
 }
 
-char *listProcesses(uint64_t pid)
+uint64_t getProcessesInfo(char *buffer, uint64_t bufferSize)
 {
-	return sys_listProcesses(pid);
+	return sys_getAllProcessesInfo(buffer, bufferSize);
 }
 
 void changeProcessPriority(uint64_t pid, uint8_t newPriority)
