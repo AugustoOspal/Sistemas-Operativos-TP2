@@ -10,6 +10,8 @@ doubleLinkedListADT newDoubleLinkedListCDT(void);
 void FreeDoubleLinkedListCDT(doubleLinkedListADT list);
 void addToDoubleLinkedList(doubleLinkedListADT list, void *elem);
 void removeFromDoubleLinkedList(doubleLinkedListADT list, void *elem);
+void *findInDoubleLinkedList(doubleLinkedListADT list, bool (*equals)(void *elem, void *target), void *target);
+void removeFromDoubleLinkedListIf(doubleLinkedListADT list, bool (*equals)(void *elem, void *target), void *target);
 size_t getDoubleLinkedListLength(doubleLinkedListADT list);
 bool isListEmpty(doubleLinkedListADT list);
 

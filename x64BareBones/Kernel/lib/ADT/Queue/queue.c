@@ -105,15 +105,15 @@ bool IsQueueEmpty(const QueueADT queue)
 	return !queue->length;
 }
 
-void *FindInQueue(const QueueADT queue, bool (*predicate)(void *elem, void *data), void *data)
+void *FindInQueue(const QueueADT queue, bool (*equals)(void *elem, void *target), void *target)
 {
-	if (!queue)
+	if (!queue || !equals)
 		return NULL;
 
 	nodeP current = queue->head;
 	while (current != NULL)
 	{
-		if (predicate(current->obj, data))
+		if (equals(current->obj, target))
 		{
 			return current->obj;
 		}
@@ -134,6 +134,44 @@ void RemoveFromQueue(const QueueADT queue, void *obj)
 	while (current != NULL)
 	{
 		if (current->obj == obj)
+		{
+			if (previous == NULL)
+			{
+				queue->head = current->next;
+				if (queue->head == NULL)
+				{
+					queue->tail = NULL;
+				}
+			}
+			else
+			{
+				previous->next = current->next;
+				if (current->next == NULL)
+				{
+					queue->tail = previous;
+				}
+			}
+
+			queue->length--;
+			mem_free(current);
+			return;
+		}
+		previous = current;
+		current = current->next;
+	}
+}
+
+void RemoveFromQueueIf(QueueADT queue, bool (*equals)(void *elem, void *target), void *target)
+{
+	if (!queue || !equals)
+		return;
+
+	nodeP current = queue->head;
+	nodeP previous = NULL;
+
+	while (current != NULL)
+	{
+		if (equals(current->obj, target))
 		{
 			if (previous == NULL)
 			{

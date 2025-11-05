@@ -23,7 +23,6 @@ uint64_t createProcess(const char *name, const mainFuncPtr main, const int argc,
 	return newProc;
 }
 
-void deleteProcess(const uint64_t pid)
-{
-	removeProcess(pid);
+void deleteProcess(const uint64_t pid){
+	terminateProcess(pid);
 }

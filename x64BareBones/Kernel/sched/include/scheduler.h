@@ -12,6 +12,7 @@
 #define QUANTUM 1
 #define PRIO 4
 #define DEFAULT_PRIORITY 0
+#define MAX_CHILDREN 20
 #define DEFAULT_FOREGROUND true
 
 typedef struct ProcessCDT *ProcessADT;
@@ -52,7 +53,7 @@ void changeProcessPriority(uint64_t pid, uint8_t newPriority);
 /*
  *  @param pid del proceso a remover del scheduler
  */
-void removeProcess(uint64_t pid);
+void terminateProcess(uint64_t pid);
 
 /*
  *  @param pid del proceso a bloquear

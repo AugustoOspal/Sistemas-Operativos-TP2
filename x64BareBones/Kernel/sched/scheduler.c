@@ -1,4 +1,5 @@
 #include "scheduler.h"
+#include "../lib/ADT/DoubleLinkedList/doubleLinkedList.h"
 #include "../lib/string/strings.h"
 
 typedef enum ProcessState
@@ -6,18 +7,26 @@ typedef enum ProcessState
 	READY,
 	RUNNING,
 	BLOCKED,
-	TERMINATED
+	ZOMBIE
 } ProcessState;
 
 typedef struct ProcessCDT
 {
 	void *basePointer;
 	void *stack;
+
 	uint64_t pid;
 	char *nombre;
 	ProcessState state;
 	uint8_t priority;
-	struct Process *parent;
+
+	ProcessADT parent;
+	uint64_t children[MAX_CHILDREN];
+	size_t childrenCount;
+	uint64_t reaped[MAX_CHILDREN]; //recolectados
+	size_t reapedCount;
+	uint64_t waitingPid; //=-1 si no espera, =0 si espera a cualquiera, >0 matchea pid
+
 	uint8_t quantumLeft;
 	bool foreground;
 } ProcessCDT;
@@ -73,9 +82,12 @@ uint64_t addProcess(void *stackPointer)
 	newProcess->state = READY;
 	newProcess->quantumLeft = QUANTUM;
 	newProcess->priority = DEFAULT_PRIORITY;
+	newProcess->parent = globalScheduler.currentProcess;
 
 	addToDoubleLinkedList(globalScheduler.processTable, newProcess);
 	Enqueue(globalScheduler.priorityQueues[DEFAULT_PRIORITY], newProcess);
+
+	globalScheduler.currentProcess->children[globalScheduler.currentProcess->childrenCount++] = newProcess->pid;
 	return newProcess->pid;
 }
 
@@ -88,17 +100,13 @@ static bool matchPid(void *elem, void *data)
 
 void addProcessInfo(uint64_t pid, const char *name, void *basePointer)
 {
-	for (int i = 0; i < PRIO; i++)
+	ProcessADT proc = getProcessByPid(pid);
+	if (proc)
 	{
-		ProcessADT proc = FindInQueue(globalScheduler.priorityQueues[i], matchPid, &pid);
-
-		if (proc)
-		{
-			proc->nombre = name;
-			proc->basePointer = basePointer;
-			proc->foreground = DEFAULT_FOREGROUND;
-			return;
-		}
+		proc->nombre = name;
+		proc->basePointer = basePointer;
+		proc->foreground = DEFAULT_FOREGROUND;
+		return;
 	}
 }
 
@@ -146,10 +154,6 @@ void *schedule(void *stackPointer)
 
 		if (globalScheduler.currentProcess != idleProcess)
 		{
-			if (globalScheduler.currentProcess->state == BLOCKED)
-			{
-				return pickNextProcess();
-			}
 			if (--globalScheduler.currentProcess->quantumLeft)
 			{
 				return stackPointer;
@@ -163,49 +167,56 @@ void *schedule(void *stackPointer)
 	return pickNextProcess();
 }
 
-static ProcessADT getProcessByPid(uint64_t pid)
-{
-	for (int i = 0; i < PRIO; i++)
-	{
-		ProcessADT proc = FindInQueue(globalScheduler.priorityQueues[i], matchPid, &pid);
-
-		if (proc)
-		{
-			return proc;
-		}
-	}
-	return NULL;
+static ProcessADT getProcessByPid(uint64_t pid){
+	return findInDoubleLinkedListIf(globalScheduler.processTable, matchPid, &pid);
 }
 
 void changeProcessPriority(uint64_t pid, uint8_t newPriority)
 {
 	ProcessADT proc = getProcessByPid(pid);
-	if (newPriority >= PRIO)
+	if (newPriority >= PRIO || !proc || proc->priority == newPriority) return;
+	if (proc->state == BLOCKED) {
+		proc->priority = newPriority;
 		return;
-	if (!proc)
+	}else if(proc->state == ZOMBIE){
 		return;
-	if (proc->priority == newPriority)
-		return;
+	}
 	RemoveFromQueue(globalScheduler.priorityQueues[proc->priority], proc);
 	proc->priority = newPriority;
 	Enqueue(globalScheduler.priorityQueues[newPriority], proc);
+	if(proc->state == RUNNING){
+		globalScheduler.currentProcess = NULL;
+		forceTimerInterrupt();
+	}
 }
 
-void removeProcess(uint64_t pid)
-{
-	ProcessADT p = getProcessByPid(pid);
-	if (!p)
-		return;
-
-	// sacar de la tabla global
+static void deleteProcess(ProcessADT p){
 	removeFromDoubleLinkedList(globalScheduler.processTable, p);
+	// liberar memoria del stack y del PCB
+	mem_free(p->stack);
+	mem_free(p);
+	if(p->state == RUNNING){
+		forceTimerInterrupt();
+	}
+}
+
+void terminateProcess(uint64_t pid){
+	ProcessADT p = getProcessByPid(pid);
+    if (!p) return;
 
 	// sacar de cualquier cola en la que este (si sigue en alguna)
 	RemoveFromQueue(globalScheduler.priorityQueues[p->priority], p);
 
-	// liberar memoria del stack y del PCB
-	mem_free(p->stack);
-	mem_free(p);
+	if (p->parent->waitingPid == p->pid || p->parent->waitingPid == 0) { //el proceso padre estaba esperando
+		deleteProcess(p);
+		p->parent->reaped[--p->parent->reapedCount] = 0;
+		if(p->parent->state == BLOCKED){
+			unblockProcess(p->parent->pid);
+		}
+	} else { //el proceso padre no estaba esperando -> puede esperar despues
+		p->parent->reaped[p->parent->reapedCount++] = p->pid;
+		p->state = ZOMBIE;
+	}
 }
 
 static inline void forceTimerInterrupt(void)
@@ -236,11 +247,9 @@ void blockProcess(uint64_t pid)
 	Enqueue(globalScheduler.blockedQueue, p);
 }
 
-void unblockProcess(uint64_t pid)
-{
-	ProcessADT p = FindInQueue(globalScheduler.blockedQueue, matchPid, &pid);
-	if (!p)
-		return;
+void unblockProcess(uint64_t pid){
+	ProcessADT p = getProcessByPid(pid);
+	if (!p) return;
 
 	RemoveFromQueue(globalScheduler.blockedQueue, p);
 	p->state = READY;
@@ -362,4 +371,39 @@ uint64_t getAllProcessesInfo(char *buffer, uint64_t bufferSize)
 		buffer[bufferSize - 1] = '\0';
 
 	return count;
+}
+
+void kill(uint64_t pid){
+	terminateProcess(pid);
+}
+
+uint64_t wait(void *status){
+	ProcessADT process = globalScheduler.currentProcess;
+
+	if (process->reapedCount > 0){
+		ProcessADT reapedProcess = getProcessByPid(process->reaped[--process->reapedCount]);
+		if (!reapedProcess) return -1;
+
+		deleteProcess(reapedProcess);
+		return reapedProcess->pid;
+	} else {
+		process->waitingPid = 0; //espera a cualquiera
+		blockProcess(process->pid);
+		return -1;
+	}
+}
+
+uint64_t waitpid(uint64_t pid, void *status){
+	ProcessADT waitingProcess = getProcessByPid(pid);
+	if (!waitingProcess) return -1;
+
+	if (waitingProcess->state == ZOMBIE){
+		//armar status con datos de waitingProcess
+		deleteProcess(waitingProcess);
+		return pid;
+	} else {
+		globalScheduler.currentProcess->waitingPid = pid;
+		blockProcess(globalScheduler.currentProcess->pid);
+		return -1;
+	}
 }
