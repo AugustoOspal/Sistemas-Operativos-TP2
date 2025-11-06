@@ -123,45 +123,7 @@ void *FindInQueue(const QueueADT queue, bool (*equals)(void *elem, void *target)
 	return NULL;
 }
 
-void RemoveFromQueue(const QueueADT queue, void *obj)
-{
-	if (!queue || !obj)
-		return;
-
-	nodeP current = queue->head;
-	nodeP previous = NULL;
-
-	while (current != NULL)
-	{
-		if (current->obj == obj)
-		{
-			if (previous == NULL)
-			{
-				queue->head = current->next;
-				if (queue->head == NULL)
-				{
-					queue->tail = NULL;
-				}
-			}
-			else
-			{
-				previous->next = current->next;
-				if (current->next == NULL)
-				{
-					queue->tail = previous;
-				}
-			}
-
-			queue->length--;
-			mem_free(current);
-			return;
-		}
-		previous = current;
-		current = current->next;
-	}
-}
-
-void RemoveFromQueueIf(QueueADT queue, bool (*equals)(void *elem, void *target), void *target)
+void RemoveFromQueue(QueueADT queue, bool (*equals)(void *elem, void *target), void *target)
 {
 	if (!queue || !equals)
 		return;

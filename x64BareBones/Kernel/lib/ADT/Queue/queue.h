@@ -14,7 +14,6 @@ void *Dequeue(QueueADT queue);
 int QueueLength(QueueADT queue);
 bool IsQueueEmpty(QueueADT queue);
 void *FindInQueue(const QueueADT queue, bool (*equals)(void *elem, void *target), void *target);
-void RemoveFromQueue(QueueADT queue, void *obj);
-void RemoveFromQueueIf(QueueADT queue, bool (*equals)(void *elem, void *target), void *target);
+void RemoveFromQueue(QueueADT queue, bool (*equals)(void *elem, void *target), void *target);
 
 #endif
