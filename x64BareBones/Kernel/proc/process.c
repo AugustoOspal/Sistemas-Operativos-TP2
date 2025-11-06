@@ -19,6 +19,6 @@ void createProcess(const mainFuncPtr main, const int argc, char *argv[])
 	addProcess(processStackPointer);
 }
 
-void deleteProcess(uint64_t pid){
+void killProcess(uint64_t pid){
 	terminateProcess(pid);
 }
