@@ -17,14 +17,12 @@ typedef void (*startWrapperPtr)(mainFuncPtr main, int argc, char *argv[]);
  *  @param argv Arreglo de strings con los argumentos
  *  @return El PID del proceso creado
  */
-void createProcess(mainFuncPtr main, int argc, char *argv[]);
+uint64_t createProcess(const char *name, const mainFuncPtr main, const int argc, char *argv[]);
 
 /*
  *  @brief Elimina un proceso del scheduler y libera su memoria
  *  @param pid El PID del proceso a eliminar
  */
 void killProcess(uint64_t pid);
-
-extern void *initializeProcess(startWrapperPtr startWrapper, void *stack, mainFuncPtr main, int argc, char *argv[]);
 
 #endif

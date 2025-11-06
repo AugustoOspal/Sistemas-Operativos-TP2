@@ -1,4 +1,7 @@
 #include "syscalls.h"
+
+#include <signal.h>
+
 #include "keyboardDriver.h"
 
 #define STDIN 0
@@ -271,7 +274,7 @@ void syscallDispatcher(Registers_t *regs)
 			break;
 
 		case 0x51:
-			deleteProcess((uint64_t) arg1);
+			killProcess((uint64_t) arg1);
 			regs->rax = 0;
 			break;
 
