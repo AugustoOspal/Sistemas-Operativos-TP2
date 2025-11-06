@@ -11,6 +11,14 @@
 #include <stddef.h>
 #include <stdint.h>
 
+typedef enum { CMD_BUILTIN, CMD_PROC} command_type;
+
+typedef struct {
+	char* name;
+	command_type type;
+	void (*function)(); //puntero a la funcion, solo si es  built in
+} command_entry;
+
 typedef enum
 {
 	HELP = 0,
@@ -29,6 +37,7 @@ typedef enum
 
 void startShell();
 void readInput();
+command_entry* findCommand(char *input);
 command_id processInput(char *input);
 void help();
 void printDateTime();

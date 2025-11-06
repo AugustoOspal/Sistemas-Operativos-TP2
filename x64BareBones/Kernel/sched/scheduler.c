@@ -1,5 +1,4 @@
 #include "scheduler.h"
-4
 #include "../lib/ADT/DoubleLinkedList/doubleLinkedList.h"
 #include "../lib/string/strings.h"
 #include "interrupts.h"

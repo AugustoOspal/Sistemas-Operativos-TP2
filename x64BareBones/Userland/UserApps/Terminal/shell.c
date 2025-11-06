@@ -6,14 +6,31 @@
 
 #define BUFFER 500
 #define COMMAND_SIZE 12
+#define COMMAND_COUNT (sizeof(commands) / sizeof(command_entry))
+
 #define SPECIAL_KEY_MAX_VALUE 5
 
 char *commands_str[] = {"help",	 "exception 1", "exception 2", "pongisgolf", "zoom in",		   "zoom out",
 						"clear", "date",		"registers",   "busywait",	 "busywaitkernel", "exit"};
 
 typedef void (*ShellCommand)();
-static ShellCommand commands[] = {help,			exception_1,   exception_2,	 startPongis, zoom_in,			zoom_out,
-								  clear_screen, printDateTime, getRegisters, busy_wait,	  busy_wait_kernel, exitShell};
+static command_entry commands[] = {
+	// COMANDOS BUILTIN
+	{"help", CMD_BUILTIN, help},			
+	{"exception 1", CMD_BUILTIN, exception_1},   
+	{"exception 2", CMD_BUILTIN, exception_2},    
+	{"pongisgolf", CMD_BUILTIN, startPongis}, 
+	{"zoom in", CMD_BUILTIN, zoom_in},			
+	{"zoom out", CMD_BUILTIN, zoom_out},						  
+	{"clear", CMD_BUILTIN, clear_screen},
+	{"date", CMD_BUILTIN, printDateTime},
+	{"registers", CMD_BUILTIN, getRegisters},
+	{"busywait", CMD_BUILTIN, busy_wait},	  
+	{"busywaitkernel", CMD_BUILTIN, busy_wait_kernel},
+	{"exit", CMD_BUILTIN, exitShell}
+
+	// COMANDOS PROCESOS
+};
 
 char *registers[] = {" RAX: ", " RBX: ", " RCX: ", " RDX: ", " RSI: ", " RDI: ", " RBP: ", " RSP: ", " R8: ",
 					 " R9: ",  " R10: ", " R11: ", " R12: ", " R13: ", " R14: ", " R15: ", " RIP: "};
@@ -31,26 +48,31 @@ void startShell()
 	while (active)
 	{
 		// TODO: Acordarse de sacar esto
-		createProcess("Process A", test_processA, 0, NULL);
-		createProcess("Process B", test_processB, 0, NULL);
-		createProcess("Process C", test_processC, 0, NULL);
+		// createProcess("Process A", test_processA, 0, NULL);
+		// createProcess("Process B", test_processB, 0, NULL);
+		// createProcess("Process C", test_processC, 0, NULL);
 
-		char buffer[2000];
-		getProcessesInfo(buffer, 2000);
-		printf("%s", buffer);
+		// char buffer[2000];
+		// getProcessesInfo(buffer, 2000);
+		// printf("%s", buffer);
 
 		show_prompt();
 		readInput(input_buffer);
 		to_lower(input_buffer);
-		command_id command = processInput(input_buffer);
-		if (command != -1)
-		{
-			commands[command]();
-		}
-		else
-		{
-			notACommand(input_buffer);
-		}
+
+		command_entry *command = findCommand(input_buffer);
+
+        if (command == NULL) {
+            notACommand(input_buffer);
+            continue;
+        }
+
+        if (command->type == CMD_BUILTIN) {
+            command->function();
+        } else if (command->type == CMD_PROC) {
+            // Crear proceso nuevo (foreground o background)
+            createProcess(command->name, NULL, 0, NULL);
+        }
 	}
 }
 
@@ -99,6 +121,15 @@ command_id processInput(char *input)
 	}
 	return index;
 }
+
+command_entry* findCommand(char *input) {
+    for (int i = 0; i < COMMAND_COUNT; i++) {
+        if (strcmp(input, commands[i].name) == 0)
+            return &commands[i];
+    }
+    return NULL;
+}
+
 
 // Imprime todos los comandos disponibles
 void help()
