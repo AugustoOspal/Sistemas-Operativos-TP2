@@ -4,6 +4,7 @@ GLOBAL picMasterMask
 GLOBAL picSlaveMask
 GLOBAL haltcpu
 GLOBAL _hlt
+GLOBAL _timerInterrupt
 
 GLOBAL _irq00Handler
 GLOBAL _irq01Handler
@@ -115,6 +116,9 @@ _hlt:
 	sti
 	hlt
 	ret
+
+_timerInterrupt:
+    int 0x20
 
 _cli:
 	cli

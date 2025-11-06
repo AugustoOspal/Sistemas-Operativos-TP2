@@ -1,14 +1,15 @@
 #include "scheduler.h"
+4
 #include "../lib/ADT/DoubleLinkedList/doubleLinkedList.h"
 #include "../lib/string/strings.h"
+#include "interrupts.h"
 
-typedef enum ProcessState
-{
-	READY,
-	RUNNING,
-	BLOCKED,
-	ZOMBIE
-} ProcessState;
+	typedef enum ProcessState {
+		READY,
+		RUNNING,
+		BLOCKED,
+		ZOMBIE
+	} ProcessState;
 
 typedef struct ProcessCDT
 {
@@ -45,10 +46,12 @@ schedulerT globalScheduler;
 ProcessADT idleProcess;		 // Esta también puede ir adentro del schedulerT
 static uint64_t lastPid = 0; // Este PID es el proximo a crear
 
-static inline void forceTimerInterrupt(void)
-{ // TODO: hacer prolijo en asm
-	__asm__ __volatile__("int $0x20");
-}
+static void refill_credits(void);
+static bool matchPid(void *elem, void *data);
+static ProcessADT getProcessByPid(uint64_t pid);
+static int pickNextQueue(void);
+static void *pickNextProcess();
+static void deleteProcess(ProcessADT p);
 
 static void refill_credits(void)
 {
@@ -221,7 +224,7 @@ void changeProcessPriority(uint64_t pid, uint8_t newPriority)
 	if (proc->state == RUNNING)
 	{
 		globalScheduler.currentProcess = NULL;
-		forceTimerInterrupt();
+		_timerInterrupt();
 	}
 }
 
@@ -271,7 +274,7 @@ void terminateProcess(uint64_t pid)
 	}
 	if (globalScheduler.currentProcess == p)
 	{
-		forceTimerInterrupt();
+		_timerInterrupt();
 	}
 }
 
@@ -284,7 +287,7 @@ void blockProcess(uint64_t pid)
 			return;
 		running->state = BLOCKED;
 		Enqueue(globalScheduler.blockedQueue, running);
-		forceTimerInterrupt();
+		_timerInterrupt();
 		return;
 	}
 
@@ -313,7 +316,7 @@ void unblockProcess(uint64_t pid)
 void yield()
 {
 	globalScheduler.currentProcess->quantumLeft = 1;
-	forceTimerInterrupt();
+	_timerInterrupt();
 }
 
 uint64_t getPid()

@@ -32,6 +32,8 @@ void _sti(void);
 
 void _hlt(void);
 
+void _timerInterrupt();
+
 void picMasterMask(uint8_t mask);
 
 void picSlaveMask(uint8_t mask);
