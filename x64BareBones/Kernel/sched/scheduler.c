@@ -3,12 +3,13 @@
 #include "../lib/string/strings.h"
 #include "interrupts.h"
 
-	typedef enum ProcessState {
-		READY,
-		RUNNING,
-		BLOCKED,
-		ZOMBIE
-	} ProcessState;
+typedef enum ProcessState
+{
+	READY,
+	RUNNING,
+	BLOCKED,
+	ZOMBIE
+} ProcessState;
 
 typedef struct ProcessCDT
 {

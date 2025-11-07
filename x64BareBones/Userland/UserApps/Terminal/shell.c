@@ -16,16 +16,16 @@ char *commands_str[] = {"help",	 "exception 1", "exception 2", "pongisgolf", "zo
 typedef void (*ShellCommand)();
 static command_entry commands[] = {
 	// COMANDOS BUILTIN
-	{"help", CMD_BUILTIN, help},			
-	{"exception 1", CMD_BUILTIN, exception_1},   
-	{"exception 2", CMD_BUILTIN, exception_2},    
-	{"pongisgolf", CMD_BUILTIN, startPongis}, 
-	{"zoom in", CMD_BUILTIN, zoom_in},			
-	{"zoom out", CMD_BUILTIN, zoom_out},						  
+	{"help", CMD_BUILTIN, help},
+	{"exception 1", CMD_BUILTIN, exception_1},
+	{"exception 2", CMD_BUILTIN, exception_2},
+	{"pongisgolf", CMD_BUILTIN, startPongis},
+	{"zoom in", CMD_BUILTIN, zoom_in},
+	{"zoom out", CMD_BUILTIN, zoom_out},
 	{"clear", CMD_BUILTIN, clear_screen},
 	{"date", CMD_BUILTIN, printDateTime},
 	{"registers", CMD_BUILTIN, getRegisters},
-	{"busywait", CMD_BUILTIN, busy_wait},	  
+	{"busywait", CMD_BUILTIN, busy_wait},
 	{"busywaitkernel", CMD_BUILTIN, busy_wait_kernel},
 	{"exit", CMD_BUILTIN, exitShell}
 
@@ -62,17 +62,21 @@ void startShell()
 
 		command_entry *command = findCommand(input_buffer);
 
-        if (command == NULL) {
-            notACommand(input_buffer);
-            continue;
-        }
+		if (command == NULL)
+		{
+			notACommand(input_buffer);
+			continue;
+		}
 
-        if (command->type == CMD_BUILTIN) {
-            command->function();
-        } else if (command->type == CMD_PROC) {
-            // Crear proceso nuevo (foreground o background)
-            createProcess(command->name, NULL, 0, NULL);
-        }
+		if (command->type == CMD_BUILTIN)
+		{
+			command->function();
+		}
+		else if (command->type == CMD_PROC)
+		{
+			// Crear proceso nuevo (foreground o background)
+			createProcess(command->name, NULL, 0, NULL);
+		}
 	}
 }
 
@@ -122,14 +126,15 @@ command_id processInput(char *input)
 	return index;
 }
 
-command_entry* findCommand(char *input) {
-    for (int i = 0; i < COMMAND_COUNT; i++) {
-        if (strcmp(input, commands[i].name) == 0)
-            return &commands[i];
-    }
-    return NULL;
+command_entry *findCommand(char *input)
+{
+	for (int i = 0; i < COMMAND_COUNT; i++)
+	{
+		if (strcmp(input, commands[i].name) == 0)
+			return &commands[i];
+	}
+	return NULL;
 }
-
 
 // Imprime todos los comandos disponibles
 void help()
