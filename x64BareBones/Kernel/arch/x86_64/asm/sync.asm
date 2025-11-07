@@ -2,6 +2,7 @@ GLOBAL acquire
 GLOBAL try_acquire
 GLOBAL release
 
+;   https://c9x.me/x86/html/file_module_x86_id_41.html
 ;   cmpxchg [destino], fuente
 ;   cmpchg realiza lo siguiente de forma atomica:
 ;   1) Compara el valor en AL/AX/EAX/RAX (dependiendo el tamaño) con el valor en [destino]

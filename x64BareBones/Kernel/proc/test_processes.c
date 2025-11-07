@@ -1,16 +1,20 @@
 #include "./include/test_processes.h"
 #include "../sched/include/scheduler.h"
-
+#include "../sync/include/spinlock.h"
 #include "../drivers/include/videoDriver.h"
 
 #define CIRCLE_RADIUS 50
 #define BOX_SIZE 120
 
+uint64_t lock = 0;
+
 int processA(int argc, char *argv[])
 {
+	acquire(&lock);
+
 	int radius = 5;
 	int growing = 1;
-	while (1)
+	for (uint64_t i = 0; i < 2000; i++)
 	{
 		drawRectangle(BOX_SIZE, BOX_SIZE, 0x000000, 40, 40);
 		drawCircle(radius, 0xFF0000, 100, 100);
@@ -27,18 +31,18 @@ int processA(int argc, char *argv[])
 			if (radius <= 5)
 				growing = 1;
 		}
-
-		for (volatile int i = 0; i < 5000000; i++)
-			;
 	}
+
+	release(&lock);
 	return 0;
 }
 
 int processB(int argc, char *argv[])
 {
+	acquire(&lock);
 	int radius = 5;
 	int growing = 1;
-	while (1)
+	for (int i = 0; i < 2000; i++)
 	{
 		drawRectangle(BOX_SIZE, BOX_SIZE, 0x000000, 240, 40);
 		drawCircle(radius, 0x00FF00, 300, 100);
@@ -55,10 +59,8 @@ int processB(int argc, char *argv[])
 			if (radius <= 5)
 				growing = 1;
 		}
-
-		for (volatile int i = 0; i < 5000000; i++)
-			;
 	}
+	release(&lock);
 	return 0;
 }
 

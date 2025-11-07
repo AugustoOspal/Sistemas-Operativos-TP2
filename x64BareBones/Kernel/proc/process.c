@@ -7,8 +7,9 @@ extern void *initializeProcess(startWrapperPtr startWrapper, void *stack, mainFu
 void startWrapper(const mainFuncPtr main, const int argc, char *argv[])
 {
 	int returnCode = main(argc, argv);
-	// TODO: Hacer el exit()
-	// exit(returnCode);
+
+	// TODO: Mejorar esto, tendriamos que hacer un exit() accesible desde userland
+	killProcess(getPid());
 }
 
 uint64_t createProcess(const char *name, const mainFuncPtr main, const int argc, char *argv[])

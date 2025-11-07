@@ -66,11 +66,11 @@ int main()
 	initializeScheduler();
 
 	// Test de procesos
-	// createProcess("Proceso A", processA, 0, NULL);
-	// createProcess("Proceso B", processB, 0, NULL);
-	// createProcess("Proceso C", processC, 0, NULL);
+	createProcess("Proceso A", processA, 0, NULL);
+	createProcess("Proceso B", processB, 0, NULL);
+	createProcess("Proceso C", processC, 0, NULL);
 
-	changeProcessPriority(createProcess("shell", shellAddress, 0, NULL), 3);
+	// changeProcessPriority(createProcess("shell", shellAddress, 0, NULL), 3);
 	load_idt();
 	// play_boot_sound();
 	return 0;
