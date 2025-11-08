@@ -55,7 +55,7 @@ void semClose(const semaphoreP sem);
  *  no se destruye hasta que termine el último proceso en lista de espera. No estaba claro ese
  *  comportamiento en el manual de linux así que lo decidimos así.
  *  @param name nombre del proceso
- *  @return 0 si fue existoso, -1 si no existe ese semaforo
+ *  @return 0 si fue exitoso, -1 si no existe ese semaforo
  *  @warning No se cierra siempre instantaneamente, espera a que lo cierren todos los procesos y que
  *  todos los procesos esperando el semaforo terminen.
  */

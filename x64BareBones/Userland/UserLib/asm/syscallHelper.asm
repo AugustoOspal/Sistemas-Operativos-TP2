@@ -33,6 +33,14 @@ GLOBAL sys_blockProcess
 GLOBAL sys_unblockProcess
 GLOBAL sys_yield
 
+GLOBAL sys_semOpen
+GLOBAL sys_semClose
+GLOBAL sys_semWait
+GLOBAL sys_semPost
+GLOBAL sys_semTryWait
+GLOBAL sys_semGetValue
+GLOBAL sys_semUnlink
+
 GLOBAL opCodeException
 
 section .text
@@ -84,6 +92,14 @@ sys_blockProcess:           syscall 0x56
 sys_unblockProcess:         syscall 0x57
 sys_yield:                  syscall 0x58
 
+; Semaforos
+sys_semOpen:                syscall 0x60
+sys_semClose:               syscall 0x61
+sys_semWait:                syscall 0x62
+sys_semPost:                syscall 0x63
+sys_semTryWait:             syscall 0x64
+sys_semGetValue:            syscall 0x65
+sys_semUnlink:              syscall 0x66
 
 ; Ecceptions
 opCodeException:

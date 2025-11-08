@@ -45,6 +45,15 @@ extern void sys_blockProcess(uint64_t pid);
 extern void sys_unblockProcess(uint64_t pid);
 extern void sys_yield();
 
+// Semaforos
+extern void* sys_semOpen(const char *name, int value);
+extern void sys_semClose(void* sem);
+extern void sys_semWait(void* sem);
+extern void sys_semPost(void* sem);
+extern int sys_semTryWait(void* sem);
+extern int sys_semGetValue(void* sem, int *sval);
+extern int sys_semUnlink(const char *name);
+
 // Excepciones
 extern void opCodeException();
 
