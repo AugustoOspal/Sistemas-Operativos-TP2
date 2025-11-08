@@ -15,7 +15,18 @@
 #include "../../sync/include/spinlock.h"
 #include <stdint.h>
 
+typedef struct semaphore
+{
+	const char *name;
+	int value;
+	uint64_t lock;
+	QueueADT waitingProcesses;
+	doubleLinkedListADT linkedProcesses;
+	bool pendingDestruction;
+} semaphore;
+
 typedef struct semaphore *semaphoreP;
+
 
 /*
  *  @brief inicializa la estructura de semaforos.

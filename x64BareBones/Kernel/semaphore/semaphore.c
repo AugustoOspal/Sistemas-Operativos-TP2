@@ -1,14 +1,6 @@
 #include "include/semaphore.h"
 
-typedef struct semaphore
-{
-	const char *name;
-	int value;
-	uint64_t lock;
-	QueueADT waitingProcesses;
-	doubleLinkedListADT linkedProcesses;
-	bool pendingDestruction;
-} semaphore;
+
 
 static doubleLinkedListADT semaphoreList = NULL;
 

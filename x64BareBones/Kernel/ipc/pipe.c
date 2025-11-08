@@ -21,8 +21,31 @@ int pipe_open(){
             pipes[i]->readingIdx = 0;
             pipes[i]->toBeRead = 0;
             pipes[i]->writePos = 0;
-            pipes[i]->can_read = false;  // al principio no hay nada para leer
-            pipes[i]->can_write = true;  // al principio está vacío, se puede escribir
+
+            // inicializar semaforos
+            char semName[SEM_NAME_SIZE];
+
+            // Semáforo de escritura 
+            itoa(i, semName);                // convierte i a string
+            strcat(semName, "_write");
+            pipes[i]->writeSem = semOpen(semName, MAX_BUFFER);
+            if (pipes[i]->writeSem == NULL) {
+                mem_free(pipes[i]);
+                pipes[i] = NULL;
+                return -1;
+            }
+
+            // Semáforo de lectura 
+            itoa(i, semName);                // convierte i a string
+            strcat(semName, "_read");
+            pipes[i]->readSem = semOpen(semName, 0);
+            if (pipes[i]->readSem == NULL) {
+                sem_unlink(semName);  // liberar write_sem si falla
+                semClose(pipes[i]->writeSem);
+                mem_free(pipes[i]);
+                pipes[i] = NULL;
+                return -1;
+            }
 
             return i; // retorno el id del pipe creado
         }
@@ -43,18 +66,18 @@ int pipe_write(int pipe_id, char *buffer, int count) {
     int written = 0;
 
     for (; written < count && pipe->toBeRead < MAX_BUFFER ; written++) {
-        //semWait
+        // Espera a que haya espacio disponible
+        semWait(pipe->writeSem);
+
+        // Escribir en el buffer del pipe
         pipe->buffer[pipe->writePos] = buffer[written];
         pipe->writePos = (pipe->writePos + 1) % MAX_BUFFER; // Buffer circular
         pipe->toBeRead++;
-        //semPost
+
+        // Avisa que hay datos para leer
+        semPost(pipe->readSem);
     }
 
-    //flags
-    if (pipe->toBeRead > 0)
-        pipe->can_read = true;
-
-    pipe->can_write = (pipe->toBeRead < MAX_BUFFER);
 
     return written;    //retorno la cantidad de bytes escritos
 
@@ -69,16 +92,18 @@ pipe_read(int pipe_id, char* buffer, int count){
     int read = 0;
 
     for (; read < count && pipe->toBeRead > 0 ; read++) {
-        //semWait
+        // Esperar a que haya algo para leer
+        semWait(pipe->readSem);
+
+        // Leer un byte del buffer circular        
         buffer[read] = pipe->buffer[pipe->readingIdx];
         pipe->readingIdx = (pipe->readingIdx + 1) % MAX_BUFFER; // Buffer circular
         pipe->toBeRead--;
-        //semPost
+
+        // Señalar que hay espacio disponible para escribir
+        semPost(pipe->writeSem);    
     }
 
-    // flags
-    pipe->can_read = (pipe->toBeRead > 0);
-    pipe->can_write = (pipe->toBeRead < MAX_BUFFER);
 
     return read;    //retorno la cantidad de bytes leidos
 }
@@ -88,12 +113,19 @@ int pipe_close(int pipe_id) {
     // Verificar si el pipe_id es válido
     if (pipe_id < 0 || pipe_id >= MAX_PIPES || pipes[pipe_id] == NULL)
         return -1;
+    pipe_t *pipe = pipes[pipe_id];
 
+    // Cerrar semáforos
+    semClose(pipe->readSem);
+    semClose(pipe->writeSem);   
+    
+    // Eliminar semáforos
+    sem_unlink(pipe->readSem->name);
+    sem_unlink(pipe->writeSem->name);
 
     // Liberar memoria del pipe
-    mem_free(pipes[pipe_id]);
-    pipes[pipe_id] = NULL;
-
+    mem_free(pipe);
+    pipe = NULL;
 
     return 0; // Cierre exitoso
 }
