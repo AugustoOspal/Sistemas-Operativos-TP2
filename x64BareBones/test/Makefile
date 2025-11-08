@@ -3,14 +3,24 @@ CFLAGS = -Wall -Wextra -g -std=c99 -fPIC
 INCLUDE_DIRS = -I. \
                -I../Kernel/mem/include \
                -I../Kernel/lib/include \
+               -I../Kernel/lib/ADT/Queue \
+               -I../Kernel/lib/ADT/DoubleLinkedList \
+               -I../Kernel/lib/string \
+               -I../Kernel/sched/include \
+               -I../Kernel/proc/include \
+               -I../Kernel/sync/include \
+               -I../Kernel/semaphore/include \
                -I../Kernel/include
 
 KERNEL_TESTS = test_kernel
 
 CUTEST_OBJ = CuTest.o
 ALLTESTS_OBJ = AllTests.o
-TEST_OBJS = ../Kernel/mem/TestMemoryManager.o
+TEST_OBJS = ../Kernel/mem/TestMemoryManager.o ../Kernel/semaphore/TestSemaphore.o
 MM_OBJS = ../Kernel/mem/pmem_bitmap.o ../Kernel/mem/pmem_buddy.o
+ADT_OBJS = ../Kernel/lib/ADT/Queue/queue.o ../Kernel/lib/ADT/DoubleLinkedList/doubleLinkedList.o
+LIB_OBJS = ../Kernel/lib/string/strings.o
+SEM_OBJS = ../Kernel/semaphore/semaphore.o
 
 .PHONY: all test-kernel test-userland clean help
 
@@ -23,7 +33,7 @@ test-kernel: $(KERNEL_TESTS)
 	@echo "=========================================="
 	@./$(KERNEL_TESTS)
 
-test_kernel: $(CUTEST_OBJ) $(ALLTESTS_OBJ) $(TEST_OBJS) $(MM_OBJS)
+test_kernel: $(CUTEST_OBJ) $(ALLTESTS_OBJ) $(TEST_OBJS) $(MM_OBJS) $(ADT_OBJS) $(LIB_OBJS) $(SEM_OBJS)
 	gcc -std=c99 -Wall -Wextra -g $(INCLUDE_DIRS) -o $@ $^ -lm
 
 test-userland:
@@ -32,13 +42,36 @@ test-userland:
 %.o: %.c
 	gcc $(CFLAGS) $(INCLUDE_DIRS) -c $< -o $@
 
+# Kernel modules - compile with -fPIE for PIE executable
 ../Kernel/mem/TestMemoryManager.o: ../Kernel/mem/TestMemoryManager.c
+	gcc $(CFLAGS) $(INCLUDE_DIRS) -c $< -o $@
+
+../Kernel/mem/pmem_bitmap.o: ../Kernel/mem/pmem_bitmap.c
+	gcc $(CFLAGS) $(INCLUDE_DIRS) -c $< -o $@
+
+../Kernel/mem/pmem_buddy.o: ../Kernel/mem/pmem_buddy.c
+	gcc $(CFLAGS) $(INCLUDE_DIRS) -c $< -o $@
+
+../Kernel/lib/ADT/Queue/queue.o: ../Kernel/lib/ADT/Queue/queue.c
+	gcc $(CFLAGS) $(INCLUDE_DIRS) -c $< -o $@
+
+../Kernel/lib/ADT/DoubleLinkedList/doubleLinkedList.o: ../Kernel/lib/ADT/DoubleLinkedList/doubleLinkedList.c
+	gcc $(CFLAGS) $(INCLUDE_DIRS) -c $< -o $@
+
+../Kernel/lib/string/strings.o: ../Kernel/lib/string/strings.c
+	gcc $(CFLAGS) $(INCLUDE_DIRS) -c $< -o $@
+
+../Kernel/semaphore/TestSemaphore.o: ../Kernel/semaphore/TestSemaphore.c
+	gcc $(CFLAGS) $(INCLUDE_DIRS) -c $< -o $@
+
+../Kernel/semaphore/semaphore.o: ../Kernel/semaphore/semaphore.c
 	gcc $(CFLAGS) $(INCLUDE_DIRS) -c $< -o $@
 
 clean:
 	rm -f *.o test_kernel
 	rm -f ../Kernel/mem/TestMemoryManager.o
 	rm -f ../Kernel/mem/pmem_bitmap.o ../Kernel/mem/pmem_buddy.o
+	rm -f ../Kernel/semaphore/TestSemaphore.o ../Kernel/semaphore/semaphore.o
 	@echo "Test artifacts cleaned"
 
 help:

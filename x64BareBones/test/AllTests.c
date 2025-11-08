@@ -2,12 +2,14 @@
 
 #include "CuTest.h"
 #include "TestMemoryManager.h"
+#include "../Kernel/semaphore/TestSemaphore.h"
 
 void RunAllTests(void) {
     CuString *output = CuStringNew();
     CuSuite* suite = CuSuiteNew();
 
     CuSuiteAddSuite(suite, getMemoryManagerTestSuite());
+    CuSuiteAddSuite(suite, getSemaphoreTestSuite());
 
     CuSuiteRun(suite);
 
