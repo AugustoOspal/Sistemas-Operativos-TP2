@@ -3,6 +3,7 @@
 #include <signal.h>
 
 #include "keyboardDriver.h"
+#include "../semaphore/include/semaphore.h"
 
 #define STDIN 0
 #define STDOUT 1
@@ -312,8 +313,40 @@ void syscallDispatcher(Registers_t *regs)
 			;
 			break;
 
-			// case 0x59:
-			// TODO: Falta implementar este, tendria que esperar a los hijos
+		// case 0x59:
+		// TODO: Falta implementar este, tendria que esperar a los hijos
+
+		// Semaforos
+		case 0x60:
+			regs->rax = (uint64_t) semOpen((const char *) arg1, (int) arg2);
+			break;
+
+		case 0x61:
+			semClose((semaphoreP) arg1);
+			regs->rax = 0;
+			break;
+
+		case 0x62:
+			semWait((semaphoreP) arg1);
+			regs->rax = 0;
+			break;
+
+		case 0x63:
+			semPost((semaphoreP) arg1);
+			regs->rax = 0;
+			break;
+
+		case 0x64:
+			regs->rax = semTryWait((semaphoreP) arg1);
+			break;
+
+		case 0x65:
+			regs->rax = semGetValue((semaphoreP) arg1, (int *) arg2);
+			break;
+
+		case 0x66:
+			regs->rax = sem_unlink((const char *) arg1);
+			break;
 
 		default:
 			// Syscall desconocida o no implementada

@@ -9,6 +9,7 @@
 #include <stdint.h>
 #include <timeLib.h>
 #include <videoDriver.h>
+#include "semaphore.h"
 
 // Estructura para acceder a los registros guardados por pushState
 // El orden tiene que coincidir con el de la macro pushState en interrupts.asm
