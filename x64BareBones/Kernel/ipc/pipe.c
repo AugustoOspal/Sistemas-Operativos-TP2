@@ -83,7 +83,7 @@ int pipe_write(int pipe_id, char *buffer, int count) {
 
 }
 
-pipe_read(int pipe_id, char* buffer, int count){
+int pipe_read(int pipe_id, char* buffer, int count){
     if(pipe_id < 0 || pipe_id >= MAX_PIPES || pipes[pipe_id] == NULL)
         return -1; // pipe_id inválido
 

@@ -41,6 +41,9 @@ GLOBAL sys_semTryWait
 GLOBAL sys_semGetValue
 GLOBAL sys_semUnlink
 
+GLOBAL sys_pipe_open
+GLOBAL sys_pipe_close
+
 GLOBAL opCodeException
 
 section .text
@@ -100,6 +103,10 @@ sys_semPost:                syscall 0x63
 sys_semTryWait:             syscall 0x64
 sys_semGetValue:            syscall 0x65
 sys_semUnlink:              syscall 0x66
+
+;Pipes
+sys_pipe_open               syscall 0x67
+sys_pipe_open               syscall 0x68
 
 ; Ecceptions
 opCodeException:

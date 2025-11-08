@@ -3,6 +3,7 @@
 #include <signal.h>
 
 #include "keyboardDriver.h"
+#include "../../ipc/include/pipe.h"
 #include "../semaphore/include/semaphore.h"
 
 #define STDIN 0
@@ -315,6 +316,13 @@ void syscallDispatcher(Registers_t *regs)
 
 		// case 0x59:
 		// TODO: Falta implementar este, tendria que esperar a los hijos
+			// case 0x59:
+			// TODO: Falta implementar este, tendria que esperar a los hijos
+		case 0x67:
+			regs->rax = pipe_open();
+			break;
+		case 0x68:
+			regs->rax = pipe_close((int) arg1);
 
 		// Semaforos
 		case 0x60:
