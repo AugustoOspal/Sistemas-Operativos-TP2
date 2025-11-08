@@ -1,10 +1,14 @@
-#include "pipe.h"
+#include "include/pipe.h"
 #include <stddef.h>
 #include <stdio.h>
 #include <stdint.h>
 
 
 pipe_t * pipes[MAX_PIPES] = {NULL};
+static inline void buildSemName(int pipeId, const char *suffix, char semName[SEM_NAME_SIZE])
+{
+	ksprintf(semName, "%d_%s", pipeId, suffix);
+}
 
 int pipe_open(){
 
@@ -26,8 +30,7 @@ int pipe_open(){
             char semName[SEM_NAME_SIZE];
 
             // Semáforo de escritura 
-            itoa(i, semName);                // convierte i a string
-            strcat(semName, "_write");
+            buildSemName(i, "write", semName);
             pipes[i]->writeSem = semOpen(semName, MAX_BUFFER);
             if (pipes[i]->writeSem == NULL) {
                 mem_free(pipes[i]);
@@ -36,10 +39,10 @@ int pipe_open(){
             }
 
             // Semáforo de lectura 
-            itoa(i, semName);                // convierte i a string
-            strcat(semName, "_read");
+            buildSemName(i, "read", semName);
             pipes[i]->readSem = semOpen(semName, 0);
             if (pipes[i]->readSem == NULL) {
+                buildSemName(i, "write", semName);
                 sem_unlink(semName);  // liberar write_sem si falla
                 semClose(pipes[i]->writeSem);
                 mem_free(pipes[i]);
@@ -125,7 +128,7 @@ int pipe_close(int pipe_id) {
 
     // Liberar memoria del pipe
     mem_free(pipe);
-    pipe = NULL;
+    pipes[pipe_id] = NULL;
 
     return 0; // Cierre exitoso
 }

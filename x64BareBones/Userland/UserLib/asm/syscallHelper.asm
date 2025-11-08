@@ -106,7 +106,7 @@ sys_semUnlink:              syscall 0x66
 
 ;Pipes
 sys_pipe_open               syscall 0x67
-sys_pipe_open               syscall 0x68
+sys_pipe_close               syscall 0x68
 
 ; Ecceptions
 opCodeException:
