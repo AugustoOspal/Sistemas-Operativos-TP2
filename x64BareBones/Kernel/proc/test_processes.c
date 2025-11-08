@@ -11,7 +11,8 @@ uint64_t lock = 0;
 
 int processA(int argc, char *argv[])
 {
-	acquire(&lock);
+	const semaphoreP sem = semOpen("Tester", 1);
+	semWait(sem);
 
 	int radius = 5;
 	int growing = 1;
@@ -34,13 +35,15 @@ int processA(int argc, char *argv[])
 		}
 	}
 
-	release(&lock);
+	semPost(sem);
 	return 0;
 }
 
 int processB(int argc, char *argv[])
 {
-	acquire(&lock);
+	const semaphoreP sem = semOpen("Tester", 1);
+	semWait(sem);
+
 	int radius = 5;
 	int growing = 1;
 	for (int i = 0; i < 2000; i++)
@@ -61,7 +64,7 @@ int processB(int argc, char *argv[])
 				growing = 1;
 		}
 	}
-	release(&lock);
+	semPost(sem);
 	return 0;
 }
 

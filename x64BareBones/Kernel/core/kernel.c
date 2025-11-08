@@ -14,6 +14,7 @@
 
 // TODO: Despues borrar esto
 #include "test_processes.h"
+#include "../semaphore/include/semaphore.h"
 
 extern uint8_t text;
 extern uint8_t rodata;
@@ -64,10 +65,11 @@ int main()
 {
 	kernel_memory_init();
 	initializeScheduler();
+	semaphoresInit();
 
 	// Test de procesos
-	// createProcess("Proceso A", processA, 0, NULL);
-	// createProcess("Proceso B", processB, 0, NULL);
+	createProcess("Proceso A", processA, 0, NULL);
+	createProcess("Proceso B", processB, 0, NULL);
 	// createProcess("Proceso C", processC, 0, NULL);
 
 	// changeProcessPriority(createProcess("shell", shellAddress, 0, NULL), 3);

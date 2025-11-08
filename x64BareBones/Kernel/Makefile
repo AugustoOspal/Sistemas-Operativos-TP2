@@ -15,7 +15,8 @@ SOURCES=$(wildcard core/*.c) \
          $(wildcard syscall/*.c) \
          $(filter-out mem/Test%.c,$(wildcard mem/*.c)) \
          $(wildcard sched/*.c) \
-         $(wildcard proc/*.c)
+         $(wildcard proc/*.c) \
+         $(filter-out semaphore/Test%.c,$(wildcard semaphore/*.c))
 
 # Loader (entry point) - must be first
 LOADER=arch/x86_64/asm/loader.asm
@@ -50,7 +51,9 @@ INCLUDE_DIRS=-I./arch/x86_64/include \
              -I./mem/include \
              -I./sched/include \
              -I./proc/include \
-             -I./proc
+             -I./proc \
+             -I./semaphore/include \
+             -I./sync/include
 
 # Updated GCCFLAGS with include directories
 GCC_WITH_INCLUDES=$(GCCFLAGS) $(INCLUDE_DIRS)
