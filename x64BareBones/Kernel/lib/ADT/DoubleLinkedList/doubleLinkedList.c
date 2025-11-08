@@ -17,7 +17,7 @@ typedef struct doubleLinkedListCDT
 	int length;
 } doubleLinkedListCDT;
 
-doubleLinkedListCDT *newDoubleLinkedListCDT(void)
+doubleLinkedListADT newDoubleLinkedListADT(void)
 {
 	doubleLinkedListCDT *list = mem_alloc(sizeof(doubleLinkedListCDT));
 	if (!list)
@@ -62,6 +62,61 @@ void addToDoubleLinkedList(doubleLinkedListCDT *list, void *elem)
 
 	list->head = node;
 	list->length++;
+}
+
+void addToDoubleLinkedListSorted(doubleLinkedListCDT *list, void *elem, int (*compare)(void *a, void *b))
+{
+	if (!list || !compare)
+		return;
+
+	node_t *node = mem_alloc(sizeof(node_t));
+	if (!node)
+		return;
+
+	node->elem = elem;
+
+	// Lista vacía - insertar como primer elemento
+	if (!list->head)
+	{
+		node->prev = NULL;
+		node->next = NULL;
+		list->head = node;
+		list->length++;
+		return;
+	}
+
+	// Buscar posición de inserción
+	node_t *cur = list->head;
+	while (cur)
+	{
+		// Si elem < cur->elem, insertar antes de cur
+		if (compare(elem, cur->elem) < 0)
+		{
+			node->next = cur;
+			node->prev = cur->prev;
+
+			if (cur->prev)
+				cur->prev->next = node;
+			else
+				list->head = node; // Insertar al principio
+
+			cur->prev = node;
+			list->length++;
+			return;
+		}
+
+		// Si es el último nodo, insertar al final
+		if (!cur->next)
+		{
+			node->next = NULL;
+			node->prev = cur;
+			cur->next = node;
+			list->length++;
+			return;
+		}
+
+		cur = cur->next;
+	}
 }
 
 void *findInDoubleLinkedList(doubleLinkedListADT list, bool (*equals)(void *elem, void *target), void *target)

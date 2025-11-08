@@ -1,5 +1,40 @@
 #include "strings.h"
 
+#include "../../mem/include/pmem.h"
+
+char *strCpy(char *dest, const char *src)
+{
+	char *original = dest;
+	while (*src)
+	{
+		*dest++ = *src++;
+	}
+	*dest = '\0';
+	return original;
+}
+
+size_t strLen(const char *str)
+{
+	size_t len = 0;
+	while (str[len])
+		len++;
+	return len;
+}
+
+char *strDup(const char *src)
+{
+	if (!src)
+		return NULL;
+
+	const int len = strLen(src);
+	char *dup = mem_alloc(len + 1);
+	if (!dup)
+		return NULL;
+
+	strCpy(dup, src);
+	return dup;
+}
+
 static void write_unsigned(char **buf, unsigned int u)
 {
 	if (u >= 10)

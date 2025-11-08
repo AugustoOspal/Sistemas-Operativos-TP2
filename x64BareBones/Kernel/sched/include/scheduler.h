@@ -56,9 +56,17 @@ void changeProcessPriority(uint64_t pid, uint8_t newPriority);
 void terminateProcess(uint64_t pid);
 
 /*
+ *  @brief bloquea en ese momento el proceso, llamando al timerInterrupt
  *  @param pid del proceso a bloquear
  */
 void blockProcess(uint64_t pid);
+
+/*
+ *  @brief Muy parecido a blockProcess, con la diferencia de que
+ *  no hace un timerInterrupt cuando lo agrega a la cola
+ *  @param pid del proceso a agregar a la cola de bloqueados
+ */
+void addProcessToBlockQueue(uint64_t pid);
 
 /*
  *  @param pid del proceso a desbloquear

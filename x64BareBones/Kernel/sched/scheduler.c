@@ -61,7 +61,7 @@ static void refill_credits(void)
 
 void initializeScheduler()
 {
-	globalScheduler.processTable = newDoubleLinkedListCDT();
+	globalScheduler.processTable = newDoubleLinkedListADT();
 	for (int i = 0; i < PRIO; i++)
 	{
 		globalScheduler.priorityQueues[i] = NewQueue();
@@ -278,7 +278,7 @@ void terminateProcess(uint64_t pid)
 	}
 }
 
-void blockProcess(uint64_t pid)
+void addProcessToBlockQueue(uint64_t pid)
 {
 	if (globalScheduler.currentProcess && globalScheduler.currentProcess->pid == pid)
 	{
@@ -287,7 +287,6 @@ void blockProcess(uint64_t pid)
 			return;
 		running->state = BLOCKED;
 		Enqueue(globalScheduler.blockedQueue, running);
-		_timerInterrupt();
 		return;
 	}
 
@@ -299,6 +298,15 @@ void blockProcess(uint64_t pid)
 	p->state = BLOCKED;
 
 	Enqueue(globalScheduler.blockedQueue, p);
+}
+
+void blockProcess(uint64_t pid)
+{
+	addProcessToBlockQueue(pid);
+	if (pid == globalScheduler.currentProcess->pid)
+	{
+		_timerInterrupt();
+	}
 }
 
 void unblockProcess(uint64_t pid)
