@@ -14,8 +14,13 @@
 #define DEFAULT_PRIORITY 0
 #define MAX_CHILDREN 20
 #define DEFAULT_FOREGROUND true
+#define FD_AMOUNT 3
+#define STDIN 0
+#define STDOUT 1
+#define STDERR 2
 
 typedef struct ProcessCDT *ProcessADT;
+
 
 /*
  *  @brief Inicializa el scheduler

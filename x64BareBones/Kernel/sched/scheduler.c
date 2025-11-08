@@ -27,6 +27,8 @@ typedef struct ProcessCDT
 	uint64_t reaped[MAX_CHILDREN]; // recolectados
 	size_t reapedCount;
 	uint64_t waitingPid; //=-1 si no espera, =0 si espera a cualquiera, >0 matchea pid
+	
+	uint8_t fileDescriptors[FD_AMOUNT]; // espacio para 20 descriptores de archivo abiertos
 
 	uint8_t quantumLeft;
 	bool foreground;
@@ -99,6 +101,9 @@ uint64_t addProcess(void *stackPointer)
 	newProcess->quantumLeft = QUANTUM;
 	newProcess->priority = DEFAULT_PRIORITY;
 	newProcess->foreground = false;
+	newProcess->fileDescriptors[0] = STDIN; 
+	newProcess->fileDescriptors[1] = STDOUT; 
+	newProcess->fileDescriptors[2] = STDERR; 
 
 	newProcess->parent = globalScheduler.currentProcess;
 	newProcess->childrenCount = 0;
