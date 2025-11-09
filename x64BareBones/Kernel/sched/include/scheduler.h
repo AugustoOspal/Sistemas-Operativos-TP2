@@ -38,9 +38,10 @@ void *schedule(void *stackPointer);
 /*
  *  @brief Agrega el proceso en el scheduler
  *  @param stackPointer Stack Pointer del proceso a agregar al scheduler
+ *  @param fds Array con los file descriptors del proceso
  *  @return PID del proceso agregado al scheduler
  */
-uint64_t addProcess(void *stackPointer);
+uint64_t addProcess(void *stackPointer, int fds[FD_AMOUNT]);
 
 /*
  *  @param pid del proceso a agregar informacion

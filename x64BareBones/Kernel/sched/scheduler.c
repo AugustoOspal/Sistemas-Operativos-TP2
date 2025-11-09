@@ -78,11 +78,12 @@ void initializeScheduler()
 
 	globalScheduler.blockedQueue = NewQueue();
 
-	createProcess("idle", idleMain, 0, NULL);
+	int fds[] = {STDIN, STDOUT, STDERR};
+	createProcess("idle", idleMain, 0, NULL, fds);
 	idleProcess = Dequeue(globalScheduler.priorityQueues[DEFAULT_PRIORITY]);
 }
 
-uint64_t addProcess(void *stackPointer)
+uint64_t addProcess(void *stackPointer, int fds[FD_AMOUNT])
 {
 	// No estaria chequeando que existe scheduler
 
@@ -101,9 +102,9 @@ uint64_t addProcess(void *stackPointer)
 	newProcess->quantumLeft = QUANTUM;
 	newProcess->priority = DEFAULT_PRIORITY;
 	newProcess->foreground = false;
-	newProcess->fileDescriptors[0] = STDIN; 
-	newProcess->fileDescriptors[1] = STDOUT; 
-	newProcess->fileDescriptors[2] = STDERR; 
+	newProcess->fileDescriptors[0] = fds[0]; 
+	newProcess->fileDescriptors[1] = fds[1]; 
+	newProcess->fileDescriptors[2] = fds[2]; 
 
 	newProcess->parent = globalScheduler.currentProcess;
 	newProcess->childrenCount = 0;

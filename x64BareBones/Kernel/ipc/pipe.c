@@ -10,7 +10,9 @@ static inline void buildSemName(int pipeId, const char *suffix, char semName[SEM
 	ksprintf(semName, "%d_%s", pipeId, suffix);
 }
 
-int pipe_open(){
+static uint16_t nextFd = BASIC_FDS; 
+
+int pipe_open(int fds[2]){
 
     for(int i = 0; i < MAX_PIPES; i++){
         if(pipes[i] == NULL){ // encuentra un espacio para crear un pipe
@@ -25,6 +27,12 @@ int pipe_open(){
             pipes[i]->readingIdx = 0;
             pipes[i]->toBeRead = 0;
             pipes[i]->writePos = 0;
+
+            // asignar file descriptors
+    		pipes[i]->fds[0] = nextFd++;
+			fds[0] = pipes[i]->fds[0];
+			pipes[i]->fds[1] = nextFd++;
+			fds[1] = pipes[i]->fds[1];
 
             // inicializar semaforos
             char semName[SEM_NAME_SIZE];
@@ -131,4 +139,12 @@ int pipe_close(int pipe_id) {
     pipes[pipe_id] = NULL;
 
     return 0; // Cierre exitoso
+}
+
+int get_pipe_idx(int fd) {
+    for (int i = 0; i < MAX_PIPES; i++) {
+        if (pipes[i] != NULL && (pipes[i]->fds[0] == fd || pipes[i]->fds[1] == fd))
+            return i;
+    }
+    return NULL;
 }

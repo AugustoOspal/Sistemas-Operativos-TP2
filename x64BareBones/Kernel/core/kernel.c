@@ -71,8 +71,9 @@ int main()
 	// createProcess("Proceso A", processA, 0, NULL);
 	// createProcess("Proceso B", processB, 0, NULL);
 	// createProcess("Proceso C", processC, 0, NULL);
+	int fds[] = {STDIN, STDOUT, STDERR};
 
-	changeProcessPriority(createProcess("shell", shellAddress, 0, NULL), 3);
+	changeProcessPriority(createProcess("shell", shellAddress, 0, NULL, fds ), 3);
 	load_idt();
 	// play_boot_sound();
 	return 0;

@@ -47,75 +47,82 @@ uint8_t isSpecialChar(char c)
 
 uint64_t sys_write(uint8_t fd, const char *str, uint64_t count)
 {
-	// Solo se soporta escritura en STDOUT
-	if (fd != STDOUT)
-		return 0;
-
-	int width = getWidth();
-	int height = getHeight();
-
-	for (uint64_t i = 0; i < count; i++)
+	if (fd < 0)
 	{
-		if (isSpecialChar(str[i]))
+		return -1;
+	}
+	
+	//TODO: implementar STDERR
+	if (fd == STDOUT)
+	{	
+		int width = getWidth();
+		int height = getHeight();
+
+		for (uint64_t i = 0; i < count; i++)
 		{
-			switch (str[i])
+			if (isSpecialChar(str[i]))
 			{
-				case '\n':
-					y_coord += height + FONT_CHAR_GAP;
-
-				case '\r':
-					x_coord = 0;
-					break;
-
-				case '\t':
-					x_coord += (TAB_SPACES * (width + FONT_CHAR_GAP));
-					if (x_coord >= getScreenWidth())
-					{
-						x_coord = x_coord % getScreenWidth();
+				switch (str[i])
+				{
+					case '\n':
 						y_coord += height + FONT_CHAR_GAP;
-					}
-					break;
 
-				case '\b':
+					case '\r':
+						x_coord = 0;
+						break;
 
-					if (x_coord > width + FONT_CHAR_GAP)
-					{
-						x_coord -= (width + FONT_CHAR_GAP);
-					}
-					else
-					{
-						if (y_coord > 0)
+					case '\t':
+						x_coord += (TAB_SPACES * (width + FONT_CHAR_GAP));
+						if (x_coord >= getScreenWidth())
 						{
-							y_coord -= (height + FONT_CHAR_GAP);
-							x_coord = getScreenWidth() - TAB_SPACES * (width + FONT_CHAR_GAP) + x_coord;
+							x_coord = x_coord % getScreenWidth();
+							y_coord += height + FONT_CHAR_GAP;
+						}
+						break;
+
+					case '\b':
+
+						if (x_coord > width + FONT_CHAR_GAP)
+						{
+							x_coord -= (width + FONT_CHAR_GAP);
 						}
 						else
 						{
-							x_coord = 0;
+							if (y_coord > 0)
+							{
+								y_coord -= (height + FONT_CHAR_GAP);
+								x_coord = getScreenWidth() - TAB_SPACES * (width + FONT_CHAR_GAP) + x_coord;
+							}
+							else
+							{
+								x_coord = 0;
+							}
 						}
-					}
 
-					// TODO: Esto en vez del un espacio tendria que ser un caracter con todo
-					// el bit map en 1. Tambien sirve para el cursor
-					drawRectangle(width, height, NEGRO, x_coord, y_coord);
-					break;
+						// TODO: Esto en vez del un espacio tendria que ser un caracter con todo
+						// el bit map en 1. Tambien sirve para el cursor
+						drawRectangle(width, height, NEGRO, x_coord, y_coord);
+						break;
+				}
+			}
+
+			// TODO: Aca se podria optimizar con getRemainingScreenWidth
+			else if (isValidScreenPrint(x_coord, y_coord, width, height))
+			{
+				drawChar(str[i], BLANCO, x_coord, y_coord);
+				x_coord += width + FONT_CHAR_GAP;
+			}
+			else
+			{
+				x_coord = 0;
+				y_coord += height + FONT_CHAR_GAP;
 			}
 		}
 
-		// TODO: Aca se podria optimizar con getRemainingScreenWidth
-		else if (isValidScreenPrint(x_coord, y_coord, width, height))
-		{
-			drawChar(str[i], BLANCO, x_coord, y_coord);
-			x_coord += width + FONT_CHAR_GAP;
+			return count;
 		}
-		else
-		{
-			x_coord = 0;
-			y_coord += height + FONT_CHAR_GAP;
-		}
-	}
-
-	return count;
+	    
+	return pipe_write(fd, (char *)str, count);
 }
 
 uint64_t sys_read(uint8_t fd, char *buffer, uint64_t count)
@@ -135,7 +142,7 @@ uint64_t sys_read(uint8_t fd, char *buffer, uint64_t count)
 		return count;
 	}
 
-	return 0;
+    return pipe_read(fd, buffer, count);
 }
 
 void syscallDispatcher(Registers_t *regs)
@@ -272,7 +279,7 @@ void syscallDispatcher(Registers_t *regs)
 			break;
 
 		case 0x50:
-			regs->rax = createProcess((char *) arg1, (mainFuncPtr) arg2, (int) arg3, (char **) arg4);
+			regs->rax = createProcess((char *) arg1, (mainFuncPtr) arg2, (int) arg3, (char **) arg4, arg5);
 			break;
 
 		case 0x51:
