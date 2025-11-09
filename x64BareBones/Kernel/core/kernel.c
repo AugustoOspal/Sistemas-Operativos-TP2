@@ -66,7 +66,8 @@ int main()
 	kernel_memory_init();
 	initializeScheduler();
 	semaphoresInit();
-
+	keyboard_init();
+	
 	// Test de procesos
 	// createProcess("Proceso A", processA, 0, NULL);
 	// createProcess("Proceso B", processB, 0, NULL);

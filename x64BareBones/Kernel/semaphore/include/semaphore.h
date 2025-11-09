@@ -80,4 +80,13 @@ int sem_unlink(const char *name);
  *  implementamos “ineficientemente” según el libro, aprovechamos y lo dejamos negativo
  */
 int semGetValue(semaphoreP sem, int *sval);
+
+
+/*
+ *  @brief Busca un semaforo por su nombre.
+ *  @param name Nombre del semaforo a buscar
+ *  @return Puntero al semaforo si lo encuentra, NULL si no existe
+ */
+semaphoreP getSem(const char *name);
+
 #endif // SISTEMAS_OPERATIVOS_TP2_SEMAPHORE_H

@@ -22,4 +22,7 @@ void keyboard_handler(Registers_t *regs);
 // Retorna 0 si el buffer está vacío.
 char kbd_get_char();
 
+// Inicializa el semaforo del driver del teclado
+void keyboard_init();
+
 #endif

@@ -133,10 +133,7 @@ uint64_t sys_read(uint8_t fd, char *buffer, uint64_t count)
 
 		for (uint64_t i = 0; i < count; i++)
 		{
-			if (!(c = kbd_get_char()))
-				return i;
-
-			buffer[i] = c;
+			buffer[i] = kbd_get_char();
 		}
 
 		return count;
@@ -326,7 +323,7 @@ void syscallDispatcher(Registers_t *regs)
 			// case 0x59:
 			// TODO: Falta implementar este, tendria que esperar a los hijos
 		case 0x67:
-			regs->rax = pipe_open();
+			regs->rax = pipe_open(arg1);
 			break;
 		case 0x68:
 			regs->rax = pipe_close((int) arg1);

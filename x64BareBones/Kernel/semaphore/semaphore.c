@@ -7,7 +7,7 @@ static doubleLinkedListADT semaphoreList = NULL;
 static bool matchSemName(void *elem, void *name);
 static bool matchPid(void *elem, void *pid);
 static int cmpSem(void *a, void *b);
-static semaphoreP getSem(const char *name);
+// static semaphoreP getSem(const char *name);
 static semaphoreP createSem();
 
 void semaphoresInit(void)
@@ -173,7 +173,7 @@ static int cmpSem(void *a, void *b)
 	return 0;
 }
 
-static semaphoreP getSem(const char *name)
+semaphoreP getSem(const char *name)
 {
 	if (!semaphoreList || !name)
 		return NULL;

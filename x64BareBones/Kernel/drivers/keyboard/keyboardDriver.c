@@ -1,4 +1,5 @@
 #include "keyboardDriver.h"
+#include "../../semaphore/include/semaphore.h"
 
 // --- Definiciones de Scancodes (Set 1) ---
 // Teclas Modificadoras (Make codes)
@@ -53,6 +54,14 @@ static char keyboard_buffer[KEYBOARD_BUFFER_SIZE];
 static unsigned int buffer_write_idx = 0;
 static unsigned int buffer_read_idx = 0;
 static unsigned int buffer_count = 0;
+
+void keyboard_init() {
+    if (semOpen("keyboard_sem", 0) == NULL){
+		return -1;
+	}
+	return 0;
+}
+
 
 char procesScanCode(unsigned int scancode)
 {
@@ -162,11 +171,13 @@ void keyboard_handler(Registers_t *regs)
 	else if (c != 0)
 	{
 		loadCharToBuffer(c);
+		semPost(getSem("keyboard_sem")); // Señalizar que hay una tecla disponible
 	}
 }
 
 char kbd_get_char()
 {
+	semWait(getSem("keyboard_sem")); // Esperar hasta que haya una tecla disponible
 	if (buffer_count == 0)
 		return 0; // Buffer vacío
 
