@@ -318,17 +318,11 @@ void syscallDispatcher(Registers_t *regs)
 			;
 			break;
 
-		// case 0x59:
-		// TODO: Falta implementar este, tendria que esperar a los hijos
-			// case 0x59:
-			// TODO: Falta implementar este, tendria que esperar a los hijos
-		case 0x67:
-			regs->rax = pipe_open(arg1);
+		case 0x59:
+			regs->rax = waitPid((uint64_t) arg1);
 			break;
-		case 0x68:
-			regs->rax = pipe_close((int) arg1);
 
-		// Semaforos
+			// Semaforos
 		case 0x60:
 			regs->rax = (uint64_t) semOpen((const char *) arg1, (int) arg2);
 			break;
@@ -359,6 +353,12 @@ void syscallDispatcher(Registers_t *regs)
 		case 0x66:
 			regs->rax = sem_unlink((const char *) arg1);
 			break;
+
+		case 0x67:
+			regs->rax = pipe_open(arg1);
+			break;
+		case 0x68:
+			regs->rax = pipe_close((int) arg1);
 
 		default:
 			// Syscall desconocida o no implementada

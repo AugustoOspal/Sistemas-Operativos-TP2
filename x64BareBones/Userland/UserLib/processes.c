@@ -1,12 +1,12 @@
 #include "include/processes.h"
-#include "include/syscallLib.h"
+#include "include/usrio.h"
 
 /*
  *	@brie
  */
-uint64_t createProcess(const char *name, int (*main)(int argc, char *argv[]), int argc, char *argv[])
+uint64_t createProcess(const char *name, int (*main)(int argc, char *argv[]), int argc, char *argv[], int fds[FD_AMOUNT])
 {
-	return sys_createProcess(name, main, argc, argv);
+	return sys_createProcess(name, main, argc, argv, fds);
 }
 
 void deleteProcess(uint64_t pid)
@@ -42,4 +42,29 @@ void unblockProcess(uint64_t pid)
 void yield()
 {
 	sys_yield();
+}
+
+uint64_t waitPid(uint64_t pid)
+{
+	return sys_waitPid(pid);
+}
+
+void cat(){
+    int charsInline = 0;
+    char c;
+    while((c = getchar()) != '\0'){
+        if(c == '\b'){
+            if(charsInline > 0){
+                charsInline--;
+                putchar(c);
+            }
+        }else{
+            if(c == '\n'){
+                charsInline = 0;
+            }else{
+                charsInline++;
+            }
+            putchar(c);
+        }
+    }
 }

@@ -5,13 +5,15 @@
 #include "processes.h"
 
 #define BUFFER 500
-#define COMMAND_SIZE 12
+#define COMMAND_SIZE 13
 #define COMMAND_COUNT (sizeof(commands) / sizeof(command_entry))
+int defaultFds[] = {STDIN, STDOUT, STDERR};
+
 
 #define SPECIAL_KEY_MAX_VALUE 5
 
 char *commands_str[] = {"help",	 "exception 1", "exception 2", "pongisgolf", "zoom in",		   "zoom out",
-						"clear", "date",		"registers",   "busywait",	 "busywaitkernel", "exit"};
+						"clear", "date",		"registers",   "busywait",	 "busywaitkernel", "exit", "cat"};
 
 typedef void (*ShellCommand)();
 static command_entry commands[] = {
@@ -27,9 +29,11 @@ static command_entry commands[] = {
 	{"registers", CMD_BUILTIN, getRegisters},
 	{"busywait", CMD_BUILTIN, busy_wait},
 	{"busywaitkernel", CMD_BUILTIN, busy_wait_kernel},
-	{"exit", CMD_BUILTIN, exitShell}
+	{"exit", CMD_BUILTIN, exitShell},
 
 	// COMANDOS PROCESOS
+	{"cat", CMD_PROC, runCat},
+	
 };
 
 char *registers[] = {" RAX: ", " RBX: ", " RCX: ", " RDX: ", " RSI: ", " RDI: ", " RBP: ", " RSP: ", " R8: ",
@@ -75,7 +79,8 @@ void startShell()
 		else if (command->type == CMD_PROC)
 		{
 			// Crear proceso nuevo (foreground o background)
-			createProcess(command->name, NULL, 0, NULL);
+			uint64_t pid = createProcess(command->name, command->function, 0, NULL, defaultFds);
+			waitPid(pid);
 		}
 	}
 }
@@ -250,6 +255,13 @@ void busy_wait_kernel()
 	sleepMilli(5000);
 
 	printf("Kernel busy-wait finished.\n");
+}
+
+//Comandos no Builtin
+
+void runCat()
+{
+	cat();
 }
 
 int main()

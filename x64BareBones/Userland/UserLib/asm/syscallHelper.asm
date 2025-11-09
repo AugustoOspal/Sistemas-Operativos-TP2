@@ -32,6 +32,7 @@ GLOBAL sys_changeProcessPriority
 GLOBAL sys_blockProcess
 GLOBAL sys_unblockProcess
 GLOBAL sys_yield
+GLOBAL sys_waitPid
 
 GLOBAL sys_semOpen
 GLOBAL sys_semClose
@@ -94,6 +95,7 @@ sys_changeProcessPriority:  syscall 0x55
 sys_blockProcess:           syscall 0x56
 sys_unblockProcess:         syscall 0x57
 sys_yield:                  syscall 0x58
+sys_waitPid:                syscall 0x59
 
 ; Semaforos
 sys_semOpen:                syscall 0x60
@@ -105,8 +107,8 @@ sys_semGetValue:            syscall 0x65
 sys_semUnlink:              syscall 0x66
 
 ;Pipes
-sys_pipe_open               syscall 0x67
-sys_pipe_close               syscall 0x68
+sys_pipe_open:               syscall 0x67
+sys_pipe_close:              syscall 0x68
 
 ; Ecceptions
 opCodeException:

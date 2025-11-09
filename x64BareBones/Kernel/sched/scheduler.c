@@ -473,7 +473,7 @@ uint64_t wait(void *status)
 	return pid;
 }
 
-uint64_t waitpid(uint64_t pid, void *status)
+uint64_t waitPid(uint64_t pid)
 {
 	// busco proceso
 	ProcessADT waitingProcess = getProcessByPid(pid);

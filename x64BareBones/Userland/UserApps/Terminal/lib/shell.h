@@ -11,6 +11,10 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#define STDIN 0
+#define STDOUT 1
+#define STDERR 2
+
 typedef enum
 {
 	CMD_BUILTIN,
@@ -57,5 +61,6 @@ void exception_1();
 void exception_2();
 void busy_wait();
 void busy_wait_kernel();
+void runCat();
 
 #endif

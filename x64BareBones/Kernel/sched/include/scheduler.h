@@ -106,6 +106,14 @@ int getProcessInfo(uint64_t pid, char *buffer, uint64_t bufferSize);
  */
 uint64_t getAllProcessesInfo(char *buffer, uint64_t bufferSize);
 
+/*
+ *  @brief Espera a que un proceso hijo termine
+ *  @param pid PID del proceso hijo a esperar
+ *  @param status Puntero donde guardar el estado de salida del proceso hijo (puede ser NULL)
+ *  @return PID del proceso hijo que terminó, o -1 en caso de error
+ */
+uint64_t waitPid(uint64_t pid);
+
 // resignTimeWindow(); // usa yield
 
 #endif

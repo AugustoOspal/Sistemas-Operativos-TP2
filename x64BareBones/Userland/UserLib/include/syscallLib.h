@@ -4,6 +4,8 @@
 #include "timeLib.h"
 #include <stdint.h>
 
+#define FD_AMOUNT 3
+
 // Video
 extern void sys_clearScreen(void);
 extern void sys_putPixel(uint32_t hexColor, uint64_t x, uint64_t y);
@@ -36,7 +38,7 @@ extern void sys_waitMilli(uint64_t milliseconds);
 extern void sys_playSound(uint32_t frequency, uint32_t duration);
 
 // Procesos
-extern uint64_t sys_createProcess(const char *name, int (*main)(int argc, char *argv[]), int argc, char *argv[]);
+extern uint64_t sys_createProcess(const char *name, int (*main)(int argc, char *argv[]), int argc, char *argv[], int fds[FD_AMOUNT]);
 extern void sys_deleteProcess(uint64_t pid);
 extern uint64_t sys_getPid();
 extern uint64_t sys_getAllProcessesInfo(char *buffer, uint64_t bufferSize);
@@ -44,6 +46,7 @@ extern void sys_changeProcessPriority(uint64_t pid, uint8_t newPriority);
 extern void sys_blockProcess(uint64_t pid);
 extern void sys_unblockProcess(uint64_t pid);
 extern void sys_yield();
+extern uint64_t sys_waitPid(uint64_t pid);
 
 // Semaforos
 extern void* sys_semOpen(const char *name, int value);

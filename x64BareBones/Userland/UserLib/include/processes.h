@@ -2,6 +2,7 @@
 #define SISTEMAS_OPERATIVOS_TP2_PROCESSES_H
 
 #include <stdint.h>
+#include "syscallLib.h"
 
 /*
  *  @brief Creates a new process
@@ -11,7 +12,7 @@
  *  @param argv Array of arguments
  *  @return PID of the created process
  */
-uint64_t createProcess(const char *name, int (*main)(int argc, char *argv[]), int argc, char *argv[]);
+uint64_t createProcess(const char *name, int (*main)(int argc, char *argv[]), int argc, char *argv[], int fds[FD_AMOUNT]);
 
 /*
  *  @brief Deletes a process
@@ -43,5 +44,13 @@ void changeProcessPriority(uint64_t pid, uint8_t newPriority);
 void blockProcess(uint64_t pid);
 void unblockProcess(uint64_t pid);
 void yield();
+
+uint64_t waitPid(uint64_t pid);
+
+/*
+    *  @brief implementacion de cat
+    *  Imprime el stdin tal como lo recibe.
+*/
+void cat();
 
 #endif // SISTEMAS_OPERATIVOS_TP2_PROCESSES_H
