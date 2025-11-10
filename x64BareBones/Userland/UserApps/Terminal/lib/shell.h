@@ -66,5 +66,6 @@ void runCat();
 void runMem();
 void runLoop();
 void runWc();
+void runFilter();
 
 #endif

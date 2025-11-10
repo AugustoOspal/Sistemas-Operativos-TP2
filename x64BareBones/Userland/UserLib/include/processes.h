@@ -57,4 +57,6 @@ void loop();
 
 void wc();
 
+void filter();
+
 #endif // SISTEMAS_OPERATIVOS_TP2_PROCESSES_H

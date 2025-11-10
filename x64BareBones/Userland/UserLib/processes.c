@@ -113,3 +113,13 @@ void wc(){
 	}
 	printf("\nLines: %d, Words: %d, Characters: %d\n", lines, words, charsInline);
 }
+
+void filter(){
+    char c;
+    while((c = getchar()) != '\n'){
+        if(c == 'a' || c == 'e' || c == 'i' || c == 'o' || c == 'u' ||
+           c == 'A' || c == 'E' || c == 'I' || c == 'O' || c == 'U'){
+            putchar(c);
+        }
+    }
+}
