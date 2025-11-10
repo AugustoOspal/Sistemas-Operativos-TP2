@@ -68,3 +68,11 @@ void cat(){
         }
     }
 }
+
+void loop(){
+    int pid = sys_getPid();
+    while(1){
+        printf("Hi! My PID is: %d\n", pid);
+        sys_sleepMilli(2000);
+    }
+}
