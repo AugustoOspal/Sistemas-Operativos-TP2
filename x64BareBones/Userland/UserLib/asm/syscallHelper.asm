@@ -45,6 +45,8 @@ GLOBAL sys_semUnlink
 GLOBAL sys_pipe_open
 GLOBAL sys_pipe_close
 
+GLOBAL sys_mem_info
+
 GLOBAL opCodeException
 
 section .text
@@ -109,6 +111,9 @@ sys_semUnlink:              syscall 0x66
 ;Pipes
 sys_pipe_open:               syscall 0x67
 sys_pipe_close:              syscall 0x68
+
+;Memoria
+sys_mem_info:                syscall 0x69
 
 ; Ecceptions
 opCodeException:

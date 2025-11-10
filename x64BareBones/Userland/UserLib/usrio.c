@@ -168,3 +168,8 @@ uint64_t get_regist(uint64_t *registers)
 {
 	return sys_getRegisters(registers);
 }
+
+void get_mem_info(pm_stats_t *stats)
+{
+	sys_mem_info(stats);
+}

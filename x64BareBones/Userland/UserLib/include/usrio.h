@@ -12,5 +12,6 @@ int puts(const char *s);
 
 void to_lower(char *str);
 uint64_t get_regist(uint64_t *registers);
+void get_mem_info(pm_stats_t *stats);
 
 #endif

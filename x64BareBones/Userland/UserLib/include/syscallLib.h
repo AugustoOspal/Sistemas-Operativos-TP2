@@ -4,6 +4,13 @@
 #include "timeLib.h"
 #include <stdint.h>
 
+typedef struct
+{
+	uint64_t total;
+	uint64_t used;
+	uint64_t free;
+} pm_stats_t;
+
 #define FD_AMOUNT 3
 
 // Video
@@ -60,6 +67,9 @@ extern int sys_semUnlink(const char *name);
 //Pipes
 extern int sys_pipe_open();
 extern int sys_pipe_close(int pipe_id);
+
+//Memoria
+extern void sys_mem_info(pm_stats_t *stats);
 
 // Excepciones
 extern void opCodeException();

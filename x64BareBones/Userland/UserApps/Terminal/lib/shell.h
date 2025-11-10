@@ -63,5 +63,6 @@ void busy_wait();
 void busy_wait_kernel();
 void runPs();
 void runCat();
+void runMem();
 
 #endif

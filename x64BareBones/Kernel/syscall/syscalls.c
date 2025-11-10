@@ -359,6 +359,10 @@ void syscallDispatcher(Registers_t *regs)
 			break;
 		case 0x68:
 			regs->rax = pipe_close((int) arg1);
+		case 0x69:
+			mem_get_stats((pm_stats_t *) arg1);
+			regs->rax = 0;
+			break;
 
 		default:
 			// Syscall desconocida o no implementada
