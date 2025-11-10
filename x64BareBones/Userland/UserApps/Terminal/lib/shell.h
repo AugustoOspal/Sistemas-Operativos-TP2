@@ -61,6 +61,7 @@ void exception_1();
 void exception_2();
 void busy_wait();
 void busy_wait_kernel();
+void runPs();
 void runCat();
 
 #endif

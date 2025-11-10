@@ -3,6 +3,14 @@
 #include "../lib/string/strings.h"
 #include "interrupts.h"
 
+#define PID_COL_WIDTH 5
+#define NAME_COL_WIDTH 16
+#define PRIO_COL_WIDTH 8
+#define STATE_COL_WIDTH 8
+#define FG_COL_WIDTH 10
+#define ADDR_COL_WIDTH 12
+#define PROCESS_INFO_LINE_MAX 160
+
 typedef enum ProcessState
 {
 	READY,
@@ -54,11 +62,109 @@ static ProcessADT getProcessByPid(uint64_t pid);
 static int pickNextQueue(void);
 static void *pickNextProcess();
 static void deleteProcess(ProcessADT p);
+static const char *getProcessStateString(ProcessState state);
+static void formatProcessName(const char *src, char *dest, size_t maxLen);
+static void formatStringColumn(const char *src, char *dest, size_t width);
+static void formatUnsignedColumn(unsigned long value, char *dest, size_t width);
+static void formatHexColumn(unsigned long value, char *dest, size_t width);
+static bool appendLine(char *buffer, uint64_t bufferSize, int *pos, const char *line, int lineLen);
 
 static void refill_credits(void)
 {
 	for (int i = 0; i < PRIO; i++)
 		globalScheduler.credits[i] = globalScheduler.weights[i];
+}
+
+static const char *getProcessStateString(ProcessState state)
+{
+	switch (state)
+	{
+		case READY:
+			return "READY";
+		case RUNNING:
+			return "RUNNING";
+		case BLOCKED:
+			return "BLOCKED";
+		case ZOMBIE:
+			return "ZOMBIE";
+		default:
+			return "UNKNOWN";
+	}
+}
+
+static void formatProcessName(const char *src, char *dest, size_t maxLen)
+{
+	if (!src)
+		src = "(unnamed)";
+
+	size_t i = 0;
+	for (; i < maxLen && src[i]; i++)
+	{
+		dest[i] = src[i];
+	}
+
+	if (src[i] != '\0' && maxLen >= 3)
+	{
+		dest[maxLen - 3] = '.';
+		dest[maxLen - 2] = '.';
+		dest[maxLen - 1] = '.';
+		i = maxLen;
+	}
+
+	while (i < maxLen)
+	{
+		dest[i++] = ' ';
+	}
+
+	dest[maxLen] = '\0';
+}
+
+static void formatStringColumn(const char *src, char *dest, size_t width)
+{
+	if (!src)
+		src = "";
+
+	size_t i = 0;
+	for (; i < width && src[i]; i++)
+	{
+		dest[i] = src[i];
+	}
+
+	while (i < width)
+	{
+		dest[i++] = ' ';
+	}
+
+	dest[width] = '\0';
+}
+
+static void formatUnsignedColumn(unsigned long value, char *dest, size_t width)
+{
+	char tmp[32];
+	ksprintf(tmp, "%lu", value);
+	formatStringColumn(tmp, dest, width);
+}
+
+static void formatHexColumn(unsigned long value, char *dest, size_t width)
+{
+	char tmp[32];
+	ksprintf(tmp, "0x%lx", value);
+	formatStringColumn(tmp, dest, width);
+}
+
+static bool appendLine(char *buffer, uint64_t bufferSize, int *pos, const char *line, int lineLen)
+{
+	if (lineLen <= 0 || *pos + lineLen >= bufferSize)
+		return false;
+
+	for (int i = 0; i < lineLen; i++)
+	{
+		buffer[*pos + i] = line[i];
+	}
+
+	*pos += lineLen;
+	buffer[*pos] = '\0';
+	return true;
 }
 
 void initializeScheduler()
@@ -348,25 +454,7 @@ int getProcessInfo(uint64_t pid, char *buffer, uint64_t bufferSize)
 	if (!p)
 		return -1;
 
-	const char *state_str;
-	switch (p->state)
-	{
-		case READY:
-			state_str = "READY";
-			break;
-		case RUNNING:
-			state_str = "RUNNING";
-			break;
-		case BLOCKED:
-			state_str = "BLOCKED";
-			break;
-		case ZOMBIE:
-			state_str = "ZOMBIE";
-			break;
-		default:
-			state_str = "UNKNOWN";
-			break;
-	}
+	const char *state_str = getProcessStateString(p->state);
 
 	// Formato CSV: PID,Name,Priority,State,Foreground,Stack,BasePointer
 	int written =
@@ -381,14 +469,48 @@ uint64_t getAllProcessesInfo(char *buffer, uint64_t bufferSize)
 	if (!buffer || bufferSize == 0)
 		return 0;
 
-	// Escribir header CSV
-	int pos = ksprintf(buffer, "PID,Name,Priority,State,Foreground,Stack,BasePointer\n");
+	const char *separator = "+-------+------------------+----------+----------+------------+--------------+--------------+\n";
 
-	if (pos >= bufferSize)
-	{
-		buffer[bufferSize - 1] = '\0';
+	char line[PROCESS_INFO_LINE_MAX];
+	int pos = 0;
+	buffer[0] = '\0';
+
+	int lineLen = ksprintf(line, "%s", separator);
+	if (!appendLine(buffer, bufferSize, &pos, line, lineLen))
 		return 0;
-	}
+
+	char pidHeader[PID_COL_WIDTH + 1];
+	char nameHeader[NAME_COL_WIDTH + 1];
+	char prioHeader[PRIO_COL_WIDTH + 1];
+	char stateHeader[STATE_COL_WIDTH + 1];
+	char fgHeader[FG_COL_WIDTH + 1];
+	char stackHeader[ADDR_COL_WIDTH + 1];
+	char baseHeader[ADDR_COL_WIDTH + 1];
+
+	formatStringColumn("PID", pidHeader, PID_COL_WIDTH);
+	formatStringColumn("Name", nameHeader, NAME_COL_WIDTH);
+	formatStringColumn("Priority", prioHeader, PRIO_COL_WIDTH);
+	formatStringColumn("State", stateHeader, STATE_COL_WIDTH);
+	formatStringColumn("Foreground", fgHeader, FG_COL_WIDTH);
+	formatStringColumn("Stack", stackHeader, ADDR_COL_WIDTH);
+	formatStringColumn("Base Ptr", baseHeader, ADDR_COL_WIDTH);
+
+	lineLen = ksprintf(
+		line,
+		"| %s | %s | %s | %s | %s | %s | %s |\n",
+		pidHeader,
+		nameHeader,
+		prioHeader,
+		stateHeader,
+		fgHeader,
+		stackHeader,
+		baseHeader);
+	if (!appendLine(buffer, bufferSize, &pos, line, lineLen))
+		return 0;
+
+	lineLen = ksprintf(line, "%s", separator);
+	if (!appendLine(buffer, bufferSize, &pos, line, lineLen))
+		return 0;
 
 	// TODO: A lo mejor en vez de contarlo asi se podria poner un campo en la struct
 	uint64_t count = 0;
@@ -398,47 +520,43 @@ uint64_t getAllProcessesInfo(char *buffer, uint64_t bufferSize)
 		if (!p)
 			continue;
 
-		const char *state_str;
-		switch (p->state)
-		{
-			case READY:
-				state_str = "READY";
-				break;
-			case RUNNING:
-				state_str = "RUNNING";
-				break;
-			case BLOCKED:
-				state_str = "BLOCKED";
-				break;
-			case ZOMBIE:
-				state_str = "ZOMBIE";
-				break;
-			default:
-				state_str = "UNKNOWN";
-				break;
-		}
+		const char *state_str = getProcessStateString(p->state);
 
-		// Escribir directamente al buffer con ksprintf
-		int written = ksprintf(buffer + pos, "%lu,%s,%u,%s,%s,0x%lx,0x%lx\n", p->pid,
-							   p->nombre ? p->nombre : "(unnamed)", p->priority, state_str,
-							   p->foreground ? "Yes" : "No", (unsigned long) p->stack, (unsigned long) p->basePointer);
+		char displayName[NAME_COL_WIDTH + 1];
+		char pidCol[PID_COL_WIDTH + 1];
+		char prioCol[PRIO_COL_WIDTH + 1];
+		char stateCol[STATE_COL_WIDTH + 1];
+		char fgCol[FG_COL_WIDTH + 1];
+		char stackCol[ADDR_COL_WIDTH + 1];
+		char baseCol[ADDR_COL_WIDTH + 1];
 
-		if (written > 0 && pos + written < bufferSize)
-		{
-			pos += written;
-			count++;
-		}
-		else
-		{
-			break; // No hay más espacio
-		}
+		formatProcessName(p->nombre, displayName, NAME_COL_WIDTH);
+		formatUnsignedColumn(p->pid, pidCol, PID_COL_WIDTH);
+		formatUnsignedColumn(p->priority, prioCol, PRIO_COL_WIDTH);
+		formatStringColumn(state_str, stateCol, STATE_COL_WIDTH);
+		formatStringColumn(p->foreground ? "Yes" : "No", fgCol, FG_COL_WIDTH);
+		formatHexColumn((unsigned long) p->stack, stackCol, ADDR_COL_WIDTH);
+		formatHexColumn((unsigned long) p->basePointer, baseCol, ADDR_COL_WIDTH);
+
+		lineLen = ksprintf(
+			line,
+			"| %s | %s | %s | %s | %s | %s | %s |\n",
+			pidCol,
+			displayName,
+			prioCol,
+			stateCol,
+			fgCol,
+			stackCol,
+			baseCol);
+
+		if (!appendLine(buffer, bufferSize, &pos, line, lineLen))
+			break;
+
+		count++;
 	}
 
-	// Null terminator
-	if (pos < bufferSize)
-		buffer[pos] = '\0';
-	else
-		buffer[bufferSize - 1] = '\0';
+	lineLen = ksprintf(line, "%s", separator);
+	appendLine(buffer, bufferSize, &pos, line, lineLen);
 
 	return count;
 }

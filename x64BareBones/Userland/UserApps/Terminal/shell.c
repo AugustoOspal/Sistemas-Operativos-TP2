@@ -5,7 +5,7 @@
 #include "processes.h"
 
 #define BUFFER 500
-#define COMMAND_SIZE 13
+#define COMMAND_SIZE 14
 #define COMMAND_COUNT (sizeof(commands) / sizeof(command_entry))
 int defaultFds[] = {STDIN, STDOUT, STDERR};
 
@@ -13,7 +13,7 @@ int defaultFds[] = {STDIN, STDOUT, STDERR};
 #define SPECIAL_KEY_MAX_VALUE 5
 
 char *commands_str[] = {"help",	 "exception 1", "exception 2", "pongisgolf", "zoom in",		   "zoom out",
-						"clear", "date",		"registers",   "busywait",	 "busywaitkernel", "exit", "cat"};
+						"clear", "date",		"registers",   "busywait",	 "busywaitkernel", "exit", "cat", "ps"};
 
 typedef void (*ShellCommand)();
 static command_entry commands[] = {
@@ -32,7 +32,9 @@ static command_entry commands[] = {
 	{"exit", CMD_BUILTIN, exitShell},
 
 	// COMANDOS PROCESOS
+	{"ps", CMD_PROC, runPs}, 
 	{"cat", CMD_PROC, runCat},
+
 	
 };
 
@@ -258,6 +260,13 @@ void busy_wait_kernel()
 }
 
 //Comandos no Builtin
+
+void runPs()
+{
+	char buffer[2000];
+	getProcessesInfo(buffer, 2000);
+	printf("%s", buffer);
+}
 
 void runCat()
 {
