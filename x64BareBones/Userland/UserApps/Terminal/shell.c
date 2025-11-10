@@ -5,7 +5,7 @@
 #include "processes.h"
 
 #define BUFFER 500
-#define COMMAND_SIZE 16
+#define COMMAND_SIZE 17
 #define COMMAND_COUNT (sizeof(commands) / sizeof(command_entry))
 int defaultFds[] = {STDIN, STDOUT, STDERR};
 
@@ -13,7 +13,7 @@ int defaultFds[] = {STDIN, STDOUT, STDERR};
 #define SPECIAL_KEY_MAX_VALUE 5
 
 char *commands_str[] = {"help",	 "exception 1", "exception 2", "pongisgolf", "zoom in",		   "zoom out",
-						"clear", "date",		"registers",   "busywait",	 "busywaitkernel", "exit", "cat", "ps", "mem", "loop"};
+						"clear", "date",		"registers",   "busywait",	 "busywaitkernel", "exit", "cat", "ps", "mem", "loop", "wc"};
 
 typedef void (*ShellCommand)();
 static command_entry commands[] = {
@@ -35,7 +35,8 @@ static command_entry commands[] = {
 	{"ps", CMD_PROC, runPs}, 
 	{"cat", CMD_PROC, runCat},
 	{"mem", CMD_PROC, runMem},
-	{"loop", CMD_PROC, runLoop}
+	{"loop", CMD_PROC, runLoop},
+	{"wc", CMD_PROC, runWc}
 	
 };
 
@@ -287,6 +288,11 @@ void runMem()
 void runLoop()
 {
 	loop();
+}
+
+void runWc()
+{
+	wc();
 }
 
 int main()

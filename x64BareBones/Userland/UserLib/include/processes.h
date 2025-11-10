@@ -53,4 +53,8 @@ uint64_t waitPid(uint64_t pid);
 */
 void cat();
 
+void loop();
+
+void wc();
+
 #endif // SISTEMAS_OPERATIVOS_TP2_PROCESSES_H

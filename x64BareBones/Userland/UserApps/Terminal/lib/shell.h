@@ -65,5 +65,6 @@ void runPs();
 void runCat();
 void runMem();
 void runLoop();
+void runWc();
 
 #endif

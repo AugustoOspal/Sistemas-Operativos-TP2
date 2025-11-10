@@ -1,5 +1,7 @@
 #include "include/processes.h"
 #include "include/usrio.h"
+#include <stdbool.h>
+#include <stdlib.h>
 
 /*
  *	@brie
@@ -75,4 +77,39 @@ void loop(){
         printf("Hi! My PID is: %d\n", pid);
         sys_sleepMilli(2000);
     }
+}
+
+void wc(){
+    int charsInline = 0;
+	int words = 0;
+	int lines = 0;
+	char c;
+	bool inWord = false;
+
+	while((c = getchar()) != '\n'){
+		if(c == '\b'){
+			if(charsInline > 0){
+				charsInline--;
+				putchar(c);
+			}
+		}else{
+			if(c == '\n'){
+				lines++;
+				charsInline = 0;
+				inWord = false;
+			}else{
+				if(c == ' ' || c == '\t'){
+					inWord = false;
+				}else{
+					if(!inWord){
+						words++;
+						inWord = true;
+					}
+				}
+				charsInline++;
+			}
+			putchar(c);
+		}
+	}
+	printf("\nLines: %d, Words: %d, Characters: %d\n", lines, words, charsInline);
 }
