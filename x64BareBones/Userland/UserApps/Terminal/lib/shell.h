@@ -25,47 +25,29 @@ typedef struct
 {
 	char *name;
 	command_type type;
-	void (*function)(); // puntero a la funcion, solo si es  built in
+	int (*function)(int argc, char *argv[]);
 } command_entry;
 
-typedef enum
-{
-	HELP = 0,
-	EXC_1,
-	EXC_2,
-	PONGISGOLF,
-	ZOOM_IN,
-	ZOOM_OUT,
-	CLEAR,
-	DATE,
-	REGISTERS,
-	BUSY_WAIT,
-	BUSY_WAIT_KERNEL,
-	EXIT
-} command_id;
-
 void startShell();
-void readInput();
-command_entry *findCommand(char *input);
-command_id processInput(char *input);
-void help();
-void printDateTime();
-void notACommand();
-void getRegisters();
-void exitShell();
-void clear_screen();
-void startPongis();
-void zoom_in();
-void zoom_out();
-void exception_1();
-void exception_2();
-void busy_wait();
-void busy_wait_kernel();
-void runPs();
-void runCat();
-void runMem();
-void runLoop();
-void runWc();
-void runFilter();
+void readInput(char *buffer);
+int help(int argc, char *argv[]);
+int printDateTime(int argc, char *argv[]);
+void notACommand(char *input);
+int getRegisters(int argc, char *argv[]);
+int exitShell(int argc, char *argv[]);
+int clear_screen(int argc, char *argv[]);
+int startPongis(int argc, char *argv[]);
+int zoom_in(int argc, char *argv[]);
+int zoom_out(int argc, char *argv[]);
+int exception_1(int argc, char *argv[]);
+int exception_2(int argc, char *argv[]);
+int busy_wait(int argc, char *argv[]);
+int busy_wait_kernel(int argc, char *argv[]);
+int runPs(int argc, char *argv[]);
+int runCat(int argc, char *argv[]);
+int runMem(int argc, char *argv[]);
+int runLoop(int argc, char *argv[]);
+int runWc(int argc, char *argv[]);
+int runFilter(int argc, char *argv[]);
 
 #endif

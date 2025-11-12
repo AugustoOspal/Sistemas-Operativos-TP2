@@ -5,17 +5,20 @@
 #include "processes.h"
 
 #define BUFFER 500
-#define COMMAND_SIZE 18
-#define COMMAND_COUNT (sizeof(commands) / sizeof(command_entry))
-int defaultFds[] = {STDIN, STDOUT, STDERR};
-
-
+#define MAX_PIPE_CMDS 8
+#define MAX_COMMAND_ARGS 8
+static int defaultFds[] = {STDIN, STDOUT, STDERR};
 #define SPECIAL_KEY_MAX_VALUE 5
 
-char *commands_str[] = {"help",	 "exception 1", "exception 2", "pongisgolf", "zoom in",		   "zoom out",
-						"clear", "date",		"registers",   "busywait",	 "busywaitkernel", "exit", "cat", "ps", "mem", "loop", "wc", "filter"};
+typedef struct
+{
+	command_entry *entry;
+	int argc;
+	char **argv;
+} parsed_command_t;
 
-typedef void (*ShellCommand)();
+static char *argv_storage[MAX_PIPE_CMDS][MAX_COMMAND_ARGS + 2];
+
 static command_entry commands[] = {
 	// COMANDOS BUILTIN
 	{"help", CMD_BUILTIN, help},
@@ -41,8 +44,18 @@ static command_entry commands[] = {
 	
 };
 
-char *registers[] = {" RAX: ", " RBX: ", " RCX: ", " RDX: ", " RSI: ", " RDI: ", " RBP: ", " RSP: ", " R8: ",
-					 " R9: ",  " R10: ", " R11: ", " R12: ", " R13: ", " R14: ", " R15: ", " RIP: "};
+#define COMMAND_COUNT (sizeof(commands) / sizeof(command_entry))
+
+static bool isWhitespace(char c);
+static char *skipSpaces(char *ptr);
+static void rtrim(char *str);
+static char *trimSegment(char *segment);
+static bool matchesCommandName(char *segment, const char *name, char **argsStart);
+static int fillArgVector(parsed_command_t *parsed, char *argsStart);
+static int parseCommandSegment(char *segment, parsed_command_t *parsed, char **argvStorage);
+static int parseEntry(char *input, parsed_command_t *outCommands, int maxCommands);
+static void executeSingleCommand(parsed_command_t *cmd);
+static void executePipeline(parsed_command_t *cmds, int count);
 
 void show_prompt()
 {
@@ -54,42 +67,312 @@ static uint8_t active = 1;
 void startShell()
 {
 	char input_buffer[BUFFER];
+	parsed_command_t entryCommands[MAX_PIPE_CMDS];
+
 	while (active)
 	{
-		// TODO: Acordarse de sacar esto
-		// createProcess("Process A", test_processA, 0, NULL);
-		// createProcess("Process B", test_processB, 0, NULL);
-		// createProcess("Process C", test_processC, 0, NULL);
-
-		// char buffer[2000];
-		// getProcessesInfo(buffer, 2000);
-		// printf("%s", buffer);
-
 		show_prompt();
 		readInput(input_buffer);
 		to_lower(input_buffer);
 
-		command_entry *command = findCommand(input_buffer);
-
-		if (command == NULL)
+		int commandCount = parseEntry(input_buffer, entryCommands, MAX_PIPE_CMDS);
+		if (commandCount <= 0)
 		{
-			notACommand(input_buffer);
 			continue;
 		}
 
-		if (command->type == CMD_BUILTIN)
+		if (commandCount == 1)
 		{
-			command->function();
+			executeSingleCommand(&entryCommands[0]);
 		}
-		else if (command->type == CMD_PROC)
+		else
 		{
-			// Crear proceso nuevo (foreground o background)
-			uint64_t pid = createProcess(command->name, command->function, 0, NULL, defaultFds);
-			waitPid(pid);
+			executePipeline(entryCommands, commandCount);
 		}
 	}
 }
 
+//usar la de stringLib
+static int str_len(const char *str)
+{
+	int len = 0;
+	if (str == NULL)
+		return 0;
+	while (str[len] != '\0')
+		len++;
+	return len;
+}
+
+static bool isWhitespace(char c)
+{
+	return (c == ' ' || c == '\t');
+}
+
+static char *skipSpaces(char *ptr)
+{
+	while (ptr && *ptr != '\0' && isWhitespace(*ptr))
+		ptr++;
+	return ptr;
+}
+
+static void rtrim(char *str)
+{
+	if (str == NULL)
+		return;
+
+	int len = str_len(str);
+	while (len > 0 && isWhitespace(str[len - 1]))
+	{
+		str[len - 1] = '\0';
+		len--;
+	}
+}
+
+static char *trimSegment(char *segment)
+{
+	char *trimmed = skipSpaces(segment);
+	rtrim(trimmed);
+	return trimmed;
+}
+
+static bool matchesCommandName(char *segment, const char *name, char **argsStart)
+{
+	char *cursor = segment;
+	const char *target = name;
+
+	while (*target && *cursor && *cursor == *target)
+	{
+		cursor++;
+		target++;
+	}
+
+	if (*target != '\0')
+	{
+		return false;
+	}
+
+	if (*cursor == '\0')
+	{
+		*argsStart = cursor;
+		return true;
+	}
+
+	if (isWhitespace(*cursor))
+	{
+		*cursor = '\0';
+		cursor++;
+		cursor = skipSpaces(cursor);
+		*argsStart = cursor;
+		return true;
+	}
+
+	return false;
+}
+
+static int fillArgVector(parsed_command_t *parsed, char *argsStart)
+{
+	int argc = 0;
+	parsed->argv[argc++] = parsed->entry->name;
+
+	if (argsStart != NULL)
+	{
+		char *cursor = argsStart;
+		while (*cursor != '\0')
+		{
+			cursor = skipSpaces(cursor);
+			if (*cursor == '\0')
+			{
+				break;
+			}
+
+			if (argc - 1 >= MAX_COMMAND_ARGS)
+			{
+				printf("Too many arguments. Max supported: %d\n", MAX_COMMAND_ARGS);
+				return -1;
+			}
+
+			parsed->argv[argc++] = cursor;
+			while (*cursor != '\0' && !isWhitespace(*cursor))
+				cursor++;
+
+			if (*cursor == '\0')
+			{
+				break;
+			}
+
+			*cursor = '\0';
+			cursor++;
+		}
+	}
+
+	parsed->argv[argc] = NULL;
+	parsed->argc = argc;
+	return 0;
+}
+
+static int parseCommandSegment(char *segment, parsed_command_t *parsed, char **argvStorage)
+{
+	char *argsStart = NULL;
+	command_entry *entry = NULL;
+
+	for (int i = 0; i < COMMAND_COUNT; i++)
+	{
+		if (matchesCommandName(segment, commands[i].name, &argsStart))
+		{
+			entry = &commands[i];
+			break;
+		}
+	}
+
+	if (entry == NULL)
+	{
+		notACommand(segment);
+		return -1;
+	}
+
+	parsed->entry = entry;
+	parsed->argv = argvStorage;
+	return fillArgVector(parsed, argsStart);
+}
+
+static int parseEntry(char *input, parsed_command_t *outCommands, int maxCommands)
+{
+	int count = 0; // numero de comandos parseados
+	char *cursor = input; // cursor de parseo
+	bool expectCommand = true; // si espero un comando o un pipe
+
+	while (expectCommand)
+	{
+		char *segmentStart = skipSpaces(cursor);
+		if (*segmentStart == '\0') // fin del input
+		{
+			if (count == 0)
+			{
+				return 0;
+			}
+
+			if (expectCommand) // esperaba un comando pero no hay mas
+			{
+				printf("Empty command in pipeline.\n");
+				return -1;
+			}
+
+			return count;
+		}
+
+		if (count >= maxCommands)
+		{
+			printf("Pipeline too long. Max commands: %d\n", maxCommands);
+			return -1;
+		}
+
+		char *scan = segmentStart;
+		while (*scan != '\0' && *scan != '|') 
+			scan++;
+
+		char delimiter = *scan;
+		char *next = (delimiter == '|') ? scan + 1 : scan;// next apunta al comienzo del próximo segmento
+		if (delimiter == '|')
+		{
+			*scan = '\0';
+		}
+
+		char *cleanSegment = trimSegment(segmentStart);
+		if (*cleanSegment == '\0')
+		{
+			printf("Empty command in pipeline.\n");
+			return -1;
+		}
+
+		if (parseCommandSegment(cleanSegment, &outCommands[count], argv_storage[count]) != 0)
+		{
+			return -1;
+		}
+
+		count++;
+		expectCommand = (delimiter == '|');
+		cursor = next;
+
+		if (!expectCommand)
+		{
+			break;
+		}
+	}
+
+	return count;
+}
+
+static void executeSingleCommand(parsed_command_t *cmd)
+{
+	if (cmd->entry->type == CMD_BUILTIN)
+	{
+		cmd->entry->function(cmd->argc, cmd->argv);
+		return;
+	}
+
+	uint64_t pid = createProcess(cmd->entry->name, cmd->entry->function, cmd->argc, cmd->argv, defaultFds);
+	if (pid == 0)
+	{
+		printf("Failed to start \"%s\".\n", cmd->entry->name);
+		return;
+	}
+	waitPid(pid);
+}
+
+static void executePipeline(parsed_command_t *cmds, int count)
+{
+	for (int i = 0; i < count; i++)
+	{
+		if (cmds[i].entry->type != CMD_PROC)
+		{
+			printf("Pipelines only support process commands. \"%s\" is builtin.\n", cmds[i].entry->name);
+			return;
+		}
+	}
+
+	int pipeCount = count - 1;
+	int pipeIds[MAX_PIPE_CMDS - 1];
+	int pipeFds[MAX_PIPE_CMDS - 1][2];
+	uint64_t pids[MAX_PIPE_CMDS];
+
+	for (int i = 0; i < pipeCount; i++)
+	{
+		pipeIds[i] = sys_pipe_open(pipeFds[i]);
+		if (pipeIds[i] < 0)
+		{
+			printf("Failed to create pipe %d.\n", i);
+			for (int j = 0; j < i; j++)
+				sys_pipe_close(pipeIds[j]);
+			return;
+		}
+	}
+
+	int spawned = 0;
+	for (; spawned < count; spawned++)
+	{
+		int fds[FD_AMOUNT];
+		fds[STDIN] = (spawned == 0) ? defaultFds[STDIN] : pipeFds[spawned - 1][0];
+		fds[STDOUT] = (spawned == count - 1) ? defaultFds[STDOUT] : pipeFds[spawned][1];
+		fds[STDERR] = defaultFds[STDERR];
+
+		pids[spawned] = createProcess(cmds[spawned].entry->name, cmds[spawned].entry->function, cmds[spawned].argc, cmds[spawned].argv, fds);
+		if (pids[spawned] == 0)
+		{
+			printf("Failed to start \"%s\".\n", cmds[spawned].entry->name);
+			break;
+		}
+	}
+
+	for (int i = 0; i < spawned; i++)
+	{
+		waitPid(pids[i]);
+	}
+
+	for (int i = 0; i < pipeCount; i++)
+	{
+		sys_pipe_close(pipeIds[i]);
+	}
+}
 // Falta implementar la syscall read
 void readInput(char *buffer)
 {
@@ -123,45 +406,24 @@ void readInput(char *buffer)
 	*(c - 1) = '\0';
 }
 
-command_id processInput(char *input)
-{
-	int index = -1;
-	for (int i = 0; i < COMMAND_SIZE && (index == -1); i++)
-	{
-		if (strcmp(input, commands_str[i]) == 0)
-		{
-			index = i;
-		}
-	}
-	return index;
-}
-
-command_entry *findCommand(char *input)
-{
-	for (int i = 0; i < COMMAND_COUNT; i++)
-	{
-		if (strcmp(input, commands[i].name) == 0)
-			return &commands[i];
-	}
-	return NULL;
-}
-
 // Imprime todos los comandos disponibles
-void help()
+int help(int argc, char *argv[])
 {
 	printf("Commands:\n");
-	for (int i = 0; i < COMMAND_SIZE; i++)
+	for (int i = 0; i < COMMAND_COUNT; i++)
 	{
-		printf("\t- %s\n", commands_str[i]);
+		printf("\t- %s\n", commands[i].name);
 	}
+	return 0;
 }
 
 // Faltan las syscals del dateTime
-void printDateTime()
+int printDateTime(int argc, char *argv[])
 {
 	dateTime dt;
 	getDateTime(&dt);
 	printf(" %d/%d/%d %d:%d:%d\n", dt.day, dt.month, dt.year, dt.hour, dt.min, dt.sec);
+	return 0;
 }
 
 // Nombres de los registros para el comando 'registers'
@@ -169,7 +431,7 @@ void printDateTime()
 static const char *register_names[] = {"R15", "R14", "R13", "R12", "R11", "R10", "R9 ", "R8 ", "RSI", "RDI",
 									   "RBP", "RDX", "RCX", "RBX", "RAX", "RIP", "CS ", "FLG", "RSP", "SS "};
 
-void getRegisters()
+int getRegisters(int argc, char *argv[])
 {
 	uint64_t registers[20];
 	if (get_regist(registers) != 0)
@@ -184,13 +446,15 @@ void getRegisters()
 			printf("  %s: %x\n", register_names[i], registers[i]);
 		}
 	}
+	return 0;
 }
 
-void startPongis()
+int startPongis(int argc, char *argv[])
 {
 	printf("Starting Pongis Golf...\n");
 	startPongisGolf();
-	clear_screen();
+	clearScreen();
+	return 0;
 }
 
 void notACommand(char *input)
@@ -198,37 +462,45 @@ void notACommand(char *input)
 	printf("Command \"%s\" not found. Type 'help' for a list of commands.\n", input);
 }
 
-void clear_screen()
+int clear_screen(int argc, char *argv[])
 {
 	clearScreen();
+	return 0;
 }
 
-void zoom_in()
+int zoom_in(int argc, char *argv[])
 {
 	zoomIn();
+	return 0;
 }
 
-void zoom_out()
+int zoom_out(int argc, char *argv[])
 {
 	zoomOut();
+	return 0;
 }
 
-void exitShell()
+int exitShell(int argc, char *argv[])
 {
 	printf("\n");
 	printf("Exiting...\n");
 
 	printf("\n[Exit succesful]\n");
 	active = 0;
+	return 0;
 }
 
-void exception_1()
+int exception_1(int argc, char *argv[])
 {
 	int a = 1 / 0;
+	(void) a;
+	return 0;
 }
-void exception_2()
+
+int exception_2(int argc, char *argv[])
 {
 	opCodeException();
+	return 0;
 }
 
 /*
@@ -239,7 +511,7 @@ void exception_2()
 	el kernel esperando una tecla, y con sleep tambien
 	lo mismo.
 */
-void busy_wait()
+int busy_wait(int argc, char *argv[])
 {
 	printf("Running userland busy-wait. Press Ctrl+R now.\n");
 
@@ -251,32 +523,36 @@ void busy_wait()
 	}
 
 	printf("Userland busy-wait finished.\n");
+	return 0;
 }
 
-void busy_wait_kernel()
+int busy_wait_kernel(int argc, char *argv[])
 {
 	printf("Running kernel busy-wait. Press Ctrl+R now.\n");
 
 	sleepMilli(5000);
 
 	printf("Kernel busy-wait finished.\n");
+	return 0;
 }
 
 //Comandos no Builtin
 
-void runPs()
+int runPs(int argc, char *argv[])
 {
 	char buffer[2000];
 	getProcessesInfo(buffer, 2000);
 	printf("%s", buffer);
+	return 0;
 }
 
-void runCat()
+int runCat(int argc, char *argv[])
 {
 	cat();
+	return 0;
 }
 
-void runMem()
+int runMem(int argc, char *argv[])
 {
 	pm_stats_t stats;
 	get_mem_info(&stats);
@@ -284,21 +560,25 @@ void runMem()
 	printf("  Total: %d bytes\n", stats.total);
 	printf("  Used:  %d bytes\n", stats.used);
 	printf("  Free:  %d bytes\n", stats.free);
+	return 0;
 }
 
-void runLoop()
+int runLoop(int argc, char *argv[])
 {
 	loop();
+	return 0;
 }
 
-void runWc()
+int runWc(int argc, char *argv[])
 {
 	wc();
+	return 0;
 }
 
-void runFilter()
+int runFilter(int argc, char *argv[])
 {
 	filter();
+	return 0;
 }
 
 int main()

@@ -65,7 +65,7 @@ extern int sys_semGetValue(void* sem, int *sval);
 extern int sys_semUnlink(const char *name);
 
 //Pipes
-extern int sys_pipe_open();
+extern int sys_pipe_open(int fds[2]);
 extern int sys_pipe_close(int pipe_id);
 
 //Memoria
