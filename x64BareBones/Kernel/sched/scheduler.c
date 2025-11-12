@@ -2,6 +2,7 @@
 #include "../lib/ADT/DoubleLinkedList/doubleLinkedList.h"
 #include "../lib/string/strings.h"
 #include "interrupts.h"
+#include "../ipc/include/pipe.h"
 
 #define PID_COL_WIDTH 5
 #define NAME_COL_WIDTH 16
@@ -36,7 +37,7 @@ typedef struct ProcessCDT
 	size_t reapedCount;
 	uint64_t waitingPid; //=-1 si no espera, =0 si espera a cualquiera, >0 matchea pid
 	
-	uint8_t fileDescriptors[FD_AMOUNT]; // espacio para 20 descriptores de archivo abiertos
+	int16_t fileDescriptors[FD_AMOUNT]; // espacio para 20 descriptores de archivo abiertos
 
 	uint8_t quantumLeft;
 	bool foreground;
@@ -208,9 +209,9 @@ uint64_t addProcess(void *stackPointer, int fds[FD_AMOUNT])
 	newProcess->quantumLeft = QUANTUM;
 	newProcess->priority = DEFAULT_PRIORITY;
 	newProcess->foreground = false;
-	newProcess->fileDescriptors[0] = fds[0]; 
-	newProcess->fileDescriptors[1] = fds[1]; 
-	newProcess->fileDescriptors[2] = fds[2]; 
+	newProcess->fileDescriptors[0] = generateFileDescriptor(); 
+	newProcess->fileDescriptors[1] = generateFileDescriptor(); 
+	newProcess->fileDescriptors[2] = generateFileDescriptor(); 
 
 	newProcess->parent = globalScheduler.currentProcess;
 	newProcess->childrenCount = 0;

@@ -59,4 +59,6 @@ void wc();
 
 void filter();
 
+void kill(uint64_t pid);
+
 #endif // SISTEMAS_OPERATIVOS_TP2_PROCESSES_H

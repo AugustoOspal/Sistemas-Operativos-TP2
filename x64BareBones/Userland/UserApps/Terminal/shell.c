@@ -1,7 +1,5 @@
 #include "shell.h"
 
-#include <stdlib.h>
-
 #include "processes.h"
 
 #define BUFFER 500
@@ -40,8 +38,11 @@ static command_entry commands[] = {
 	{"mem", CMD_PROC, runMem},
 	{"loop", CMD_PROC, runLoop},
 	{"wc", CMD_PROC, runWc},
-	{"filter", CMD_PROC, runFilter}
-	
+	{"filter", CMD_PROC, runFilter},
+	{"kill", CMD_PROC, runKill},
+	{"nice", CMD_PROC, runNice},
+	{"block", CMD_PROC, runBlock},
+
 };
 
 #define COMMAND_COUNT (sizeof(commands) / sizeof(command_entry))
@@ -330,7 +331,7 @@ static void executePipeline(parsed_command_t *cmds, int count)
 		}
 	}
 
-	int pipeCount = count - 1;
+	int pipeCount = count - 1; //numero de pipes necesarios 
 	int pipeIds[MAX_PIPE_CMDS - 1];
 	int pipeFds[MAX_PIPE_CMDS - 1][2];
 	uint64_t pids[MAX_PIPE_CMDS];
@@ -578,6 +579,47 @@ int runWc(int argc, char *argv[])
 int runFilter(int argc, char *argv[])
 {
 	filter();
+	return 0;
+}
+
+int runKill(int argc, char *argv[])
+{
+	if (argc < 2)
+	{
+		printf("Usage: kill <pid>\n");
+		return -1;
+	}
+
+	kill(atoi(argv[1]));
+	return 0;
+}
+
+runNice(int argc, char *argv[])
+{
+	if (argc < 3)
+	{
+		printf("Usage: nice <pid> <new_priority>\n");
+		return -1;
+	}
+
+	uint64_t pid = atoi(argv[1]);
+	uint8_t newPriority = (uint8_t)atoi(argv[2]);
+	changeProcessPriority(pid, newPriority);
+	return 0;
+
+}
+
+//Todo: que pase de bloqueado a listo
+runBlock(int argc, char *argv[])
+{
+	if (argc < 2)
+	{
+		printf("Usage: block <pid>\n");
+		return -1;
+	}
+
+	uint64_t pid = atoi(argv[1]);
+	blockProcess(pid);
 	return 0;
 }
 

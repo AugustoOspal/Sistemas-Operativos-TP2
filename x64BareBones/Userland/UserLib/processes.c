@@ -123,3 +123,7 @@ void filter(){
         }
     }
 }
+
+void kill(uint64_t pid){
+	sys_deleteProcess(pid);
+}

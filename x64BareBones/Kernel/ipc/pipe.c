@@ -2,17 +2,32 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <stdint.h>
+#include "../lib/string/strings.h"
+#include "../mem/include/pmem.h"
+#include "../semaphore/include/semaphore.h"
 
+typedef struct{
+	char buffer[MAX_BUFFER]; // guarda los datos escritos en el pipe
+	int readingIdx; // indice de lectura
+	int toBeRead; // cantidad de datos pendientes de leer
+	int writePos; // indice de escritura
+	int fds[PIPE_FDS_AMOUNT]; // file descriptors asociados al pipe
 
-pipe_t * pipes[MAX_PIPES] = {NULL};
-static inline void buildSemName(int pipeId, const char *suffix, char semName[SEM_NAME_SIZE])
+	semaphoreP writeSem; // representa la cantidad de espacios libres para escribir
+	semaphoreP readSem; // representa la cantidad de datos disponibles para leer
+} pipe_t;
+
+pipe_t *pipes[MAX_PIPES] = {NULL};
+static uint16_t nextFd = 0; 
+
+static void buildSemName(int pipeId, const char *suffix, char semName[SEM_NAME_SIZE]);
+
+int16_t generateFileDescriptor(void)
 {
-	ksprintf(semName, "%d_%s", pipeId, suffix);
+    return nextFd++;
 }
 
-static uint16_t nextFd = BASIC_FDS; 
-
-int pipe_open(int fds[2]){
+int16_t pipe_open(int fds[2]){
 
     for(int i = 0; i < MAX_PIPES; i++){
         if(pipes[i] == NULL){ // encuentra un espacio para crear un pipe
@@ -67,7 +82,7 @@ int pipe_open(int fds[2]){
 
 
 //Un proceso llama a pipe_write para escribir n bytes en el buffer del pipe
-int pipe_write(int pipe_id, char *buffer, int count) {
+int16_t pipe_write(int pipe_id, char *buffer, int count) {
 
     if(pipe_id < 0 || pipe_id >= MAX_PIPES || pipes[pipe_id] == NULL)
         return -1; // pipe_id inválido
@@ -76,7 +91,7 @@ int pipe_write(int pipe_id, char *buffer, int count) {
 
     int written = 0;
 
-    for (; written < count && pipe->toBeRead < MAX_BUFFER ; written++) {
+    for (; written < count; written++) {
         // Espera a que haya espacio disponible
         semWait(pipe->writeSem);
 
@@ -94,7 +109,7 @@ int pipe_write(int pipe_id, char *buffer, int count) {
 
 }
 
-int pipe_read(int pipe_id, char* buffer, int count){
+int16_t pipe_read(int pipe_id, char* buffer, int count){
     if(pipe_id < 0 || pipe_id >= MAX_PIPES || pipes[pipe_id] == NULL)
         return -1; // pipe_id inválido
 
@@ -102,7 +117,7 @@ int pipe_read(int pipe_id, char* buffer, int count){
 
     int read = 0;
 
-    for (; read < count && pipe->toBeRead > 0 ; read++) {
+    for (; read < count; read++) {
         // Esperar a que haya algo para leer
         semWait(pipe->readSem);
 
@@ -120,7 +135,7 @@ int pipe_read(int pipe_id, char* buffer, int count){
 }
 
 //liberar los recursos del pipe
-int pipe_close(int pipe_id) {
+int16_t pipe_close(int pipe_id) {
     // Verificar si el pipe_id es válido
     if (pipe_id < 0 || pipe_id >= MAX_PIPES || pipes[pipe_id] == NULL)
         return -1;
@@ -141,10 +156,16 @@ int pipe_close(int pipe_id) {
     return 0; // Cierre exitoso
 }
 
-int get_pipe_idx(int fd) {
+int16_t get_pipe_idx(int fd) {
     for (int i = 0; i < MAX_PIPES; i++) {
         if (pipes[i] != NULL && (pipes[i]->fds[0] == fd || pipes[i]->fds[1] == fd))
             return i;
     }
     return NULL;
+}
+
+
+static void buildSemName(int pipeId, const char *suffix, char semName[SEM_NAME_SIZE])
+{
+	ksprintf(semName, "%d_%s", pipeId, suffix);
 }

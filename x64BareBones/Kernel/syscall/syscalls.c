@@ -51,7 +51,7 @@ uint64_t sys_write(uint8_t fd, const char *str, uint64_t count)
 	{
 		return -1;
 	}
-	
+
 	//TODO: implementar STDERR
 	if (fd == STDOUT)
 	{	

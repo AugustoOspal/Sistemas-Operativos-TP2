@@ -49,5 +49,9 @@ int runMem(int argc, char *argv[]);
 int runLoop(int argc, char *argv[]);
 int runWc(int argc, char *argv[]);
 int runFilter(int argc, char *argv[]);
+int runKill(int argc, char *argv[]);
+int runNice(int argc, char *argv[]);
+int runBlock(int argc, char *argv[]);
+
 
 #endif

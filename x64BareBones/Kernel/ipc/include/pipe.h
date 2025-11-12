@@ -3,28 +3,19 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <limits.h>
 #include <../../semaphore/include/semaphore.h>
 
-#define MAX_PIPES 20
+#define MAX_PIPES INT16_MAX
 #define MAX_BUFFER 256
 #define SEM_NAME_SIZE 32
 #define BASIC_FDS 3 // 0,1,2 reservados para stdin, stdout, stderr
 #define PIPE_FDS_AMOUNT 2
 
-typedef struct{
-    char buffer[MAX_BUFFER]; // guarda los datos escritos en el pipe
-    int readingIdx; // indice de lectura 
-    int toBeRead; // cantidad de datos pendientes de leer
-    int writePos; // indice de escritura
-    int fds[PIPE_FDS_AMOUNT]; // file descriptors asociados al pipe
-
-    semaphoreP writeSem; // representa la cantidad de espacios libres para escribir
-    semaphoreP readSem; // representa la cantidad de datos disponibles para leer
-} pipe_t;
-
-int pipe_open();
-int pipe_write(int pipe_id, char *buffer, int count);
-int pipe_read(int pipe_id, char* buffer, int count);
-int pipe_close(int pipeId);
+int16_t generateFileDescriptor(void);
+int16_t pipe_open(int fds[2]);
+int16_t pipe_write(int pipe_id, char *buffer, int count);
+int16_t pipe_read(int pipe_id, char* buffer, int count);
+int16_t pipe_close(int pipe_id);
 
 #endif
