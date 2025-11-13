@@ -26,7 +26,7 @@ SOURCES=$(wildcard core/*.c) \
          $(filter-out mem/Test%.c $(EXCLUDE_MEM),$(wildcard mem/*.c)) \
          $(wildcard sched/*.c) \
          $(wildcard proc/*.c) \
-         $(wildcard ipc/*.c) \
+         $(filter-out ipc/Test%.c,$(wildcard ipc/*.c)) \
          $(filter-out semaphore/Test%.c,$(wildcard semaphore/*.c))
 
 # Loader (entry point) - must be first

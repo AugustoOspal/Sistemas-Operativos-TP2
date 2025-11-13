@@ -66,7 +66,7 @@ MockFunctions.o: MockFunctions.c
 	gcc $(CFLAGS) $(INCLUDE_DIRS) -c $< -o $@
 
 ../Kernel/lib/string/strings.o: ../Kernel/lib/string/strings.c
-	gcc -Wall -Wextra -g -std=c99 -fPIE $(INCLUDE_DIRS) -c $< -o $@
+	gcc $(CFLAGS) $(INCLUDE_DIRS) -c $< -o $@
 
 ../Kernel/semaphore/TestSemaphore.o: ../Kernel/semaphore/TestSemaphore.c
 	gcc $(CFLAGS) $(INCLUDE_DIRS) -c $< -o $@
@@ -86,6 +86,7 @@ clean:
 	rm -f ../Kernel/mem/pmem_bitmap.o ../Kernel/mem/pmem_buddy.o
 	rm -f ../Kernel/semaphore/TestSemaphore.o ../Kernel/semaphore/semaphore.o
 	rm -f ../Kernel/ipc/TestPipe.o ../Kernel/ipc/pipe.o
+	rm -f ../Kernel/lib/string/strings.o ../Kernel/lib/ADT/Queue/queue.o ../Kernel/lib/ADT/DoubleLinkedList/doubleLinkedList.o
 	@echo "Test artifacts cleaned"
 
 help:
