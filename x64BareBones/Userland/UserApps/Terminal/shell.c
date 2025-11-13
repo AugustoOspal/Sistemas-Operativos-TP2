@@ -33,7 +33,7 @@ static command_entry commands[] = {
 	{"exit", CMD_BUILTIN, exitShell},
 
 	// COMANDOS PROCESOS
-	{"ps", CMD_PROC, runPs}, 
+	{"ps", CMD_PROC, runPs},
 	{"cat", CMD_PROC, runCat},
 	{"mem", CMD_PROC, runMem},
 	{"loop", CMD_PROC, runLoop},
@@ -42,6 +42,7 @@ static command_entry commands[] = {
 	{"kill", CMD_PROC, runKill},
 	{"nice", CMD_PROC, runNice},
 	{"block", CMD_PROC, runBlock},
+	{"mvar", CMD_PROC, runMvar}
 
 };
 
@@ -93,7 +94,7 @@ void startShell()
 	}
 }
 
-//usar la de stringLib
+// usar la de stringLib
 static int str_len(const char *str)
 {
 	int len = 0;
@@ -238,8 +239,8 @@ static int parseCommandSegment(char *segment, parsed_command_t *parsed, char **a
 
 static int parseEntry(char *input, parsed_command_t *outCommands, int maxCommands)
 {
-	int count = 0; // numero de comandos parseados
-	char *cursor = input; // cursor de parseo
+	int count = 0;			   // numero de comandos parseados
+	char *cursor = input;	   // cursor de parseo
 	bool expectCommand = true; // si espero un comando o un pipe
 
 	while (expectCommand)
@@ -268,11 +269,11 @@ static int parseEntry(char *input, parsed_command_t *outCommands, int maxCommand
 		}
 
 		char *scan = segmentStart;
-		while (*scan != '\0' && *scan != '|') 
+		while (*scan != '\0' && *scan != '|')
 			scan++;
 
 		char delimiter = *scan;
-		char *next = (delimiter == '|') ? scan + 1 : scan;// next apunta al comienzo del próximo segmento
+		char *next = (delimiter == '|') ? scan + 1 : scan; // next apunta al comienzo del próximo segmento
 		if (delimiter == '|')
 		{
 			*scan = '\0';
@@ -331,7 +332,7 @@ static void executePipeline(parsed_command_t *cmds, int count)
 		}
 	}
 
-	int pipeCount = count - 1; //numero de pipes necesarios 
+	int pipeCount = count - 1; // numero de pipes necesarios
 	int pipeIds[MAX_PIPE_CMDS - 1];
 	int pipeFds[MAX_PIPE_CMDS - 1][2];
 	uint64_t pids[MAX_PIPE_CMDS];
@@ -356,7 +357,8 @@ static void executePipeline(parsed_command_t *cmds, int count)
 		fds[STDOUT] = (spawned == count - 1) ? defaultFds[STDOUT] : pipeFds[spawned][1];
 		fds[STDERR] = defaultFds[STDERR];
 
-		pids[spawned] = createProcess(cmds[spawned].entry->name, cmds[spawned].entry->function, cmds[spawned].argc, cmds[spawned].argv, fds);
+		pids[spawned] = createProcess(cmds[spawned].entry->name, cmds[spawned].entry->function, cmds[spawned].argc,
+									  cmds[spawned].argv, fds);
 		if (pids[spawned] == 0)
 		{
 			printf("Failed to start \"%s\".\n", cmds[spawned].entry->name);
@@ -537,7 +539,7 @@ int busy_wait_kernel(int argc, char *argv[])
 	return 0;
 }
 
-//Comandos no Builtin
+// Comandos no Builtin
 
 int runPs(int argc, char *argv[])
 {
@@ -594,7 +596,7 @@ int runKill(int argc, char *argv[])
 	return 0;
 }
 
-runNice(int argc, char *argv[])
+int runNice(int argc, char *argv[])
 {
 	if (argc < 3)
 	{
@@ -603,14 +605,13 @@ runNice(int argc, char *argv[])
 	}
 
 	uint64_t pid = atoi(argv[1]);
-	uint8_t newPriority = (uint8_t)atoi(argv[2]);
+	uint8_t newPriority = (uint8_t) atoi(argv[2]);
 	changeProcessPriority(pid, newPriority);
 	return 0;
-
 }
 
-//Todo: que pase de bloqueado a listo
-runBlock(int argc, char *argv[])
+// Todo: que pase de bloqueado a listo
+int runBlock(int argc, char *argv[])
 {
 	if (argc < 2)
 	{
@@ -620,6 +621,12 @@ runBlock(int argc, char *argv[])
 
 	uint64_t pid = atoi(argv[1]);
 	blockProcess(pid);
+	return 0;
+}
+
+int runMvar(int argc, char *argv[])
+{
+	mainMvar(argc, argv);
 	return 0;
 }
 

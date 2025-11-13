@@ -14,13 +14,11 @@
 #define DEFAULT_PRIORITY 0
 #define MAX_CHILDREN 20
 #define DEFAULT_FOREGROUND true
-#define FD_AMOUNT 3
 #define STDIN 0
 #define STDOUT 1
 #define STDERR 2
 
 typedef struct ProcessCDT *ProcessADT;
-
 
 /*
  *  @brief Inicializa el scheduler
@@ -41,7 +39,7 @@ void *schedule(void *stackPointer);
  *  @param fds Array con los file descriptors del proceso
  *  @return PID del proceso agregado al scheduler
  */
-uint64_t addProcess(void *stackPointer, int fds[FD_AMOUNT]);
+uint64_t addProcess(void *stackPointer, const int16_t fds[FD_AMOUNT]);
 
 /*
  *  @param pid del proceso a agregar informacion

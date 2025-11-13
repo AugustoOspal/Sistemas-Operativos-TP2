@@ -8,7 +8,8 @@ OUTPUT_DIR := ../..
 MY_CFLAGS  := $(GCCFLAGS) \
                -Ilib \
                -I../../UserLib/include \
-               -I../PongisGolf/lib
+               -I../PongisGolf/lib \
+               -I../ReadersWriters/lib
 
 CSOURCES   := $(wildcard [^_]*.c)
 COBJECTS   := $(CSOURCES:.c=.o)
@@ -36,17 +37,19 @@ $(LOADER_O): _loader.c
 # Linkeo para binario (usa OUTPUT_FORMAT del linker script)
 $(OUTPUT_DIR)/$(MODULE_BIN): $(LOADER_O) $(COBJECTS) $(ASMOBJS) \
                               ../../UserLib/libuserland.a \
-                              ../PongisGolf/libpongisgolf.a
+                              ../PongisGolf/libpongisgolf.a \
+                              ../ReadersWriters/libreaderswriters.a
 	$(GCC) $(MY_CFLAGS) -no-pie -T $(LDSCRIPT) \
-          $(LOADER_O) $(COBJECTS) $(ASMOBJS) ../PongisGolf/libpongisgolf.a ../../UserLib/libuserland.a \
+          $(LOADER_O) $(COBJECTS) $(ASMOBJS) ../PongisGolf/libpongisgolf.a ../ReadersWriters/libreaderswriters.a ../../UserLib/libuserland.a \
           -o $@ $(LDFLAGS)
 
 # Linkeo para ELF (ignora OUTPUT_FORMAT del linker script con -Wl,--oformat)
 $(OUTPUT_DIR)/$(MODULE_ELF): $(LOADER_O) $(COBJECTS) $(ASMOBJS) \
                               ../../UserLib/libuserland.a \
-                              ../PongisGolf/libpongisgolf.a
+                              ../PongisGolf/libpongisgolf.a \
+                              ../ReadersWriters/libreaderswriters.a
 	$(GCC) $(MY_CFLAGS) -no-pie -T $(LDSCRIPT) -Wl,--oformat=elf64-x86-64 \
-          $(LOADER_O) $(COBJECTS) $(ASMOBJS) ../PongisGolf/libpongisgolf.a ../../UserLib/libuserland.a \
+          $(LOADER_O) $(COBJECTS) $(ASMOBJS) ../PongisGolf/libpongisgolf.a ../ReadersWriters/libreaderswriters.a ../../UserLib/libuserland.a \
           -o $@ $(LDFLAGS)
 
 clean:

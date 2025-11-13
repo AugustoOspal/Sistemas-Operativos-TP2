@@ -1,44 +1,51 @@
-#include <stdlib.h>
-#include <stdint.h>
 #include <stdbool.h>
+#include <stdint.h>
+#include <stdlib.h>
 #include <string.h>
 
+#include "../lib/ADT/DoubleLinkedList/doubleLinkedList.h"
+#include "../lib/ADT/Queue/queue.h"
+#include "../lib/string/strings.h"
+#include "../mem/include/pmem.h"
 #include "CuTest.h"
 #include "TestSemaphore.h"
 #include "include/semaphore.h"
-#include "../mem/include/pmem.h"
-#include "../lib/ADT/Queue/queue.h"
-#include "../lib/ADT/DoubleLinkedList/doubleLinkedList.h"
-#include "../lib/string/strings.h"
 
 // ============ MOCK FUNCTIONS (stubs for linking) ============
 
-uint64_t getPid(void) {
+uint64_t getPid(void)
+{
 	return 1;
 }
 
-void addProcessToBlockQueue(uint64_t pid) {
-	(void)pid;
+void addProcessToBlockQueue(uint64_t pid)
+{
+	(void) pid;
 }
 
-void unblockProcess(uint64_t pid) {
-	(void)pid;
+void unblockProcess(uint64_t pid)
+{
+	(void) pid;
 }
 
-void yield(void) {
+void yield(void)
+{
 }
 
-void acquire(uint64_t *lock) {
-	(void)lock;
+void acquire(uint64_t *lock)
+{
+	(void) lock;
 }
 
-int try_acquire(uint64_t *lock) {
-	(void)lock;
+int try_acquire(uint64_t *lock)
+{
+	(void) lock;
 	return 0;
 }
 
-void release(uint64_t *lock) {
-	(void)lock;
+void release(uint64_t *lock)
+{
+	(void) lock;
 }
 
 // ============ FORWARD DECLARATIONS ============
@@ -540,7 +547,8 @@ void testSemaphoreSpinlockProtection(CuTest *const tc)
 	testSemaphore = whenSemaphoreIsOpened("sem_spinlock_protect", 5);
 
 	// When: Multiple wait/post operations are performed rapidly
-	for (int i = 0; i < 3; i++) {
+	for (int i = 0; i < 3; i++)
+	{
 		whenSemaphoreWaitIsCalled(testSemaphore);
 		whenSemaphorePostIsCalled(testSemaphore);
 	}

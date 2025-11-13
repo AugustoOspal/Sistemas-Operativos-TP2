@@ -1,8 +1,8 @@
 #include "scheduler.h"
+#include "../ipc/include/pipe.h"
 #include "../lib/ADT/DoubleLinkedList/doubleLinkedList.h"
 #include "../lib/string/strings.h"
 #include "interrupts.h"
-#include "../ipc/include/pipe.h"
 
 #define PID_COL_WIDTH 5
 #define NAME_COL_WIDTH 16
@@ -36,7 +36,7 @@ typedef struct ProcessCDT
 	uint64_t reaped[MAX_CHILDREN]; // recolectados
 	size_t reapedCount;
 	uint64_t waitingPid; //=-1 si no espera, =0 si espera a cualquiera, >0 matchea pid
-	
+
 	int16_t fileDescriptors[FD_AMOUNT]; // espacio para 20 descriptores de archivo abiertos
 
 	uint8_t quantumLeft;
@@ -190,7 +190,7 @@ void initializeScheduler()
 	idleProcess = Dequeue(globalScheduler.priorityQueues[DEFAULT_PRIORITY]);
 }
 
-uint64_t addProcess(void *stackPointer, int fds[FD_AMOUNT])
+uint64_t addProcess(void *stackPointer, const int16_t fds[FD_AMOUNT])
 {
 	// No estaria chequeando que existe scheduler
 
@@ -209,9 +209,9 @@ uint64_t addProcess(void *stackPointer, int fds[FD_AMOUNT])
 	newProcess->quantumLeft = QUANTUM;
 	newProcess->priority = DEFAULT_PRIORITY;
 	newProcess->foreground = false;
-	newProcess->fileDescriptors[0] = generateFileDescriptor(); 
-	newProcess->fileDescriptors[1] = generateFileDescriptor(); 
-	newProcess->fileDescriptors[2] = generateFileDescriptor(); 
+	newProcess->fileDescriptors[0] = fds[0];
+	newProcess->fileDescriptors[1] = fds[1];
+	newProcess->fileDescriptors[2] = fds[2];
 
 	newProcess->parent = globalScheduler.currentProcess;
 	newProcess->childrenCount = 0;
@@ -470,7 +470,8 @@ uint64_t getAllProcessesInfo(char *buffer, uint64_t bufferSize)
 	if (!buffer || bufferSize == 0)
 		return 0;
 
-	const char *separator = "+-------+------------------+----------+----------+------------+--------------+--------------+\n";
+	const char *separator =
+		"+-------+------------------+----------+----------+------------+--------------+--------------+\n";
 
 	char line[PROCESS_INFO_LINE_MAX];
 	int pos = 0;
@@ -496,16 +497,8 @@ uint64_t getAllProcessesInfo(char *buffer, uint64_t bufferSize)
 	formatStringColumn("Stack", stackHeader, ADDR_COL_WIDTH);
 	formatStringColumn("Base Ptr", baseHeader, ADDR_COL_WIDTH);
 
-	lineLen = ksprintf(
-		line,
-		"| %s | %s | %s | %s | %s | %s | %s |\n",
-		pidHeader,
-		nameHeader,
-		prioHeader,
-		stateHeader,
-		fgHeader,
-		stackHeader,
-		baseHeader);
+	lineLen = ksprintf(line, "| %s | %s | %s | %s | %s | %s | %s |\n", pidHeader, nameHeader, prioHeader, stateHeader,
+					   fgHeader, stackHeader, baseHeader);
 	if (!appendLine(buffer, bufferSize, &pos, line, lineLen))
 		return 0;
 
@@ -539,16 +532,8 @@ uint64_t getAllProcessesInfo(char *buffer, uint64_t bufferSize)
 		formatHexColumn((unsigned long) p->stack, stackCol, ADDR_COL_WIDTH);
 		formatHexColumn((unsigned long) p->basePointer, baseCol, ADDR_COL_WIDTH);
 
-		lineLen = ksprintf(
-			line,
-			"| %s | %s | %s | %s | %s | %s | %s |\n",
-			pidCol,
-			displayName,
-			prioCol,
-			stateCol,
-			fgCol,
-			stackCol,
-			baseCol);
+		lineLen = ksprintf(line, "| %s | %s | %s | %s | %s | %s | %s |\n", pidCol, displayName, prioCol, stateCol,
+						   fgCol, stackCol, baseCol);
 
 		if (!appendLine(buffer, bufferSize, &pos, line, lineLen))
 			break;

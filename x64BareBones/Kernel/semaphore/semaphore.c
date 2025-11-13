@@ -1,6 +1,22 @@
 #include "include/semaphore.h"
+#include "../lib/ADT/DoubleLinkedList/doubleLinkedList.h"
+#include "../lib/ADT/Queue/queue.h"
+#include "../lib/string/strings.h"
+#include "../mem/include/pmem.h"
+#include "../sched/include/scheduler.h"
+#include "../sync/include/spinlock.h"
+#include <stdbool.h>
+#include <stdint.h>
 
-
+typedef struct semaphore
+{
+	const char *name;
+	int value;
+	uint64_t lock;
+	QueueADT waitingProcesses;
+	doubleLinkedListADT linkedProcesses;
+	bool pendingDestruction;
+} semaphore;
 
 static doubleLinkedListADT semaphoreList = NULL;
 

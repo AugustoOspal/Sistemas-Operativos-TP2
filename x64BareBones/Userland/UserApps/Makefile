@@ -1,15 +1,19 @@
 include ../Makefile.inc
 
-.PHONY: all clean PongisGolf Terminal
+.PHONY: all clean PongisGolf ReadersWriters Terminal
 
-all: PongisGolf Terminal
+all: PongisGolf ReadersWriters Terminal
 
 PongisGolf:
 	$(MAKE) -C PongisGolf
 
-Terminal: PongisGolf
+ReadersWriters:
+	$(MAKE) -C ReadersWriters
+
+Terminal: PongisGolf ReadersWriters
 	$(MAKE) -C Terminal
 
 clean:
 	$(MAKE) -C PongisGolf clean
+	$(MAKE) -C ReadersWriters clean
 	$(MAKE) -C Terminal clean

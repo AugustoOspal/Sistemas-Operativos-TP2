@@ -1,32 +1,13 @@
 /*
  *  Nos inspiramos de la implementacion de:
- *  Págs 274 y 278 del libro de Abraham-Silberschatz Operating systems 10th 2018
- *  Págs desde 1133 a 1143 del libro The Linux Programming Interface
+ *		- Págs 274 y 278 del libro de Abraham-Silberschatz Operating systems 10th 2018
+ *		- Págs desde 1133 a 1143 del libro The Linux Programming Interface
  */
 
 #ifndef SISTEMAS_OPERATIVOS_TP2_SEMAPHORE_H
 #define SISTEMAS_OPERATIVOS_TP2_SEMAPHORE_H
 
-#include "../../lib/ADT/DoubleLinkedList/doubleLinkedList.h"
-#include "../../lib/ADT/Queue/queue.h"
-#include "../../lib/string/strings.h"
-#include "../../mem/include/pmem.h"
-#include "../../sched/include/scheduler.h"
-#include "../../sync/include/spinlock.h"
-#include <stdint.h>
-
-typedef struct semaphore
-{
-	const char *name;
-	int value;
-	uint64_t lock;
-	QueueADT waitingProcesses;
-	doubleLinkedListADT linkedProcesses;
-	bool pendingDestruction;
-} semaphore;
-
 typedef struct semaphore *semaphoreP;
-
 
 /*
  *  @brief inicializa la estructura de semaforos.
@@ -50,14 +31,14 @@ int semTryWait(semaphoreP sem);
  *  @param name Nombre del semaforo a abrir o crear
  *  @param value Valor inicial del semaforo
  */
-semaphoreP semOpen(const char *name, const int value);
+semaphoreP semOpen(const char *name, int value);
 
 /*
  *  @brief Cierra la asociacion que había entre el semaforo y el proceso que
  *  llama a esta función y decrece la cantidad de procesos asociados.
  *
  */
-void semClose(const semaphoreP sem);
+void semClose(semaphoreP sem);
 
 /*
  *  @brief Hace inaccesible el semaforo con ese nombre y lo marca para que sea destruido
@@ -80,7 +61,6 @@ int sem_unlink(const char *name);
  *  implementamos “ineficientemente” según el libro, aprovechamos y lo dejamos negativo
  */
 int semGetValue(semaphoreP sem, int *sval);
-
 
 /*
  *  @brief Busca un semaforo por su nombre.

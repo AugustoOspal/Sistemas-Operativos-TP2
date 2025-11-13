@@ -6,14 +6,24 @@ include Makefile.inc
 KERNEL_ELF=kernel.elf
 KERNEL_BIN=kernel.bin
 
-# Find all C source files in subsystems (excluding test files)
+# Memory manager selection (default: bitmap)
+MEMORY_MANAGER ?= bitmap
+
+# Determine which memory manager to exclude
+ifeq ($(MEMORY_MANAGER),buddy)
+    EXCLUDE_MEM=mem/pmem_bitmap.c
+else
+    EXCLUDE_MEM=mem/pmem_buddy.c
+endif
+
+# Find all C source files in subsystems (excluding test files and unused memory manager)
 SOURCES=$(wildcard core/*.c) \
          $(wildcard interrupt/*.c) \
          $(wildcard drivers/*/*.c) \
          $(wildcard lib/*/*.c) \
          $(wildcard lib/*/*/*.c) \
          $(wildcard syscall/*.c) \
-         $(filter-out mem/Test%.c,$(wildcard mem/*.c)) \
+         $(filter-out mem/Test%.c $(EXCLUDE_MEM),$(wildcard mem/*.c)) \
          $(wildcard sched/*.c) \
          $(wildcard proc/*.c) \
          $(wildcard ipc/*.c) \

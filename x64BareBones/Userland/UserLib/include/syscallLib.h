@@ -2,6 +2,7 @@
 #define _SYSCALL_LIB_H
 
 #include "timeLib.h"
+#include <stddef.h>
 #include <stdint.h>
 
 typedef struct
@@ -45,7 +46,8 @@ extern void sys_sleepMilli(uint64_t milliseconds);
 extern void sys_playSound(uint32_t frequency, uint32_t duration);
 
 // Procesos
-extern uint64_t sys_createProcess(const char *name, int (*main)(int argc, char *argv[]), int argc, char *argv[], int fds[FD_AMOUNT]);
+extern uint64_t sys_createProcess(const char *name, int (*main)(int argc, char *argv[]), int argc, char *argv[],
+								  int fds[FD_AMOUNT]);
 extern void sys_deleteProcess(uint64_t pid);
 extern uint64_t sys_getPid();
 extern uint64_t sys_getAllProcessesInfo(char *buffer, uint64_t bufferSize);
@@ -56,20 +58,22 @@ extern void sys_yield();
 extern uint64_t sys_waitPid(uint64_t pid);
 
 // Semaforos
-extern void* sys_semOpen(const char *name, int value);
-extern void sys_semClose(void* sem);
-extern void sys_semWait(void* sem);
-extern void sys_semPost(void* sem);
-extern int sys_semTryWait(void* sem);
-extern int sys_semGetValue(void* sem, int *sval);
+extern void *sys_semOpen(const char *name, int value);
+extern void sys_semClose(void *sem);
+extern void sys_semWait(void *sem);
+extern void sys_semPost(void *sem);
+extern int sys_semTryWait(void *sem);
+extern int sys_semGetValue(void *sem, int *sval);
 extern int sys_semUnlink(const char *name);
 
-//Pipes
+// Pipes
 extern int sys_pipe_open(int fds[2]);
 extern int sys_pipe_close(int pipe_id);
 
-//Memoria
+// Memoria
 extern void sys_mem_info(pm_stats_t *stats);
+extern void *sys_mem_alloc(size_t size);
+extern void sys_mem_free(void *ptr);
 
 // Excepciones
 extern void opCodeException();

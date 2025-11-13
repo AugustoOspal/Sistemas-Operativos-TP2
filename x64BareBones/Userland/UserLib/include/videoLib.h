@@ -1,5 +1,5 @@
-#ifndef _LIB_H
-#define _LIB_H
+#ifndef LIB_H
+#define LIB_H
 
 #include "syscallLib.h"
 #include <stdint.h>

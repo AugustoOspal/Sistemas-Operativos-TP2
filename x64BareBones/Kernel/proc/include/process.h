@@ -5,6 +5,7 @@
 #include <stdint.h>
 
 #define STACK_SIZE 4096
+#define FD_AMOUNT 3
 
 typedef int (*mainFuncPtr)(int argc, char *argv[]);
 typedef void (*startWrapperPtr)(mainFuncPtr main, int argc, char *argv[]);
@@ -18,8 +19,7 @@ typedef void (*startWrapperPtr)(mainFuncPtr main, int argc, char *argv[]);
  *  @param fds Array con los file descriptors del proceso
  *  @return El PID del proceso creado
  */
-//Todo: que no quede fds[magic number], es el mismo que el de scheduler.h --> FD_AMOUNT
-uint64_t createProcess(const char *name, const mainFuncPtr main, const int argc, char *argv[], int fds[3]);
+uint64_t createProcess(const char *name, const mainFuncPtr main, const int argc, char *argv[], int fds[FD_AMOUNT]);
 
 /*
  *  @brief Elimina un proceso del scheduler y libera su memoria

@@ -2,9 +2,9 @@
 
 #include <signal.h>
 
-#include "keyboardDriver.h"
 #include "../../ipc/include/pipe.h"
 #include "../semaphore/include/semaphore.h"
+#include "keyboardDriver.h"
 
 #define STDIN 0
 #define STDOUT 1
@@ -45,6 +45,7 @@ uint8_t isSpecialChar(char c)
 	return (c == '\n' || c == '\r' || c == '\t' || c == '\b');
 }
 
+// TODO: Creo que la sys_write no deberia imprimir en pantalla, ver si se puede modularizar
 uint64_t sys_write(uint8_t fd, const char *str, uint64_t count)
 {
 	if (fd < 0)
@@ -52,9 +53,9 @@ uint64_t sys_write(uint8_t fd, const char *str, uint64_t count)
 		return -1;
 	}
 
-	//TODO: implementar STDERR
+	// TODO: implementar STDERR
 	if (fd == STDOUT)
-	{	
+	{
 		int width = getWidth();
 		int height = getHeight();
 
@@ -119,10 +120,10 @@ uint64_t sys_write(uint8_t fd, const char *str, uint64_t count)
 			}
 		}
 
-			return count;
-		}
-	    
-	return pipe_write(fd, (char *)str, count);
+		return count;
+	}
+
+	return pipe_write(fd, (char *) str, count);
 }
 
 uint64_t sys_read(uint8_t fd, char *buffer, uint64_t count)
@@ -139,7 +140,7 @@ uint64_t sys_read(uint8_t fd, char *buffer, uint64_t count)
 		return count;
 	}
 
-    return pipe_read(fd, buffer, count);
+	return pipe_read(fd, buffer, count);
 }
 
 void syscallDispatcher(Registers_t *regs)
@@ -354,14 +355,25 @@ void syscallDispatcher(Registers_t *regs)
 			regs->rax = sem_unlink((const char *) arg1);
 			break;
 
-		case 0x67:
-			regs->rax = pipe_open(arg1);
+		case 0x80:
+			regs->rax = pipe_open((int16_t *) arg1);
 			break;
-		case 0x68:
+
+		case 0x81:
 			regs->rax = pipe_close((int) arg1);
-		case 0x69:
+			break;
+
+		case 0x90:
 			mem_get_stats((pm_stats_t *) arg1);
 			regs->rax = 0;
+			break;
+
+		case 0x91:
+			regs->rax = (uint64_t) mem_alloc((size_t) arg1);
+			break;
+
+		case 0x92:
+			mem_free((void *) arg1);
 			break;
 
 		default:

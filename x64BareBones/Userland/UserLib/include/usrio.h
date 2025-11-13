@@ -1,5 +1,5 @@
-#ifndef _USRIO_H_
-#define _USRIO_H_
+#ifndef USRIO_H_
+#define USRIO_H_
 
 #include "syscallLib.h"
 #include <stdarg.h>
@@ -12,6 +12,5 @@ int puts(const char *s);
 
 void to_lower(char *str);
 uint64_t get_regist(uint64_t *registers);
-void get_mem_info(pm_stats_t *stats);
 
 #endif

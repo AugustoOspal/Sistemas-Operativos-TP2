@@ -6,7 +6,8 @@
 /*
  *	@brie
  */
-uint64_t createProcess(const char *name, int (*main)(int argc, char *argv[]), int argc, char *argv[], int fds[FD_AMOUNT])
+uint64_t createProcess(const char *name, int (*main)(int argc, char *argv[]), int argc, char *argv[],
+					   int fds[FD_AMOUNT])
 {
 	return sys_createProcess(name, main, argc, argv, fds);
 }
@@ -51,57 +52,81 @@ uint64_t waitPid(uint64_t pid)
 	return sys_waitPid(pid);
 }
 
-void cat(){
-    int charsInline = 0;
-    char c;
-    while((c = getchar()) != '\0'){
-        if(c == '\b'){
-            if(charsInline > 0){
-                charsInline--;
-                putchar(c);
-            }
-        }else{
-            if(c == '\n'){
-                charsInline = 0;
-            }else{
-                charsInline++;
-            }
-            putchar(c);
-        }
-    }
+void cat()
+{
+	int charsInline = 0;
+	char c;
+	while ((c = getchar()) != '\0')
+	{
+		if (c == '\b')
+		{
+			if (charsInline > 0)
+			{
+				charsInline--;
+				putchar(c);
+			}
+		}
+		else
+		{
+			if (c == '\n')
+			{
+				charsInline = 0;
+			}
+			else
+			{
+				charsInline++;
+			}
+			putchar(c);
+		}
+	}
 }
 
-void loop(){
-    int pid = sys_getPid();
-    while(1){
-        printf("Hi! My PID is: %d\n", pid);
-        sys_sleepMilli(2000);
-    }
+void loop()
+{
+	int pid = sys_getPid();
+	while (1)
+	{
+		printf("Hi! My PID is: %d\n", pid);
+		sys_sleepMilli(2000);
+	}
 }
 
-void wc(){
-    int charsInline = 0;
+void wc()
+{
+	int charsInline = 0;
 	int words = 0;
 	int lines = 0;
 	char c;
 	bool inWord = false;
 
-	while((c = getchar()) != '\n'){
-		if(c == '\b'){
-			if(charsInline > 0){
+	while ((c = getchar()) != '\n')
+	{
+		if (c == '\b')
+		{
+			if (charsInline > 0)
+			{
 				charsInline--;
 				putchar(c);
 			}
-		}else{
-			if(c == '\n'){
+		}
+		else
+		{
+			if (c == '\n')
+			{
 				lines++;
 				charsInline = 0;
 				inWord = false;
-			}else{
-				if(c == ' ' || c == '\t'){
+			}
+			else
+			{
+				if (c == ' ' || c == '\t')
+				{
 					inWord = false;
-				}else{
-					if(!inWord){
+				}
+				else
+				{
+					if (!inWord)
+					{
 						words++;
 						inWord = true;
 					}
@@ -114,16 +139,20 @@ void wc(){
 	printf("\nLines: %d, Words: %d, Characters: %d\n", lines, words, charsInline);
 }
 
-void filter(){
-    char c;
-    while((c = getchar()) != '\n'){
-        if(c == 'a' || c == 'e' || c == 'i' || c == 'o' || c == 'u' ||
-           c == 'A' || c == 'E' || c == 'I' || c == 'O' || c == 'U'){
-            putchar(c);
-        }
-    }
+void filter()
+{
+	char c;
+	while ((c = getchar()) != '\n')
+	{
+		if (c == 'a' || c == 'e' || c == 'i' || c == 'o' || c == 'u' || c == 'A' || c == 'E' || c == 'I' || c == 'O' ||
+			c == 'U')
+		{
+			putchar(c);
+		}
+	}
 }
 
-void kill(uint64_t pid){
+void kill(uint64_t pid)
+{
 	sys_deleteProcess(pid);
 }

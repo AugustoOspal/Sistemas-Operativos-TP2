@@ -1,67 +1,92 @@
-#include "../UserLib/include/semaphores.h"
-#include "../mem/include/pmem.h"
-#include "../UserLib/include/processes.h"
-#include <stdint.h>
+#include "../../UserLib/include/mem.h"
+#include "../../UserLib/include/processes.h"
+#include "../../UserLib/include/semaphores.h"
+#include "../../UserLib/include/stringLib.h"
+#include "../../UserLib/include/timeLib.h"
 #include <stdbool.h>
+#include <stdint.h>
 
 static char slot = 0;
 static semaphoreP semFull;
 static semaphoreP semEmpty;
 
-typedef struct {
-    int id;
-    char symbol;
+typedef struct
+{
+	int id;
+	char symbol;
 } writer_arg_t;
 
-typedef struct {
-    int id;
+typedef struct
+{
+	int id;
 } reader_arg_t;
 
-static void writerMain(void *arg) {
-    writer_arg_t *a = (writer_arg_t *)arg;
-    sys_sleepMilli(3000);
-    semWait(semEmpty);
-    slot = a->symbol;
-    semPost(semFull);
-    exit(0);
+int writerMain(int argc, char **argv)
+{
+	char *symbol = argv[0];
+	sleepMilli(3000);
+	semWait(semEmpty);
+	slot = symbol[0];
+	semPost(semFull);
+	return 0;
 }
 
-static void readerConsume (char value) {
-    sys_write(1, &value, 1);
+static void readerConsume(char value, char *id)
+{
+	int index = 0;
+	char s[10];
+	s[index++] = value;
+	s[index++] = '(';
+	for (int i = 0; id[i] != 0; i++)
+	{
+		s[index++] = id[i];
+	}
+	s[index++] = ')';
+	s[index++] = '\n';
+	sys_write(1, s, index + 1);
 }
 
-static void readerMain(void *arg) {
-    reader_arg_t *a = (reader_arg_t *)arg;
-    sys_sleepMilli(3000);
-    semWait(semFull);
-    char c = slot;
-    slot = 0;
-    semPost(semEmpty);
-    readerConsume(c);
-    exit(0);
+int readerMain(int argc, char **argv)
+{
+	char *id = argv[0];
+	sleepMilli(3000);
+	semWait(semFull);
+	char c = slot;
+	slot = 0;
+	semPost(semEmpty);
+	readerConsume(c, id);
+	return 0;
 }
 
-int main(int argc, char **argv) {
-    int W = (argc > 1) ? atoi(argv[1]) : 2;
-    int R = (argc > 2) ? atoi(argv[2]) : 2;
+int mainMvar(int argc, char **argv)
+{
+	int writerCount = (argc > 1) ? atoi(argv[1]) : 2;
+	int readerCount = (argc > 2) ? atoi(argv[2]) : 2;
 
-    semEmpty = semOpen("mvar_empty", 1);
-    semFull = semOpen("mvar_full",  0);
+	semEmpty = semOpen("mvar_empty", 1);
+	semFull = semOpen("mvar_full", 0);
 
-    static const char letters[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+	static const char letters[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
-    for (int i = 0; i < W; i++) {
-        writer_arg_t *wa = (writer_arg_t *)mem_alloc(sizeof(writer_arg_t));
-        wa->id = i;
-        wa->symbol = letters[i % (int)(sizeof(letters)-1)];
-        createProcess("Writer", writerMain, 0, NULL);
-    }
+	for (int i = 0; i < writerCount; i++)
+	{
+		char *symbol = mem_alloc(2);
+		symbol[0] = letters[i % (int) (sizeof(letters) - 1)];
+		symbol[1] = '\0';
+		char **args = mem_alloc(sizeof(char *) * 2);
+		args[0] = symbol;
+		args[1] = NULL;
+		createProcess("Writer", writerMain, 1, args, NULL);
+	}
 
-    for (int j = 0; j < R; j++) {
-        reader_arg_t *ra = (reader_arg_t *)mem_alloc(sizeof(reader_arg_t));
-        ra->id = j;
-        createProcess("Reader", readerMain, 0, NULL);
-    }
+	char buffers[readerCount][20];
+	for (int j = 0; j < readerCount; j++)
+	{
+		char *id = mem_alloc(6);
+		itoa(j, buffers[j], 10);
+		char *args[] = {buffers[j]};
+		createProcess("Reader", readerMain, 1, args, NULL);
+	}
 
-    return 0;
+	return 0;
 }

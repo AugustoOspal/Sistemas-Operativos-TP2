@@ -1,7 +1,9 @@
 #ifndef _SHELL_H_
 #define _SHELL_H_
 
+#include "mem.h"
 #include "pongisLib.h"
+#include "readersWriters.h"
 #include "stringLib.h"
 #include "test_processes.h" // TODO: Despues sacar esto
 #include "timeLib.h"
@@ -52,6 +54,6 @@ int runFilter(int argc, char *argv[]);
 int runKill(int argc, char *argv[]);
 int runNice(int argc, char *argv[]);
 int runBlock(int argc, char *argv[]);
-
+int runMvar(int argc, char *argv[]);
 
 #endif

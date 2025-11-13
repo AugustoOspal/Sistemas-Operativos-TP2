@@ -46,6 +46,8 @@ GLOBAL sys_pipe_open
 GLOBAL sys_pipe_close
 
 GLOBAL sys_mem_info
+GLOBAL sys_mem_alloc
+GLOBAL sys_mem_free
 
 GLOBAL opCodeException
 
@@ -109,11 +111,13 @@ sys_semGetValue:            syscall 0x65
 sys_semUnlink:              syscall 0x66
 
 ;Pipes
-sys_pipe_open:               syscall 0x67
-sys_pipe_close:              syscall 0x68
+sys_pipe_open:               syscall 0x80
+sys_pipe_close:              syscall 0x81
 
 ;Memoria
-sys_mem_info:                syscall 0x69
+sys_mem_info:                syscall 0x90
+sys_mem_alloc:               syscall 0x91
+sys_mem_free:                syscall 0x92
 
 ; Ecceptions
 opCodeException:

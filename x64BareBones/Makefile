@@ -1,11 +1,16 @@
 
 all:  bootloader kernel userland image
 
+buddy: bootloader kernel-buddy userland image
+
 bootloader:
 	cd Bootloader; make all
 
 kernel:
 	cd Kernel; make all
+
+kernel-buddy:
+	cd Kernel; make all MEMORY_MANAGER=buddy
 
 userland:
 	cd Userland; make all
@@ -23,4 +28,4 @@ clean:
 	cd Userland; make clean
 	cd test; make clean
 
-.PHONY: bootloader image collections kernel userland all clean test
+.PHONY: bootloader image collections kernel kernel-buddy userland all buddy clean test

@@ -13,8 +13,8 @@
 #include <string.h>
 
 // TODO: Despues borrar esto
-#include "test_processes.h"
 #include "../semaphore/include/semaphore.h"
+#include "test_processes.h"
 
 extern uint8_t text;
 extern uint8_t rodata;
@@ -58,7 +58,7 @@ static void kernel_memory_init(void)
 {
 	void *pool_start = (void *) &_pm_pool_start;
 	size_t pool_len = (size_t) ((char *) &_pm_pool_end - (char *) &_pm_pool_start);
-	pm_init(pool_start, pool_len);
+	mem_init(pool_start, pool_len);
 }
 
 int main()
@@ -67,14 +67,14 @@ int main()
 	initializeScheduler();
 	semaphoresInit();
 	keyboard_init();
-	
+
 	// Test de procesos
 	// createProcess("Proceso A", processA, 0, NULL);
 	// createProcess("Proceso B", processB, 0, NULL);
 	// createProcess("Proceso C", processC, 0, NULL);
 	int fds[] = {STDIN, STDOUT, STDERR};
 
-	changeProcessPriority(createProcess("shell", shellAddress, 0, NULL, fds ), 3);
+	changeProcessPriority(createProcess("shell", shellAddress, 0, NULL, fds), 3);
 	load_idt();
 	// play_boot_sound();
 	return 0;

@@ -11,7 +11,7 @@ extern char getchar(void)
 	return c;
 }
 
-int putchar(char c)
+int putchar(const char c)
 {
 	sys_write(STDOUT, &c, 1);
 	return c;
@@ -167,9 +167,4 @@ void to_lower(char *str)
 uint64_t get_regist(uint64_t *registers)
 {
 	return sys_getRegisters(registers);
-}
-
-void get_mem_info(pm_stats_t *stats)
-{
-	sys_mem_info(stats);
 }

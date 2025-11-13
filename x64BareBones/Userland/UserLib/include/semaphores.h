@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-typedef void* semaphoreP;
+typedef void *semaphoreP;
 
 /*
  *  @brief Abre un semaforo que cumpla con ese nombre o lo crea en caso de que no exista.
@@ -52,4 +52,4 @@ int semGetValue(semaphoreP sem, int *sval);
  */
 int semUnlink(const char *name);
 
-#endif //SISTEMAS_OPERATIVOS_TP2_SEMAPHORES_H
+#endif // SISTEMAS_OPERATIVOS_TP2_SEMAPHORES_H

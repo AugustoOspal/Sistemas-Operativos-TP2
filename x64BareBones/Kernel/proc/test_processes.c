@@ -1,8 +1,8 @@
 #include "./include/test_processes.h"
 #include "../drivers/include/videoDriver.h"
 #include "../sched/include/scheduler.h"
-#include "../sync/include/spinlock.h"
 #include "../semaphore/include/semaphore.h"
+#include "../sync/include/spinlock.h"
 
 #define CIRCLE_RADIUS 50
 #define BOX_SIZE 120
