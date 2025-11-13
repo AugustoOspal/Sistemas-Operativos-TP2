@@ -57,9 +57,22 @@ static unsigned int buffer_write_idx = 0;
 static unsigned int buffer_read_idx = 0;
 static unsigned int buffer_count = 0;
 
+// Flag para indicar EOF (Ctrl+D)
+static bool kbd_eof_flag = false;
+
 void keyboard_init()
 {
 	semOpen("keyboard_sem", 0);
+}
+
+bool kbd_check_eof(void)
+{
+	if (kbd_eof_flag)
+	{
+		kbd_eof_flag = false;
+		return true;
+	}
+	return false;
 }
 
 char procesScanCode(const unsigned int scancode)
@@ -175,6 +188,12 @@ void keyboard_handler(Registers_t *regs)
 		{
 			killProcess(fgPid);
 		}
+	}
+	// Ctrl+D: Enviar EOF
+	else if (kbd_modifier_state.ctrl && (c == 'd' || c == 'D'))
+	{
+		kbd_eof_flag = true;
+		semPost(getSem("keyboard_sem")); // Despertar proceso esperando lectura
 	}
 	else if (c != 0)
 	{

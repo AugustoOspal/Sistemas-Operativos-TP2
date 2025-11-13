@@ -130,11 +130,21 @@ uint64_t sys_read(uint8_t fd, char *buffer, uint64_t count)
 {
 	if (fd == STDIN)
 	{
-		char c;
+		// Verificar si se presionó Ctrl+D antes de leer
+		if (kbd_check_eof())
+		{
+			return 0; // EOF: retornar 0 bytes leídos
+		}
 
 		for (uint64_t i = 0; i < count; i++)
 		{
 			buffer[i] = kbd_get_char();
+
+			// Verificar EOF después de cada carácter
+			if (kbd_check_eof())
+			{
+				return i; // Retornar los bytes leídos hasta ahora
+			}
 		}
 
 		return count;

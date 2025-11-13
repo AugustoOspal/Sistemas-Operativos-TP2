@@ -22,6 +22,10 @@ void keyboard_handler(Registers_t *regs);
 // Retorna 0 si el buffer está vacío.
 char kbd_get_char();
 
+// Verifica si se presionó Ctrl+D (EOF)
+// Retorna true si hay EOF pendiente y lo consume
+bool kbd_check_eof(void);
+
 // Inicializa el semaforo del driver del teclado
 void keyboard_init();
 

@@ -6,8 +6,11 @@
 extern char getchar(void)
 {
 	char c;
-	while (!sys_read(STDIN, &c, 1))
-		;
+	uint64_t bytesRead = sys_read(STDIN, &c, 1);
+	if (bytesRead == 0)
+	{
+		return '\0'; // EOF
+	}
 	return c;
 }
 
