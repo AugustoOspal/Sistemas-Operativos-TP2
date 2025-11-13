@@ -6,7 +6,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#define MAX_PIPES INT16_MAX
+#define MAX_PIPES 8
 #define PIPE_BUFFER 256
 #define SEM_NAME_SIZE 32
 #define BASIC_FDS 3 // 0,1,2 reservados para stdin, stdout, stderr
@@ -27,8 +27,7 @@ int16_t pipe_open(int16_t fds[2]);
  *	@param count Cantidad de caracteres a copiar del buffer al pipe
  *	@return Cantidad de bytes escritos
  */
-int16_t pipe_write(int pipe_id, const char *buffer, int count);
-
+int16_t pipe_write(const int16_t fd, const char *buffer, const int count);
 /**
  *	@brief Lee datos de un pipe
  *	@param pipe_id ID del pipe del que vamos a leer
@@ -36,7 +35,7 @@ int16_t pipe_write(int pipe_id, const char *buffer, int count);
  *	@param count Cantidad de caracteres que vamos a leer del pipe y guardar en el buffer
  *	@return Cantidad de bytes leidos
  */
-int16_t pipe_read(int pipe_id, char *buffer, int count);
+int16_t pipe_read(const int16_t fd, char *buffer, const int count);
 
 /**
  * @brief Libera los recursos asociados con el pipe

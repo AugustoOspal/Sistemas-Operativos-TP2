@@ -19,7 +19,7 @@ typedef struct
 } pipe_t;
 
 pipe_t *pipes[MAX_PIPES];
-static uint16_t nextFd = 0;
+static uint16_t nextFd = 3; 
 
 static void buildSemName(int pipeId, const char *suffix, char semName[SEM_NAME_SIZE]);
 
@@ -73,8 +73,9 @@ int16_t pipe_open(int16_t fds[2])
 	return -1;
 }
 
-int16_t pipe_write(const int pipe_id, const char *buffer, const int count)
+int16_t pipe_write(const int16_t fd, const char *buffer, const int count)
 {
+	int pipe_id = get_pipe_idx(fd);
 	if (pipe_id < 0 || pipe_id >= MAX_PIPES || pipes[pipe_id] == NULL)
 		return -1;
 
@@ -96,8 +97,10 @@ int16_t pipe_write(const int pipe_id, const char *buffer, const int count)
 	return written;
 }
 
-int16_t pipe_read(const int pipe_id, char *buffer, const int count)
+int16_t pipe_read(const int16_t fd, char *buffer, const int count)
 {
+	int pipe_id = get_pipe_idx(fd);
+
 	if (pipe_id < 0 || pipe_id >= MAX_PIPES || pipes[pipe_id] == NULL)
 		return -1;
 

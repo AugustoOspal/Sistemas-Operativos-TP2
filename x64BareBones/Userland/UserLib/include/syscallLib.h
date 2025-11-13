@@ -57,7 +57,7 @@ extern void sys_blockProcess(uint64_t pid);
 extern void sys_unblockProcess(uint64_t pid);
 extern void sys_yield();
 extern uint64_t sys_waitPid(uint64_t pid);
-extern uint8_t sys_getProcessFd(int std);
+extern int16_t sys_getProcessFd(int std);
 
 // Semaforos
 extern void *sys_semOpen(const char *name, int value);

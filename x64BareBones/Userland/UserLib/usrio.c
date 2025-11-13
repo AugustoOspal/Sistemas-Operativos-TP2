@@ -6,7 +6,7 @@
 extern char getchar(void)
 {
 	char c;
-	uint64_t bytesRead = sys_read(STDIN, &c, 1);
+	uint64_t bytesRead = sys_read(sys_getProcessFd(0), &c, 1);
 	if (bytesRead == 0)
 	{
 		return '\0'; // EOF
@@ -16,7 +16,7 @@ extern char getchar(void)
 
 int putchar(const char c)
 {
-	sys_write(STDOUT, &c, 1);
+	sys_write(sys_getProcessFd(1), &c, 1);
 	return c;
 }
 

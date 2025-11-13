@@ -627,9 +627,9 @@ uint64_t getForegroundPid(void)
 	return fgProcess ? fgProcess->pid : 0;
 }
 
-uint8_t getProcesFd(const int std)
+int16_t getProcesFd(const int fdIdx)
 {
-	return globalScheduler.currentProcess->fileDescriptors[std];
+	return globalScheduler.currentProcess->fileDescriptors[fdIdx];
 }
 /*
 estrategia wait y terminar procesos

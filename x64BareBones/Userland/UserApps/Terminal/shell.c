@@ -356,9 +356,9 @@ static void executePipeline(const parsed_command_t *cmds, const unsigned int cou
 	}
 
 	const unsigned int pipeCount = count - 1;
-	int16_t pipeIds[MAX_PIPE_CMDS - 1];
-	int16_t pipeFds[MAX_PIPE_CMDS - 1][2];
-	uint64_t pids[MAX_PIPE_CMDS];
+	int16_t pipeIds[pipeCount];
+	int16_t pipeFds[pipeCount][2];
+	uint64_t pids[count];
 
 	for (unsigned int i = 0; i < pipeCount; i++)
 	{
