@@ -1,11 +1,13 @@
 #include "shell.h"
 
+#include "../../../Kernel/ipc/include/pipe.h"
 #include "processes.h"
+#include "pipe.h"
 
 #define BUFFER 500
 #define MAX_PIPE_CMDS 8
 #define MAX_COMMAND_ARGS 8
-static int defaultFds[] = {STDIN, STDOUT, STDERR};
+static int16_t defaultFds[] = {STDIN, STDOUT, STDERR};
 #define SPECIAL_KEY_MAX_VALUE 5
 
 typedef struct
@@ -58,7 +60,7 @@ static int fillArgVector(parsed_command_t *parsed, char *argsStart);
 static int parseCommandSegment(char *segment, parsed_command_t *parsed, char **argvStorage);
 static int parseEntry(char *input, parsed_command_t *outCommands, int maxCommands);
 static void executeSingleCommand(parsed_command_t *cmd);
-static void executePipeline(parsed_command_t *cmds, int count);
+static void executePipeline(const parsed_command_t *cmds, unsigned int count);
 
 void show_prompt()
 {
@@ -339,12 +341,12 @@ static void executeSingleCommand(parsed_command_t *cmd)
 	}
 }
 
-static void executePipeline(parsed_command_t *cmds, int count)
+static void executePipeline(const parsed_command_t *cmds, const unsigned int count)
 {
 	// Check if pipeline is in background - all commands should have same background flag
-	bool isBackground = cmds[count - 1].background;
+	const bool isBackground = cmds[count - 1].background;
 
-	for (int i = 0; i < count; i++)
+	for (unsigned int i = 0; i < count; i++)
 	{
 		if (cmds[i].entry->type != CMD_PROC)
 		{
@@ -353,33 +355,32 @@ static void executePipeline(parsed_command_t *cmds, int count)
 		}
 	}
 
-	const int pipeCount = count - 1;
-	int pipeIds[MAX_PIPE_CMDS - 1];
-	int pipeFds[MAX_PIPE_CMDS - 1][2];
+	const unsigned int pipeCount = count - 1;
+	int16_t pipeIds[MAX_PIPE_CMDS - 1];
+	int16_t pipeFds[MAX_PIPE_CMDS - 1][2];
 	uint64_t pids[MAX_PIPE_CMDS];
 
-	for (int i = 0; i < pipeCount; i++)
+	for (unsigned int i = 0; i < pipeCount; i++)
 	{
-		pipeIds[i] = sys_pipe_open(pipeFds[i]);
+		pipeIds[i] = pipeOpen(pipeFds[i]);
 		if (pipeIds[i] < 0)
 		{
 			printf("Failed to create pipe %d.\n", i);
-			for (int j = 0; j < i; j++)
-				sys_pipe_close(pipeIds[j]);
+			for (unsigned int j = 0; j < i; j++)
+				pipeClose(pipeIds[j]);
 			return;
 		}
 	}
 
-	int spawned = 0;
+	unsigned int spawned = 0;
 	for (; spawned < count; spawned++)
 	{
-		int fds[FD_AMOUNT];
-		fds[STDIN] = (spawned == 0) ? defaultFds[STDIN] : pipeFds[spawned - 1][0];
+		int16_t fds[FD_AMOUNT];
+		fds[STDIN] = (!spawned) ? defaultFds[STDIN] : pipeFds[spawned - 1][0];
 		fds[STDOUT] = (spawned == count - 1) ? defaultFds[STDOUT] : pipeFds[spawned][1];
 		fds[STDERR] = defaultFds[STDERR];
 
-		// Solo el último comando del pipeline puede ser foreground
-		bool foreground = (spawned == count - 1) && !isBackground;
+		const bool foreground = (spawned == count - 1) && !isBackground;
 		pids[spawned] = createProcess(cmds[spawned].entry->name, cmds[spawned].entry->function, cmds[spawned].argc,
 									  cmds[spawned].argv, fds, foreground);
 		if (pids[spawned] == 0)
@@ -391,7 +392,7 @@ static void executePipeline(parsed_command_t *cmds, int count)
 
 	if (!isBackground)
 	{
-		for (int i = 0; i < spawned; i++)
+		for (unsigned int i = 0; i < spawned; i++)
 		{
 			waitPid(pids[i]);
 		}
@@ -401,7 +402,7 @@ static void executePipeline(parsed_command_t *cmds, int count)
 		printf("[%llu] pipeline started\n", pids[0]);
 	}
 
-	for (int i = 0; i < pipeCount; i++)
+	for (unsigned int i = 0; i < pipeCount; i++)
 	{
 		sys_pipe_close(pipeIds[i]);
 	}

@@ -119,6 +119,8 @@ uint64_t waitPid(uint64_t pid);
  */
 uint64_t getForegroundPid(void);
 
+uint8_t getProcesFd(int std);
+
 // resignTimeWindow(); // usa yield
 
 #endif

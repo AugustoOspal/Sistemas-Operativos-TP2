@@ -387,6 +387,10 @@ void syscallDispatcher(Registers_t *regs)
 			mem_free((void *) arg1);
 			break;
 
+		case 0x100:
+			regs->rax = getProcesFd( (int) arg1 );
+			break;
+
 		default:
 			// Syscall desconocida o no implementada
 			// Se imprime un error o se establece un código de error en rax

@@ -6,8 +6,8 @@
 /*
  *	@brie
  */
-uint64_t createProcess(const char *name, int (*main)(int argc, char *argv[]), int argc, char *argv[],
-					   int fds[FD_AMOUNT], bool foreground)
+uint64_t createProcess(const char *name, int (*main)(int argc, char *argv[]), const int argc, char *argv[],
+					   int16_t fds[FD_AMOUNT], const bool foreground)
 {
 	return sys_createProcess(name, main, argc, argv, fds, foreground);
 }

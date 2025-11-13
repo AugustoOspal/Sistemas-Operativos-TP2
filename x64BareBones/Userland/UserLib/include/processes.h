@@ -15,7 +15,7 @@
  *  @return PID of the created process
  */
 uint64_t createProcess(const char *name, int (*main)(int argc, char *argv[]), int argc, char *argv[],
-					   int fds[FD_AMOUNT], bool foreground);
+					   int16_t fds[FD_AMOUNT], bool foreground);
 
 /*
  *  @brief Deletes a process

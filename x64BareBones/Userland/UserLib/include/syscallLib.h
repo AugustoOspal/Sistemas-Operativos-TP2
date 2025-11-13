@@ -48,7 +48,7 @@ extern void sys_playSound(uint32_t frequency, uint32_t duration);
 
 // Procesos
 extern uint64_t sys_createProcess(const char *name, int (*main)(int argc, char *argv[]), int argc, char *argv[],
-								  int fds[FD_AMOUNT], bool foreground);
+								  int16_t fds[FD_AMOUNT], bool foreground);
 extern void sys_deleteProcess(uint64_t pid);
 extern uint64_t sys_getPid();
 extern uint64_t sys_getAllProcessesInfo(char *buffer, uint64_t bufferSize);
@@ -57,6 +57,7 @@ extern void sys_blockProcess(uint64_t pid);
 extern void sys_unblockProcess(uint64_t pid);
 extern void sys_yield();
 extern uint64_t sys_waitPid(uint64_t pid);
+extern uint8_t sys_getProcessFd(int std);
 
 // Semaforos
 extern void *sys_semOpen(const char *name, int value);
@@ -68,8 +69,8 @@ extern int sys_semGetValue(void *sem, int *sval);
 extern int sys_semUnlink(const char *name);
 
 // Pipes
-extern int sys_pipe_open(int fds[2]);
-extern int sys_pipe_close(int pipe_id);
+extern int16_t sys_pipe_open(int16_t fds[2]);
+extern int16_t sys_pipe_close(int16_t pipe_id);
 
 // Memoria
 extern void sys_mem_info(pm_stats_t *stats);
