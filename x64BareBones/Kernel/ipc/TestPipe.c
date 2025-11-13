@@ -331,8 +331,9 @@ void testPipeCircularBuffer(CuTest *const tc)
 
 	// When: Buffer wraps around (write at position past middle, then continue)
 	char pattern[300];
-	for (int i = 0; i < 300; i++) {
-		pattern[i] = (char)('A' + (i % 26));
+	for (int i = 0; i < 300; i++)
+	{
+		pattern[i] = (char) ('A' + (i % 26));
 	}
 
 	// Write 256 bytes (fill buffer completely)

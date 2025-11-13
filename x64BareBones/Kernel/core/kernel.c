@@ -9,6 +9,7 @@
 #include "soundDriver.h"
 #include "timeLib.h"
 #include "videoDriver.h"
+#include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
 
@@ -72,9 +73,9 @@ int main()
 	// createProcess("Proceso A", processA, 0, NULL);
 	// createProcess("Proceso B", processB, 0, NULL);
 	// createProcess("Proceso C", processC, 0, NULL);
-	int fds[] = {STDIN, STDOUT, STDERR};
+	const int16_t fds[] = {STDIN, STDOUT, STDERR};
 
-	changeProcessPriority(createProcess("shell", shellAddress, 0, NULL, fds), 3);
+	changeProcessPriority(createProcess("shell", shellAddress, 0, NULL, fds, false), 3);
 	load_idt();
 	// play_boot_sound();
 	return 0;

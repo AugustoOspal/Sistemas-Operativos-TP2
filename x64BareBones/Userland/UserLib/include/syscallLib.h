@@ -2,6 +2,7 @@
 #define _SYSCALL_LIB_H
 
 #include "timeLib.h"
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 
@@ -47,7 +48,7 @@ extern void sys_playSound(uint32_t frequency, uint32_t duration);
 
 // Procesos
 extern uint64_t sys_createProcess(const char *name, int (*main)(int argc, char *argv[]), int argc, char *argv[],
-								  int fds[FD_AMOUNT]);
+								  int fds[FD_AMOUNT], bool foreground);
 extern void sys_deleteProcess(uint64_t pid);
 extern uint64_t sys_getPid();
 extern uint64_t sys_getAllProcessesInfo(char *buffer, uint64_t bufferSize);

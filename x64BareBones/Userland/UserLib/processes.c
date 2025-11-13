@@ -7,9 +7,9 @@
  *	@brie
  */
 uint64_t createProcess(const char *name, int (*main)(int argc, char *argv[]), int argc, char *argv[],
-					   int fds[FD_AMOUNT])
+					   int fds[FD_AMOUNT], bool foreground)
 {
-	return sys_createProcess(name, main, argc, argv, fds);
+	return sys_createProcess(name, main, argc, argv, fds, foreground);
 }
 
 void deleteProcess(uint64_t pid)
@@ -93,56 +93,37 @@ void loop()
 
 void wc()
 {
-	int charsInline = 0;
+	int chars = 0;
 	int words = 0;
 	int lines = 0;
 	char c;
 	bool inWord = false;
 
-	while ((c = getchar()) != '\n')
+	while ((c = getchar()) != '\0')
 	{
-		if (c == '\b')
+		chars++;
+		if (c == '\n')
 		{
-			if (charsInline > 0)
-			{
-				charsInline--;
-				putchar(c);
-			}
+			lines++;
+			inWord = false;
 		}
-		else
+		else if (c == ' ' || c == '\t')
 		{
-			if (c == '\n')
-			{
-				lines++;
-				charsInline = 0;
-				inWord = false;
-			}
-			else
-			{
-				if (c == ' ' || c == '\t')
-				{
-					inWord = false;
-				}
-				else
-				{
-					if (!inWord)
-					{
-						words++;
-						inWord = true;
-					}
-				}
-				charsInline++;
-			}
-			putchar(c);
+			inWord = false;
+		}
+		else if (!inWord)
+		{
+			words++;
+			inWord = true;
 		}
 	}
-	printf("\nLines: %d, Words: %d, Characters: %d\n", lines, words, charsInline);
+	printf("%d %d %d\n", lines, words, chars);
 }
 
 void filter()
 {
 	char c;
-	while ((c = getchar()) != '\n')
+	while ((c = getchar()) != '\0')
 	{
 		if (c == 'a' || c == 'e' || c == 'i' || c == 'o' || c == 'u' || c == 'A' || c == 'E' || c == 'I' || c == 'O' ||
 			c == 'U')

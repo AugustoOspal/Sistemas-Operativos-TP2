@@ -10,10 +10,12 @@
  *  @param main Pointer to the main function of the process
  *  @param argc Number of arguments
  *  @param argv Array of arguments
+ *  @param fds Array of file descriptors
+ *  @param foreground Whether process runs in foreground (true) or background (false)
  *  @return PID of the created process
  */
 uint64_t createProcess(const char *name, int (*main)(int argc, char *argv[]), int argc, char *argv[],
-					   int fds[FD_AMOUNT]);
+					   int fds[FD_AMOUNT], bool foreground);
 
 /*
  *  @brief Deletes a process

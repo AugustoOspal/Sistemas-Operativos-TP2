@@ -1,4 +1,6 @@
 #include "keyboardDriver.h"
+#include "../../proc/include/process.h"
+#include "../../sched/include/scheduler.h"
 #include "../../semaphore/include/semaphore.h"
 
 // --- Definiciones de Scancodes (Set 1) ---
@@ -57,25 +59,21 @@ static unsigned int buffer_count = 0;
 
 void keyboard_init()
 {
-	if (semOpen("keyboard_sem", 0) == NULL)
-	{
-		return -1;
-	}
-	return 0;
+	semOpen("keyboard_sem", 0);
 }
 
-char procesScanCode(unsigned int scancode)
+char procesScanCode(const unsigned int scancode)
 {
 	if (scancode == 0)
 	{
-		return;
+		return -1;
 	}
 
 	/*
 		Si el scancode tiene seteado el septimo bit mas significativo
 		significa que la tecla fue liberada, sino que fue apretada
 	*/
-	int is_press = !(scancode & 0x80);
+	const int is_press = !(scancode & 0x80);
 
 	// El scancode base sin el bit de apretado/liberacion
 	unsigned int make_code = scancode & 0x7F;
@@ -164,11 +162,20 @@ void keyboard_handler(Registers_t *regs)
 	uint8_t scanCode = getKeyCode();
 	char c = procesScanCode(scanCode);
 
+	// Ctrl+R: Captura snapshot de registros
 	if (kbd_modifier_state.ctrl && (c == 'r' || c == 'R'))
 	{
 		loadSnapshot(regs);
 	}
-
+	// Ctrl+C: Terminar proceso en foreground
+	else if (kbd_modifier_state.ctrl && (c == 'c' || c == 'C'))
+	{
+		const uint64_t fgPid = getForegroundPid();
+		if (fgPid != 0)
+		{
+			killProcess(fgPid);
+		}
+	}
 	else if (c != 0)
 	{
 		loadCharToBuffer(c);

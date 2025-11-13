@@ -12,7 +12,8 @@ void startWrapper(const mainFuncPtr main, const int argc, char *argv[])
 	killProcess(getPid());
 }
 
-uint64_t createProcess(const char *name, const mainFuncPtr main, const int argc, char *argv[], const int16_t fds[3])
+uint64_t createProcess(const char *name, const mainFuncPtr main, const int argc, char *argv[], const int16_t fds[3],
+					   bool foreground)
 {
 	// TODO: Validar malloc
 	void *stackStart = mem_alloc(STACK_SIZE);
@@ -20,7 +21,7 @@ uint64_t createProcess(const char *name, const mainFuncPtr main, const int argc,
 
 	void *processStackPointer = initializeProcess(startWrapper, stackEnd, main, argc, argv);
 	const uint64_t newProc = addProcess(processStackPointer, fds);
-	addProcessInfo(newProc, name, stackStart);
+	addProcessInfo(newProc, name, stackStart, foreground);
 	return newProc;
 }
 

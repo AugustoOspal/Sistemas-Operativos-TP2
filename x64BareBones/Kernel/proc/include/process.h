@@ -1,6 +1,7 @@
 #ifndef PROCESS_H
 #define PROCESS_H
 
+#include <stdbool.h>
 #include <stdint.h>
 
 #define STACK_SIZE 4096
@@ -16,9 +17,11 @@ typedef void (*startWrapperPtr)(mainFuncPtr main, int argc, char *argv[]);
  *  @param argc Cantidad de argumentos
  *  @param argv Arreglo de strings con los argumentos
  *  @param fds Array con los file descriptors del proceso
+ *  @param foreground Indica si el proceso está en foreground (true) o background (false)
  *  @return El PID del proceso creado
  */
-uint64_t createProcess(const char *name, mainFuncPtr main, int argc, char *argv[], const int16_t fds[]);
+uint64_t createProcess(const char *name, mainFuncPtr main, int argc, char *argv[], const int16_t fds[],
+					   bool foreground);
 
 /**
  *  @brief Elimina un proceso del scheduler y libera su memoria

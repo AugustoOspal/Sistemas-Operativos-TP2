@@ -186,7 +186,7 @@ void initializeScheduler()
 	globalScheduler.blockedQueue = NewQueue();
 
 	int fds[] = {STDIN, STDOUT, STDERR};
-	createProcess("idle", idleMain, 0, NULL, fds);
+	createProcess("idle", idleMain, 0, NULL, fds, false); // idle nunca es foreground
 	idleProcess = Dequeue(globalScheduler.priorityQueues[DEFAULT_PRIORITY]);
 }
 
@@ -240,14 +240,14 @@ static ProcessADT getProcessByPid(uint64_t pid)
 	return findInDoubleLinkedList(globalScheduler.processTable, matchPid, &pid);
 }
 
-void addProcessInfo(uint64_t pid, const char *name, void *basePointer)
+void addProcessInfo(uint64_t pid, const char *name, void *basePointer, bool foreground)
 {
 	ProcessADT proc = getProcessByPid(pid);
 	if (proc)
 	{
 		proc->nombre = name;
 		proc->basePointer = basePointer;
-		proc->foreground = DEFAULT_FOREGROUND;
+		proc->foreground = foreground;
 		return;
 	}
 }
@@ -613,6 +613,18 @@ uint64_t waitPid(uint64_t pid)
 	// elimino proceso zombie
 	deleteProcess(waitingProcess);
 	return pid;
+}
+
+static bool matchForeground(void *elem, void *data)
+{
+	ProcessADT proc = (ProcessADT) elem;
+	return proc->foreground && proc->state != ZOMBIE;
+}
+
+uint64_t getForegroundPid(void)
+{
+	ProcessADT fgProcess = findInDoubleLinkedList(globalScheduler.processTable, matchForeground, NULL);
+	return fgProcess ? fgProcess->pid : 0;
 }
 
 /*

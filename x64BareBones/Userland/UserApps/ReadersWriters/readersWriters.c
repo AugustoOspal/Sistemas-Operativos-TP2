@@ -24,10 +24,12 @@ typedef struct
 int writerMain(int argc, char **argv)
 {
 	char *symbol = argv[0];
-	sleepMilli(3000);
-	semWait(semEmpty);
-	slot = symbol[0];
-	semPost(semFull);
+	while (1)
+	{
+		semWait(semEmpty);
+		slot = symbol[0];
+		semPost(semFull);
+	}
 	return 0;
 }
 
@@ -49,12 +51,15 @@ static void readerConsume(char value, char *id)
 int readerMain(int argc, char **argv)
 {
 	char *id = argv[0];
-	sleepMilli(3000);
-	semWait(semFull);
-	char c = slot;
-	slot = 0;
-	semPost(semEmpty);
-	readerConsume(c, id);
+	while (1)
+	{
+		sleepMilli(3000);
+		semWait(semFull);
+		char c = slot;
+		slot = 0;
+		semPost(semEmpty);
+		readerConsume(c, id);
+	}
 	return 0;
 }
 
@@ -76,17 +81,19 @@ int mainMvar(int argc, char **argv)
 		char **args = mem_alloc(sizeof(char *) * 2);
 		args[0] = symbol;
 		args[1] = NULL;
-		createProcess("Writer", writerMain, 1, args, NULL);
+		createProcess("Writer", writerMain, 1, args, NULL, false);
 	}
 
 	char buffers[readerCount][20];
 	for (int j = 0; j < readerCount; j++)
 	{
 		char *id = mem_alloc(6);
-		itoa(j, buffers[j], 10);
-		char *args[] = {buffers[j]};
-		createProcess("Reader", readerMain, 1, args, NULL);
+		itoa(j, id, 6);
+		char **args = mem_alloc(sizeof(char *) * 2);
+		args[0] = id;
+		args[1] = NULL;
+		createProcess("Reader", readerMain, 1, args, NULL, false);
 	}
 
-	return 0;
+	kill(getPID());
 }

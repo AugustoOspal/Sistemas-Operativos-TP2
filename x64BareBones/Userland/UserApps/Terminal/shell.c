@@ -13,6 +13,7 @@ typedef struct
 	command_entry *entry;
 	int argc;
 	char **argv;
+	bool background;
 } parsed_command_t;
 
 static char *argv_storage[MAX_PIPE_CMDS][MAX_COMMAND_ARGS + 2];
@@ -242,6 +243,7 @@ static int parseEntry(char *input, parsed_command_t *outCommands, int maxCommand
 	int count = 0;			   // numero de comandos parseados
 	char *cursor = input;	   // cursor de parseo
 	bool expectCommand = true; // si espero un comando o un pipe
+	bool isBackground = false; // si el comando va en background
 
 	while (expectCommand)
 	{
@@ -269,7 +271,7 @@ static int parseEntry(char *input, parsed_command_t *outCommands, int maxCommand
 		}
 
 		char *scan = segmentStart;
-		while (*scan != '\0' && *scan != '|')
+		while (*scan != '\0' && *scan != '|' && *scan != '&')
 			scan++;
 
 		char delimiter = *scan;
@@ -277,6 +279,11 @@ static int parseEntry(char *input, parsed_command_t *outCommands, int maxCommand
 		if (delimiter == '|')
 		{
 			*scan = '\0';
+		}
+		else if (delimiter == '&')
+		{
+			*scan = '\0';
+			isBackground = true;
 		}
 
 		char *cleanSegment = trimSegment(segmentStart);
@@ -291,6 +298,7 @@ static int parseEntry(char *input, parsed_command_t *outCommands, int maxCommand
 			return -1;
 		}
 
+		outCommands[count].background = isBackground;
 		count++;
 		expectCommand = (delimiter == '|');
 		cursor = next;
@@ -312,17 +320,30 @@ static void executeSingleCommand(parsed_command_t *cmd)
 		return;
 	}
 
-	uint64_t pid = createProcess(cmd->entry->name, cmd->entry->function, cmd->argc, cmd->argv, defaultFds);
+	// El proceso es foreground solo si NO es background
+	bool foreground = !cmd->background;
+	uint64_t pid = createProcess(cmd->entry->name, cmd->entry->function, cmd->argc, cmd->argv, defaultFds, foreground);
 	if (pid == 0)
 	{
 		printf("Failed to start \"%s\".\n", cmd->entry->name);
 		return;
 	}
-	waitPid(pid);
+
+	if (!cmd->background)
+	{
+		waitPid(pid);
+	}
+	else
+	{
+		printf("[%llu] %s\n", pid, cmd->entry->name);
+	}
 }
 
 static void executePipeline(parsed_command_t *cmds, int count)
 {
+	// Check if pipeline is in background - all commands should have same background flag
+	bool isBackground = cmds[count - 1].background;
+
 	for (int i = 0; i < count; i++)
 	{
 		if (cmds[i].entry->type != CMD_PROC)
@@ -332,7 +353,7 @@ static void executePipeline(parsed_command_t *cmds, int count)
 		}
 	}
 
-	int pipeCount = count - 1; // numero de pipes necesarios
+	const int pipeCount = count - 1;
 	int pipeIds[MAX_PIPE_CMDS - 1];
 	int pipeFds[MAX_PIPE_CMDS - 1][2];
 	uint64_t pids[MAX_PIPE_CMDS];
@@ -357,8 +378,10 @@ static void executePipeline(parsed_command_t *cmds, int count)
 		fds[STDOUT] = (spawned == count - 1) ? defaultFds[STDOUT] : pipeFds[spawned][1];
 		fds[STDERR] = defaultFds[STDERR];
 
+		// Solo el último comando del pipeline puede ser foreground
+		bool foreground = (spawned == count - 1) && !isBackground;
 		pids[spawned] = createProcess(cmds[spawned].entry->name, cmds[spawned].entry->function, cmds[spawned].argc,
-									  cmds[spawned].argv, fds);
+									  cmds[spawned].argv, fds, foreground);
 		if (pids[spawned] == 0)
 		{
 			printf("Failed to start \"%s\".\n", cmds[spawned].entry->name);
@@ -366,9 +389,16 @@ static void executePipeline(parsed_command_t *cmds, int count)
 		}
 	}
 
-	for (int i = 0; i < spawned; i++)
+	if (!isBackground)
 	{
-		waitPid(pids[i]);
+		for (int i = 0; i < spawned; i++)
+		{
+			waitPid(pids[i]);
+		}
+	}
+	else
+	{
+		printf("[%llu] pipeline started\n", pids[0]);
 	}
 
 	for (int i = 0; i < pipeCount; i++)

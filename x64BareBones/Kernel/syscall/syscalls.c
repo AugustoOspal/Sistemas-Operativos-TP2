@@ -46,7 +46,7 @@ uint8_t isSpecialChar(char c)
 }
 
 // TODO: Creo que la sys_write no deberia imprimir en pantalla, ver si se puede modularizar
-uint64_t sys_write(uint8_t fd, const char *str, uint64_t count)
+uint64_t sys_write(const uint8_t fd, const char *str, const uint64_t count)
 {
 	if (fd < 0)
 	{
@@ -277,7 +277,8 @@ void syscallDispatcher(Registers_t *regs)
 			break;
 
 		case 0x50:
-			regs->rax = createProcess((char *) arg1, (mainFuncPtr) arg2, (int) arg3, (char **) arg4, (int16_t *) arg5);
+			regs->rax = createProcess((char *) arg1, (mainFuncPtr) arg2, (int) arg3, (char **) arg4, (int16_t *) arg5,
+									  (bool) arg6);
 			break;
 
 		case 0x51:
