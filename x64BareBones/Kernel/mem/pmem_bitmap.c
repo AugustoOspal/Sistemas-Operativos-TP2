@@ -21,7 +21,7 @@ static inline uint8_t *page_addr(size_t idx)
 }
 
 // Devuelve la cantidad de paginas que se necesitan para guardar bytes
-static inline size_t pages_needed(size_t bytes)
+static size_t pages_needed(size_t bytes)
 {
 	if (bytes == 0)
 		return 1;
@@ -31,20 +31,20 @@ static inline size_t pages_needed(size_t bytes)
 	return k;
 }
 
-static inline void mark_page_used(size_t i)
+static void mark_page_used(size_t i)
 {
 	bitmap[i] = 1;
 }
-static inline void mark_page_free(size_t i)
+static void mark_page_free(size_t i)
 {
 	bitmap[i] = 0;
 }
-static inline int page_is_used(size_t i)
+static int page_is_used(size_t i)
 {
 	return bitmap[i] != 0;
 }
 
-int pm_init(void *pool_start, size_t pool_length)
+int mem_init(void *pool_start, size_t pool_length)
 {
 	// inicializa variables globales
 	pool_base = (uint8_t *) pool_start;

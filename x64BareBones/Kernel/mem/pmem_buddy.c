@@ -14,11 +14,13 @@ static int max_order; //orden maximo 2^max_order bytes
 static node_t *free_list[BUDDY_MAX_ORDER]; //arreglo de listas. free_list[o] apunta a la lista con bloques de 2^o bytes
 static uint8_t *order_map; //guarda el orden de cada bloque
 
+static size_t managed_total = 0;
+
 static uintptr_t buddy_of(uintptr_t addr, int order) {
     return addr ^ BLOCK_SIZE(order);
 }
 
-void buddy_init(void *base, size_t length) {
+void mem_init(void *base, size_t length) {
     base_addr = ALIGN_DOWN((uintptr_t)base, BLOCK_SIZE(BUDDY_MIN_ORDER));
     total_len = length - (base_addr - (uintptr_t)base);
     max_order = BUDDY_MIN_ORDER;
@@ -37,6 +39,8 @@ void buddy_init(void *base, size_t length) {
     base_addr += (meta_bytes + BLOCK_SIZE(BUDDY_MIN_ORDER) - 1) & ~(BLOCK_SIZE(BUDDY_MIN_ORDER)-1);
     total_len -= (base_addr - (uintptr_t)base);
 
+    managed_total = 0;
+
     //insertar bloques alineados a su orden maximo
     uintptr_t cur = base_addr;
     uintptr_t end = base_addr + total_len;
@@ -46,12 +50,14 @@ void buddy_init(void *base, size_t length) {
             ((node_t*)cur)->next = free_list[i];
             free_list[i] = (node_t*)cur;
             order_map[(cur - base_addr) >> BUDDY_MIN_ORDER] = i;
+            
+            managed_total += bs;
             cur += bs;
         }
     }
 }
 
-void *buddy_alloc(size_t size) {
+void *mem_alloc(size_t size) {
     int order = BUDDY_MIN_ORDER;
     while (BLOCK_SIZE(order) < size) order++;
     if (order > max_order) return NULL;
@@ -80,12 +86,12 @@ void *buddy_alloc(size_t size) {
     return (void*)b;
 }
 
-void buddy_free(void *ptr) {
+void mem_free(void *ptr) {
     if (!ptr) return;
     uintptr_t addr = (uintptr_t)ptr;
     int order = order_map[(addr - base_addr) >> BUDDY_MIN_ORDER];
 
-    while (order < BUDDY_MAX_ORDER) {
+    while (order < max_order) {
         uintptr_t buddy = buddy_of(addr, order);
         // buscar buddy en lista libre del mismo orden
         node_t **prev = &free_list[order], *n = free_list[order];
@@ -99,4 +105,19 @@ void buddy_free(void *ptr) {
     }
     ((node_t*)addr)->next = free_list[order];
     free_list[order] = (node_t*)addr;
+}
+
+void mem_get_stats(pm_stats_t *out) {
+    uint64_t free_bytes = 0;
+
+    for (int i = BUDDY_MIN_ORDER; i <= max_order; i++) {
+        size_t bs = BLOCK_SIZE(i);
+        for (node_t *n = free_list[i]; n; n = n->next) {
+            free_bytes += bs;
+        }
+    }
+
+    out->total = (uint64_t)managed_total;
+    out->free  = free_bytes;
+    out->used  = out->total - out->free;
 }
