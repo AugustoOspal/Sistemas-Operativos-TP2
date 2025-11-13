@@ -11,43 +11,6 @@
 #include "TestSemaphore.h"
 #include "include/semaphore.h"
 
-// ============ MOCK FUNCTIONS (stubs for linking) ============
-
-uint64_t getPid(void)
-{
-	return 1;
-}
-
-void addProcessToBlockQueue(uint64_t pid)
-{
-	(void) pid;
-}
-
-void unblockProcess(uint64_t pid)
-{
-	(void) pid;
-}
-
-void yield(void)
-{
-}
-
-void acquire(uint64_t *lock)
-{
-	(void) lock;
-}
-
-int try_acquire(uint64_t *lock)
-{
-	(void) lock;
-	return 0;
-}
-
-void release(uint64_t *lock)
-{
-	(void) lock;
-}
-
 // ============ FORWARD DECLARATIONS ============
 
 void testSemaphoresInitSucceeds(CuTest *const tc);
@@ -93,7 +56,7 @@ static inline void givenMemoryPoolAllocated(void)
 
 static inline void whenMemoryManagerIsInitialized(void)
 {
-	pm_init(testMemoryPool, TEST_POOL_SIZE);
+	mem_init(testMemoryPool, TEST_POOL_SIZE);
 }
 
 static inline void givenSemaphoresInitialized(void)

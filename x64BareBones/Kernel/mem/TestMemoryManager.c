@@ -42,7 +42,7 @@ static inline void givenAMemoryPool(void)
 
 static inline void whenMemoryManagerIsInitialized(void)
 {
-	pm_init(testPool, TEST_POOL_SIZE);
+	mem_init(testPool, TEST_POOL_SIZE);
 }
 
 static inline void whenMemoryIsAllocated(size_t size, void **result)

@@ -8,87 +8,75 @@
 
 typedef struct
 {
-	char buffer[MAX_BUFFER];	  // guarda los datos escritos en el pipe
-	int readingIdx;				  // indice de lectura
-	int toBeRead;				  // cantidad de datos pendientes de leer
-	int writePos;				  // indice de escritura
-	int16_t fds[PIPE_FDS_AMOUNT]; // file descriptors asociados al pipe
+	char buffer[PIPE_BUFFER];
+	int16_t fds[PIPE_FDS_AMOUNT];
+	uint64_t readingPos;
+	uint64_t writePos;
+	uint64_t size;
 
-	semaphoreP writeSem; // representa la cantidad de espacios libres para escribir
-	semaphoreP readSem;	 // representa la cantidad de datos disponibles para leer
 	char writeSemName[SEM_NAME_SIZE];
 	char readSemName[SEM_NAME_SIZE];
 } pipe_t;
 
-pipe_t *pipes[MAX_PIPES] = {NULL};
+pipe_t *pipes[MAX_PIPES];
 static uint16_t nextFd = 0;
 
 static void buildSemName(int pipeId, const char *suffix, char semName[SEM_NAME_SIZE]);
 
-int16_t generateFileDescriptor(void)
-{
-	return nextFd++;
-}
-
 int16_t pipe_open(int16_t fds[2])
 {
-	for (int i = 0; i < MAX_PIPES; i++)
+	for (int pipeID = 0; pipeID < MAX_PIPES; pipeID++)
 	{
-		if (pipes[i] == NULL)
-		{ // encuentra un espacio para crear un pipe
+		if (pipes[pipeID] == NULL)
+		{
+			pipes[pipeID] = mem_alloc(sizeof(pipe_t));
 
-			pipes[i] = mem_alloc(sizeof(pipe_t));
-
-			if (pipes[i] == NULL)
+			if (pipes[pipeID] == NULL)
 			{
-				return -1; // error de malloc
+				return -1;
 			}
 
-			// inicializar pipe
-			pipes[i]->readingIdx = 0;
-			pipes[i]->toBeRead = 0;
-			pipes[i]->writePos = 0;
+			pipes[pipeID]->readingPos = 0;
+			pipes[pipeID]->writePos = 0;
+			pipes[pipeID]->size = 0;
 
-			// asignar file descriptors
-			pipes[i]->fds[0] = nextFd++;
-			fds[0] = pipes[i]->fds[0];
-			pipes[i]->fds[1] = nextFd++;
-			fds[1] = pipes[i]->fds[1];
+			pipes[pipeID]->fds[0] = nextFd++;
+			fds[0] = pipes[pipeID]->fds[0];
+			pipes[pipeID]->fds[1] = nextFd++;
+			fds[1] = pipes[pipeID]->fds[1];
 
-			// Semáforo de escritura
-			buildSemName(i, "write", pipes[i]->writeSemName);
-			pipes[i]->writeSem = semOpen(pipes[i]->writeSemName, MAX_BUFFER);
-			if (pipes[i]->writeSem == NULL)
+			buildSemName(pipeID, "write", pipes[pipeID]->writeSemName);
+			const semaphoreP writeSem = semOpen(pipes[pipeID]->writeSemName, PIPE_BUFFER);
+			if (writeSem == NULL)
 			{
-				mem_free(pipes[i]);
-				pipes[i] = NULL;
+				mem_free(pipes[pipeID]);
+				pipes[pipeID] = NULL;
 				return -1;
 			}
 
 			// Semáforo de lectura
-			buildSemName(i, "read", pipes[i]->readSemName);
-			pipes[i]->readSem = semOpen(pipes[i]->readSemName, 0);
-			if (pipes[i]->readSem == NULL)
+			buildSemName(pipeID, "read", pipes[pipeID]->readSemName);
+			const semaphoreP readSem = semOpen(pipes[pipeID]->readSemName, 0);
+			if (readSem == NULL)
 			{
-				sem_unlink(pipes[i]->writeSemName);
-				semClose(pipes[i]->writeSem);
-				mem_free(pipes[i]);
-				pipes[i] = NULL;
+				sem_unlink(pipes[pipeID]->writeSemName);
+				semClose(readSem);
+				mem_free(pipes[pipeID]);
+				pipes[pipeID] = NULL;
 				return -1;
 			}
 
-			return i; // retorno el id del pipe creado
+			return pipeID;
 		}
 	}
 
-	return -1; // no hay espacio para mas pipes
+	return -1;
 }
 
-// Un proceso llama a pipe_write para escribir n bytes en el buffer del pipe
-int16_t pipe_write(int pipe_id, const char *buffer, int count)
+int16_t pipe_write(const int pipe_id, const char *buffer, const int count)
 {
 	if (pipe_id < 0 || pipe_id >= MAX_PIPES || pipes[pipe_id] == NULL)
-		return -1; // pipe_id inválido
+		return -1;
 
 	pipe_t *pipe = pipes[pipe_id];
 
@@ -96,25 +84,22 @@ int16_t pipe_write(int pipe_id, const char *buffer, int count)
 
 	for (; written < count; written++)
 	{
-		// Espera a que haya espacio disponible
-		semWait(pipe->writeSem);
+		semWait(getSem(pipe->writeSemName));
 
-		// Escribir en el buffer del pipe
 		pipe->buffer[pipe->writePos] = buffer[written];
-		pipe->writePos = (pipe->writePos + 1) % MAX_BUFFER; // Buffer circular
-		pipe->toBeRead++;
+		pipe->writePos = (pipe->writePos + 1) % PIPE_BUFFER;
+		pipe->size++;
 
-		// Avisa que hay datos para leer
-		semPost(pipe->readSem);
+		semPost(getSem(pipe->readSemName));
 	}
 
-	return written; // retorno la cantidad de bytes escritos
+	return written;
 }
 
-int16_t pipe_read(int pipe_id, char *buffer, int count)
+int16_t pipe_read(const int pipe_id, char *buffer, const int count)
 {
 	if (pipe_id < 0 || pipe_id >= MAX_PIPES || pipes[pipe_id] == NULL)
-		return -1; // pipe_id inválido
+		return -1;
 
 	pipe_t *pipe = pipes[pipe_id];
 
@@ -122,55 +107,52 @@ int16_t pipe_read(int pipe_id, char *buffer, int count)
 
 	for (; read < count; read++)
 	{
-		// Esperar a que haya algo para leer
-		semWait(pipe->readSem);
+		semWait(getSem(pipe->readSemName));
 
-		// Leer un byte del buffer circular
-		buffer[read] = pipe->buffer[pipe->readingIdx];
-		pipe->readingIdx = (pipe->readingIdx + 1) % MAX_BUFFER; // Buffer circular
-		pipe->toBeRead--;
+		buffer[read] = pipe->buffer[pipe->readingPos];
+		pipe->readingPos = (pipe->readingPos + 1) % PIPE_BUFFER;
+		pipe->size--;
 
-		// Señalar que hay espacio disponible para escribir
-		semPost(pipe->writeSem);
+		semPost(getSem(pipe->writeSemName));
 	}
 
-	return read; // retorno la cantidad de bytes leidos
+	return read;
 }
 
-// liberar los recursos del pipe
-int16_t pipe_close(int pipe_id)
+int16_t pipe_close(const int pipe_id)
 {
-	// Verificar si el pipe_id es válido
 	if (pipe_id < 0 || pipe_id >= MAX_PIPES || pipes[pipe_id] == NULL)
 		return -1;
+
 	pipe_t *pipe = pipes[pipe_id];
 
-	// Cerrar semáforos
-	semClose(pipe->readSem);
-	semClose(pipe->writeSem);
+	semClose(getSem(pipe->readSemName));
+	semClose(getSem(pipe->writeSemName));
 
-	// Eliminar semáforos
 	sem_unlink(pipe->readSemName);
 	sem_unlink(pipe->writeSemName);
 
-	// Liberar memoria del pipe
 	mem_free(pipe);
 	pipes[pipe_id] = NULL;
 
-	return 0; // Cierre exitoso
+	return 0;
 }
 
-int16_t get_pipe_idx(int fd)
-{
-	for (int i = 0; i < MAX_PIPES; i++)
-	{
-		if (pipes[i] != NULL && (pipes[i]->fds[0] == fd || pipes[i]->fds[1] == fd))
-			return i;
-	}
-	return -1;
-}
-
-static void buildSemName(int pipeId, const char *suffix, char semName[SEM_NAME_SIZE])
+static void buildSemName(const int pipeId, const char *suffix, char semName[SEM_NAME_SIZE])
 {
 	ksprintf(semName, "%d_%s", pipeId, suffix);
+}
+
+int16_t get_pipe_idx(const int16_t fd)
+{
+	for (int pipeId = 0; pipeId < MAX_PIPES; pipeId++)
+	{
+		if (pipes[pipeId] == NULL)
+			continue;
+
+		if (pipes[pipeId]->fds[0] == fd || pipes[pipeId]->fds[1] == fd)
+			return pipeId;
+	}
+
+	return -1;
 }

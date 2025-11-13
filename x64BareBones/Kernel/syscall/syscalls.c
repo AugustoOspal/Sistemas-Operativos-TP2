@@ -277,7 +277,7 @@ void syscallDispatcher(Registers_t *regs)
 			break;
 
 		case 0x50:
-			regs->rax = createProcess((char *) arg1, (mainFuncPtr) arg2, (int) arg3, (char **) arg4, arg5);
+			regs->rax = createProcess((char *) arg1, (mainFuncPtr) arg2, (int) arg3, (char **) arg4, (int16_t *) arg5);
 			break;
 
 		case 0x51:

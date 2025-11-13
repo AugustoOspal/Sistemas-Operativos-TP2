@@ -1,6 +1,7 @@
 #ifndef SYSCALLS_H_
 #define SYSCALLS_H_
 
+#include "semaphore.h"
 #include <color.h>
 #include <fonts.h>
 #include <lib.h>
@@ -9,7 +10,6 @@
 #include <stdint.h>
 #include <timeLib.h>
 #include <videoDriver.h>
-#include "semaphore.h"
 
 // Estructura para acceder a los registros guardados por pushState
 // El orden tiene que coincidir con el de la macro pushState en interrupts.asm

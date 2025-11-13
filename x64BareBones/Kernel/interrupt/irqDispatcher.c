@@ -4,7 +4,7 @@
 #include "process.h"
 #include "scheduler.h"
 #include "syscalls.h"
-#include "time.h"
+#include "timeLib.h"
 
 // TODO: Cambiar los nuemeros del switch por defines
 
