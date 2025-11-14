@@ -36,7 +36,7 @@ void *schedule(void *stackPointer);
  *  @brief Agrega el proceso en el scheduler
  *  @param stackPointer Stack Pointer del proceso a agregar al scheduler
  *  @param fds Array con los file descriptors del proceso
- *  @return PID del proceso agregado al scheduler
+ *  @return PID del proceso agregado al scheduler. En caso de error devuelve 0
  */
 uint64_t addProcess(void *stackPointer, const int16_t fds[FD_AMOUNT]);
 
@@ -56,9 +56,10 @@ void addProcessInfo(uint64_t pid, const char *name, void *basePointer, char **ar
 void changeProcessPriority(uint64_t pid, uint8_t newPriority);
 
 /**
- *  @param pid del proceso a remover del scheduler
+ *  @param pid PID del proceso a remover del scheduler
+ *  @retur Devuelve 0 en caso de éxito y -1 si hubo un problema
  */
-void terminateProcess(uint64_t pid);
+int terminateProcess(uint64_t pid);
 
 /**
  *  @brief bloquea en ese momento el proceso, llamando al timerInterrupt

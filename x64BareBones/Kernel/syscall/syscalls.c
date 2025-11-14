@@ -292,8 +292,7 @@ void syscallDispatcher(Registers_t *regs)
 			break;
 
 		case 0x51:
-			killProcess((uint64_t) arg1);
-			regs->rax = 0;
+			regs->rax = killProcess((uint64_t) arg1);
 			break;
 
 		case 0x52:

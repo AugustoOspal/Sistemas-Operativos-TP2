@@ -17,11 +17,12 @@
 uint64_t createProcess(const char *name, int (*main)(int argc, char *argv[]), int argc, char *argv[],
 					   int16_t fds[FD_AMOUNT], bool foreground);
 
-/*
+/**
  *  @brief Deletes a process
  *  @param pid PID of the process to delete
+ *  @return Devuelve 0 si tuvo exito o -1 de caso contrario
  */
-void deleteProcess(uint64_t pid);
+int deleteProcess(uint64_t pid);
 
 /*
  *  @brief Gets the PID of current running process

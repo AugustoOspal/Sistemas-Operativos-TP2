@@ -7,7 +7,7 @@ int64_t my_getpid()
 	return sys_getPid();
 }
 
-int64_t my_create_process(const char *name, mainFuncPtr main, const int argc, char *argv[],
+uint64_t my_create_process(const char *name, mainFuncPtr main, const int argc, char *argv[],
 						  int16_t fds[3], const bool foreground)
 {
 	return sys_createProcess(name, main, argc, argv, fds, foreground);
@@ -19,10 +19,9 @@ int64_t my_nice(const uint64_t pid, const uint64_t newPrio)
 	return 0;
 }
 
-int64_t my_kill(const uint64_t pid)
+int my_kill(const uint64_t pid)
 {
-	sys_deleteProcess(pid);
-	return 0;
+	return sys_deleteProcess(pid);
 }
 
 int64_t my_block(const uint64_t pid)

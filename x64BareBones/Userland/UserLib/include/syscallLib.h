@@ -49,7 +49,7 @@ extern void sys_playSound(uint32_t frequency, uint32_t duration);
 // Procesos
 extern uint64_t sys_createProcess(const char *name, int (*main)(int argc, char *argv[]), int argc, char *argv[],
 								  int16_t fds[FD_AMOUNT], bool foreground);
-extern void sys_deleteProcess(uint64_t pid);
+extern int sys_deleteProcess(uint64_t pid);
 extern uint64_t sys_getPid();
 extern uint64_t sys_getAllProcessesInfo(char *buffer, uint64_t bufferSize);
 extern void sys_changeProcessPriority(uint64_t pid, uint8_t newPriority);

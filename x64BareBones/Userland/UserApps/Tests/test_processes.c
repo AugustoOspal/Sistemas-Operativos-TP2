@@ -13,7 +13,7 @@ enum State
 
 typedef struct P_rq
 {
-	int32_t pid;
+	uint64_t pid;
 	enum State state;
 } p_rq;
 
@@ -35,14 +35,17 @@ int64_t test_processes(uint64_t argc, char *argv[])
 
 	p_rq p_rqs[max_processes];
 
+	size_t counter = 0;
+
 	while (1)
 	{
 		// Create max_processes processes
 		for (rq = 0; rq < max_processes; rq++)
 		{
 			p_rqs[rq].pid = my_create_process("endless_loop", (mainFuncPtr) &endless_loop, 0, argvAux, defaultFds, 0);
+			counter++;
 
-			if (p_rqs[rq].pid == -1)
+			if (!p_rqs[rq].pid)
 			{
 				printf("test_processes: ERROR creating process\n");
 				return -1;

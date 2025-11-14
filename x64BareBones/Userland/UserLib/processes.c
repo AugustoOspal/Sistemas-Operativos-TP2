@@ -12,9 +12,9 @@ uint64_t createProcess(const char *name, int (*main)(int argc, char *argv[]), co
 	return sys_createProcess(name, main, argc, argv, fds, foreground);
 }
 
-void deleteProcess(uint64_t pid)
+int deleteProcess(const uint64_t pid)
 {
-	sys_deleteProcess(pid);
+	return sys_deleteProcess(pid);
 }
 
 uint64_t getPID()

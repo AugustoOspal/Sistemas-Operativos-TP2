@@ -306,11 +306,11 @@ static void deleteProcess(ProcessADT p)
 	mem_free(p);
 }
 
-void terminateProcess(uint64_t pid)
+int terminateProcess(const uint64_t pid)
 {
 	ProcessADT p = getProcessByPid(pid);
 	if (!p)
-		return;
+		return -1;
 
 	RemoveFromQueue(globalScheduler.priorityQueues[p->priority], matchPid, &p->pid);
 	RemoveFromQueue(globalScheduler.blockedQueue, matchPid, &p->pid);
@@ -360,6 +360,8 @@ void terminateProcess(uint64_t pid)
 	{
 		_timerInterrupt();
 	}
+
+	return 0;
 }
 
 void addProcessToBlockQueue(uint64_t pid)
@@ -501,11 +503,6 @@ uint64_t getAllProcessesInfo(char *buffer, uint64_t bufferSize)
 		buffer[bufferSize - 1] = '\0';
 
 	return count;
-}
-
-void kill(uint64_t pid)
-{
-	terminateProcess(pid);
 }
 
 uint64_t wait(void *status)

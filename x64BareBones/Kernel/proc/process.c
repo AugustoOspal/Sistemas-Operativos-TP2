@@ -73,11 +73,15 @@ uint64_t createProcess(const char *name, const mainFuncPtr main, const int argc,
 
 	void *processStackPointer = initializeProcess(startWrapper, stackEnd, main, argc, newArgv);
 	const uint64_t newProc = addProcess(processStackPointer, fds);
-	addProcessInfo(newProc, name, stackStart, newArgv, foreground);
+
+	// Si devuelve 0 (idle) lo devuelve en caso de error
+	if (newProc)
+		addProcessInfo(newProc, name, stackStart, newArgv, foreground);
+
 	return newProc;
 }
 
-void killProcess(const uint64_t pid)
+int killProcess(const uint64_t pid)
 {
-	terminateProcess(pid);
+	return terminateProcess(pid);
 }

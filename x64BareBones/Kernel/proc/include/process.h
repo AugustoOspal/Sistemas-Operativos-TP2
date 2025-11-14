@@ -18,7 +18,7 @@ typedef void (*startWrapperPtr)(mainFuncPtr main, int argc, char *argv[]);
  *  @param argv Arreglo de strings con los argumentos
  *  @param fds Array con los file descriptors del proceso
  *  @param foreground Indica si el proceso está en foreground (true) o background (false)
- *  @return El PID del proceso creado
+ *  @return El PID del proceso creado. Devuelve 0 en caso de error
  */
 uint64_t createProcess(const char *name, mainFuncPtr main, int argc, char *argv[], const int16_t fds[],
 					   bool foreground);
@@ -26,7 +26,8 @@ uint64_t createProcess(const char *name, mainFuncPtr main, int argc, char *argv[
 /**
  *  @brief Elimina un proceso del scheduler y libera su memoria
  *  @param pid El PID del proceso a eliminar
+ *  @return Devuelve 0 si tuvo exito o -1 de lo contrario
  */
-void killProcess(uint64_t pid);
+int killProcess(uint64_t pid);
 
 #endif
