@@ -50,10 +50,17 @@ void yield();
 
 uint64_t waitPid(uint64_t pid);
 
+int64_t getProcessStatus(uint64_t pid);
+
+void ps();
+
+
 /*
  *  @brief implementacion de cat
  *  Imprime el stdin tal como lo recibe.
  */
+
+// TODO: Estas pasarlas a un archivo .c separado orientado a los comandos que son procesos
 void cat();
 
 void loop();

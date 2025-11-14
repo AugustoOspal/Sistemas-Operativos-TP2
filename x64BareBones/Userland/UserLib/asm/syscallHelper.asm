@@ -34,6 +34,7 @@ GLOBAL sys_unblockProcess
 GLOBAL sys_yield
 GLOBAL sys_waitPid
 GLOBAL sys_getProcessFd
+GLOBAL sys_getProcessStatus
 
 GLOBAL sys_semOpen
 GLOBAL sys_semClose
@@ -102,7 +103,8 @@ sys_unblockProcess:         syscall 0x57
 sys_yield:                  syscall 0x58
 sys_waitPid:                syscall 0x59
 ; TODO: Despues organizar esta
-sys_getProcessFd:            syscall 0x100
+sys_getProcessFd:           syscall 0x100
+sys_getProcessStatus:       syscall 0x101
 
 ; Semaforos
 sys_semOpen:                syscall 0x60

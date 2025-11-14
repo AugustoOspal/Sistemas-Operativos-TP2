@@ -1,8 +1,8 @@
 #include "shell.h"
 
 #include "../../../Kernel/ipc/include/pipe.h"
-#include "processes.h"
 #include "pipe.h"
+#include "processes.h"
 
 #define BUFFER 500
 #define MAX_PIPE_CMDS 8
@@ -34,6 +34,8 @@ static command_entry commands[] = {
 	{"busywait", CMD_BUILTIN, busy_wait},
 	{"busywaitkernel", CMD_BUILTIN, busy_wait_kernel},
 	{"exit", CMD_BUILTIN, exitShell},
+	{"nice", CMD_BUILTIN, runNice},
+	{"block", CMD_BUILTIN, runBlock},
 
 	// COMANDOS PROCESOS
 	{"ps", CMD_PROC, runPs},
@@ -43,9 +45,11 @@ static command_entry commands[] = {
 	{"wc", CMD_PROC, runWc},
 	{"filter", CMD_PROC, runFilter},
 	{"kill", CMD_PROC, runKill},
-	{"nice", CMD_PROC, runNice},
-	{"block", CMD_PROC, runBlock},
-	{"mvar", CMD_PROC, runMvar}
+	{"mvar", CMD_PROC, runMvar},
+	{"test_mm", CMD_PROC, runTestMM},
+	{"test_prio", CMD_PROC, runTestPrio},
+	{"test_processes", CMD_PROC, runTestProcesses},
+	{"test_synchro", CMD_PROC, runTestSync},
 
 };
 
@@ -574,9 +578,7 @@ int busy_wait_kernel(int argc, char *argv[])
 
 int runPs(int argc, char *argv[])
 {
-	char buffer[2000];
-	getProcessesInfo(buffer, 2000);
-	printf("%s", buffer);
+	ps();
 	return 0;
 }
 
@@ -641,7 +643,6 @@ int runNice(int argc, char *argv[])
 	return 0;
 }
 
-// Todo: que pase de bloqueado a listo
 int runBlock(int argc, char *argv[])
 {
 	if (argc < 2)
@@ -649,9 +650,16 @@ int runBlock(int argc, char *argv[])
 		printf("Usage: block <pid>\n");
 		return -1;
 	}
-
 	uint64_t pid = atoi(argv[1]);
-	blockProcess(pid);
+	if (getProcessStatus(pid) == 0)
+	{
+		blockProcess(pid);
+	}
+	else
+	{
+		unblockProcess(pid);
+	}
+
 	return 0;
 }
 
@@ -659,6 +667,26 @@ int runMvar(int argc, char *argv[])
 {
 	mainMvar(argc, argv);
 	return 0;
+}
+
+int runTestMM(int argc, char *argv[])
+{
+	return test_mm((uint64_t)argc, argv);
+}
+
+int runTestPrio(int argc, char *argv[])
+{
+	return test_prio((uint64_t)argc, argv);
+}
+
+int runTestProcesses(int argc, char *argv[])
+{
+	return test_processes((uint64_t)argc, argv);
+}
+
+int runTestSync(int argc, char *argv[])
+{
+	return test_sync((uint64_t)argc, argv);
 }
 
 int main()

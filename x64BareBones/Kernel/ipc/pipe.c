@@ -4,7 +4,6 @@
 #include "../semaphore/include/semaphore.h"
 #include <stddef.h>
 #include <stdint.h>
-#include <stdio.h>
 
 typedef struct
 {
@@ -19,7 +18,7 @@ typedef struct
 } pipe_t;
 
 pipe_t *pipes[MAX_PIPES];
-static uint16_t nextFd = 3; 
+static uint16_t nextFd = 3;
 
 static void buildSemName(int pipeId, const char *suffix, char semName[SEM_NAME_SIZE]);
 

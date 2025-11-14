@@ -9,7 +9,8 @@ MY_CFLAGS  := $(GCCFLAGS) \
                -Ilib \
                -I../../UserLib/include \
                -I../PongisGolf/lib \
-               -I../ReadersWriters/lib
+               -I../ReadersWriters/lib \
+               -I../Tests/include
 
 CSOURCES   := $(wildcard [^_]*.c)
 COBJECTS   := $(CSOURCES:.c=.o)
@@ -20,6 +21,15 @@ LOADER_O   := _loader.o
 .PHONY: all clean
 
 all: $(OUTPUT_DIR)/$(MODULE_BIN) $(OUTPUT_DIR)/$(MODULE_ELF)
+
+../Tests/tests.a:
+	$(MAKE) -C ../Tests
+
+../PongisGolf/libpongisgolf.a:
+	$(MAKE) -C ../PongisGolf
+
+../ReadersWriters/libreaderswriters.a:
+	$(MAKE) -C ../ReadersWriters
 
 $(LOADER_O): _loader.c
 	$(GCC) $(MY_CFLAGS) -c $< -o $@
@@ -38,18 +48,20 @@ $(LOADER_O): _loader.c
 $(OUTPUT_DIR)/$(MODULE_BIN): $(LOADER_O) $(COBJECTS) $(ASMOBJS) \
                               ../../UserLib/libuserland.a \
                               ../PongisGolf/libpongisgolf.a \
-                              ../ReadersWriters/libreaderswriters.a
+                              ../ReadersWriters/libreaderswriters.a \
+                              ../Tests/tests.a
 	$(GCC) $(MY_CFLAGS) -no-pie -T $(LDSCRIPT) \
-          $(LOADER_O) $(COBJECTS) $(ASMOBJS) ../PongisGolf/libpongisgolf.a ../ReadersWriters/libreaderswriters.a ../../UserLib/libuserland.a \
+          $(LOADER_O) $(COBJECTS) $(ASMOBJS) ../PongisGolf/libpongisgolf.a ../ReadersWriters/libreaderswriters.a ../Tests/tests.a ../../UserLib/libuserland.a \
           -o $@ $(LDFLAGS)
 
 # Linkeo para ELF (ignora OUTPUT_FORMAT del linker script con -Wl,--oformat)
 $(OUTPUT_DIR)/$(MODULE_ELF): $(LOADER_O) $(COBJECTS) $(ASMOBJS) \
                               ../../UserLib/libuserland.a \
                               ../PongisGolf/libpongisgolf.a \
-                              ../ReadersWriters/libreaderswriters.a
+                              ../ReadersWriters/libreaderswriters.a \
+                              ../Tests/tests.a
 	$(GCC) $(MY_CFLAGS) -no-pie -T $(LDSCRIPT) -Wl,--oformat=elf64-x86-64 \
-          $(LOADER_O) $(COBJECTS) $(ASMOBJS) ../PongisGolf/libpongisgolf.a ../ReadersWriters/libreaderswriters.a ../../UserLib/libuserland.a \
+          $(LOADER_O) $(COBJECTS) $(ASMOBJS) ../PongisGolf/libpongisgolf.a ../ReadersWriters/libreaderswriters.a ../Tests/tests.a ../../UserLib/libuserland.a \
           -o $@ $(LDFLAGS)
 
 clean:

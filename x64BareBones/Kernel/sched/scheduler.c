@@ -470,41 +470,14 @@ uint64_t getAllProcessesInfo(char *buffer, uint64_t bufferSize)
 	if (!buffer || bufferSize == 0)
 		return 0;
 
-	const char *separator =
-		"+-------+------------------+----------+----------+------------+--------------+--------------+\n";
+	// Escribir header CSV
+	int pos = ksprintf(buffer, "PID,Name,Priority,State,Foreground,Stack,BasePointer\n");
 
-	char line[PROCESS_INFO_LINE_MAX];
-	int pos = 0;
-	buffer[0] = '\0';
-
-	int lineLen = ksprintf(line, "%s", separator);
-	if (!appendLine(buffer, bufferSize, &pos, line, lineLen))
+	if (pos >= bufferSize)
+	{
+		buffer[bufferSize - 1] = '\0';
 		return 0;
-
-	char pidHeader[PID_COL_WIDTH + 1];
-	char nameHeader[NAME_COL_WIDTH + 1];
-	char prioHeader[PRIO_COL_WIDTH + 1];
-	char stateHeader[STATE_COL_WIDTH + 1];
-	char fgHeader[FG_COL_WIDTH + 1];
-	char stackHeader[ADDR_COL_WIDTH + 1];
-	char baseHeader[ADDR_COL_WIDTH + 1];
-
-	formatStringColumn("PID", pidHeader, PID_COL_WIDTH);
-	formatStringColumn("Name", nameHeader, NAME_COL_WIDTH);
-	formatStringColumn("Priority", prioHeader, PRIO_COL_WIDTH);
-	formatStringColumn("State", stateHeader, STATE_COL_WIDTH);
-	formatStringColumn("Foreground", fgHeader, FG_COL_WIDTH);
-	formatStringColumn("Stack", stackHeader, ADDR_COL_WIDTH);
-	formatStringColumn("Base Ptr", baseHeader, ADDR_COL_WIDTH);
-
-	lineLen = ksprintf(line, "| %s | %s | %s | %s | %s | %s | %s |\n", pidHeader, nameHeader, prioHeader, stateHeader,
-					   fgHeader, stackHeader, baseHeader);
-	if (!appendLine(buffer, bufferSize, &pos, line, lineLen))
-		return 0;
-
-	lineLen = ksprintf(line, "%s", separator);
-	if (!appendLine(buffer, bufferSize, &pos, line, lineLen))
-		return 0;
+	}
 
 	// TODO: A lo mejor en vez de contarlo asi se podria poner un campo en la struct
 	uint64_t count = 0;
@@ -514,35 +487,44 @@ uint64_t getAllProcessesInfo(char *buffer, uint64_t bufferSize)
 		if (!p)
 			continue;
 
-		const char *state_str = getProcessStateString(p->state);
+		const char *state_str;
+		switch (p->state)
+		{
+			case READY:
+				state_str = "READY";
+				break;
+			case RUNNING:
+				state_str = "RUNNING";
+				break;
+			case BLOCKED:
+				state_str = "BLOCKED";
+				break;
+			default:
+				state_str = "UNKNOWN";
+				break;
+		}
 
-		char displayName[NAME_COL_WIDTH + 1];
-		char pidCol[PID_COL_WIDTH + 1];
-		char prioCol[PRIO_COL_WIDTH + 1];
-		char stateCol[STATE_COL_WIDTH + 1];
-		char fgCol[FG_COL_WIDTH + 1];
-		char stackCol[ADDR_COL_WIDTH + 1];
-		char baseCol[ADDR_COL_WIDTH + 1];
+		// Escribir directamente al buffer con ksprintf
+		int written = ksprintf(buffer + pos, "%lu,%s,%u,%s,%s,0x%lx,0x%lx\n", p->pid,
+							   p->nombre ? p->nombre : "(unnamed)", p->priority, state_str,
+							   p->foreground ? "Yes" : "No", (unsigned long) p->stack, (unsigned long) p->basePointer);
 
-		formatProcessName(p->nombre, displayName, NAME_COL_WIDTH);
-		formatUnsignedColumn(p->pid, pidCol, PID_COL_WIDTH);
-		formatUnsignedColumn(p->priority, prioCol, PRIO_COL_WIDTH);
-		formatStringColumn(state_str, stateCol, STATE_COL_WIDTH);
-		formatStringColumn(p->foreground ? "Yes" : "No", fgCol, FG_COL_WIDTH);
-		formatHexColumn((unsigned long) p->stack, stackCol, ADDR_COL_WIDTH);
-		formatHexColumn((unsigned long) p->basePointer, baseCol, ADDR_COL_WIDTH);
-
-		lineLen = ksprintf(line, "| %s | %s | %s | %s | %s | %s | %s |\n", pidCol, displayName, prioCol, stateCol,
-						   fgCol, stackCol, baseCol);
-
-		if (!appendLine(buffer, bufferSize, &pos, line, lineLen))
-			break;
-
-		count++;
+		if (written > 0 && pos + written < bufferSize)
+		{
+			pos += written;
+			count++;
+		}
+		else
+		{
+			break; // No hay más espacio
+		}
 	}
 
-	lineLen = ksprintf(line, "%s", separator);
-	appendLine(buffer, bufferSize, &pos, line, lineLen);
+	// Null terminator
+	if (pos < bufferSize)
+		buffer[pos] = '\0';
+	else
+		buffer[bufferSize - 1] = '\0';
 
 	return count;
 }
@@ -631,6 +613,16 @@ int16_t getProcesFd(const int fdIdx)
 {
 	return globalScheduler.currentProcess->fileDescriptors[fdIdx];
 }
+
+int64_t getProcessStatus(uint64_t pid)
+{
+	ProcessADT proc = getProcessByPid(pid);
+	if (!proc)
+		return -1;
+
+	return (int64_t) proc->state;
+}
+
 /*
 estrategia wait y terminar procesos
 

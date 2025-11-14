@@ -52,6 +52,18 @@ uint64_t waitPid(uint64_t pid)
 	return sys_waitPid(pid);
 }
 
+int64_t getProcessStatus(uint64_t pid)
+{
+	return sys_getProcessStatus(pid);
+}
+
+void ps()
+{
+	char buffer[2000];
+	getProcessesInfo(buffer, 2000);
+	printf("%s", buffer);
+}
+
 void cat()
 {
 	int charsInline = 0;

@@ -119,12 +119,18 @@ uint64_t waitPid(uint64_t pid);
  */
 uint64_t getForegroundPid(void);
 
-
 /**
  * @brief Obtiene el file descriptor del proceso actual
  * @param fdIndx Índice del file descriptor a obtener
  */
 int16_t getProcesFd(const int fdIdx);
+
+/**
+ * @brief Obtiene el estado actual de un proceso dado su PID.
+ * @param pid PID del proceso a consultar.
+ * @return Estado del proceso (READY, RUNNING, BLOCKED, ZOMBIE) o -1 si no existe.
+ */
+int64_t getProcessStatus(uint64_t pid);
 
 // resignTimeWindow(); // usa yield
 

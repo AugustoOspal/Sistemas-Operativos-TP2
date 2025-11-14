@@ -388,7 +388,11 @@ void syscallDispatcher(Registers_t *regs)
 			break;
 
 		case 0x100:
-			regs->rax = getProcesFd( (int) arg1 );
+			regs->rax = getProcesFd((int) arg1);
+			break;
+
+		case 0x101:
+			regs->rax = getProcessStatus((uint64_t) arg1);
 			break;
 
 		default:
