@@ -45,9 +45,10 @@ uint64_t addProcess(void *stackPointer, const int16_t fds[FD_AMOUNT]);
  *  @param pid del proceso a agregar informacion
  *  @param name nombre a asignarle al proceso
  *  @param basePointer a asignarle al proceso
+ *  @param argv puntero al array de argumentos del proceso (heap-allocated)
  *  @param foreground indica si el proceso está en foreground
  */
-void addProcessInfo(uint64_t pid, const char *name, void *basePointer, bool foreground);
+void addProcessInfo(uint64_t pid, const char *name, void *basePointer, char **argv, bool foreground);
 
 /**
  *  @param pid del proceso a cambiar la prioridad

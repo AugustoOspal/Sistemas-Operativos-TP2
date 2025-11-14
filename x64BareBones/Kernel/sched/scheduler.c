@@ -24,6 +24,7 @@ typedef struct ProcessCDT
 {
 	void *basePointer;
 	void *stack;
+	char **argv;
 
 	uint64_t pid;
 	char *nombre;
@@ -204,6 +205,7 @@ uint64_t addProcess(void *stackPointer, const int16_t fds[FD_AMOUNT])
 	newProcess->stack = stackPointer;
 	newProcess->basePointer = NULL;
 	newProcess->nombre = NULL;
+	newProcess->argv = NULL;
 
 	newProcess->state = READY;
 	newProcess->quantumLeft = QUANTUM;
@@ -240,13 +242,14 @@ static ProcessADT getProcessByPid(uint64_t pid)
 	return findInDoubleLinkedList(globalScheduler.processTable, matchPid, &pid);
 }
 
-void addProcessInfo(uint64_t pid, const char *name, void *basePointer, bool foreground)
+void addProcessInfo(uint64_t pid, const char *name, void *basePointer, char **argv, bool foreground)
 {
 	ProcessADT proc = getProcessByPid(pid);
 	if (proc)
 	{
 		proc->nombre = name;
 		proc->basePointer = basePointer;
+		proc->argv = argv;
 		proc->foreground = foreground;
 		return;
 	}
@@ -345,6 +348,16 @@ static void deleteProcess(ProcessADT p)
 {
 	removeFromDoubleLinkedList(globalScheduler.processTable, matchPid, p);
 	mem_free(p->stack);
+
+	if (p->argv)
+	{
+		for (int i = 0; p->argv[i] != NULL; i++)
+		{
+			mem_free(p->argv[i]);
+		}
+		mem_free(p->argv);
+	}
+
 	mem_free(p);
 }
 
