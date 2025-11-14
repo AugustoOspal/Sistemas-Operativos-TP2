@@ -37,27 +37,24 @@ int64_t my_unblock(const uint64_t pid)
 	return 0;
 }
 
-int64_t my_sem_open(char *sem_id, const uint64_t initialValue)
+semaphoreP my_sem_open(char *sem_id, const int initialValue)
 {
-	return (int64_t) sys_semOpen(sem_id, initialValue);;
+	return sys_semOpen(sem_id, initialValue);
 }
 
-int64_t my_sem_wait(char *sem_id)
+void my_sem_wait(const semaphoreP sem)
 {
-	sys_semWait(sem_id);
-	return 0;
+	sys_semWait(sem);
 }
 
-int64_t my_sem_post(char *sem_id)
+void my_sem_post(const semaphoreP sem)
 {
-	sys_semPost(sem_id);
-	return 0;
+	sys_semPost(sem);
 }
 
-int64_t my_sem_close(char *sem_id)
+void my_sem_close(const semaphoreP sem)
 {
-	sys_semClose(sem_id);
-	return 0;
+	sys_semClose(sem);
 }
 
 int64_t my_yield()

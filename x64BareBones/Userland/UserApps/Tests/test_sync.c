@@ -1,6 +1,7 @@
 #include "./include/syscall.h"
 #include "./include/test_util.h"
 #include "../../UserLib/include/usrio.h"
+#include "../../UserLib/include/semaphores.h"
 #include <stdint.h>
 
 #define SEM_ID "sem"
@@ -34,8 +35,10 @@ uint64_t my_process_inc(uint64_t argc, char *argv[])
 	if ((use_sem = satoi(argv[2])) < 0)
 		return -1;
 
+	semaphoreP sem = NULL;
+
 	if (use_sem)
-		if (!my_sem_open(SEM_ID, 1))
+		if (!((sem = my_sem_open(SEM_ID, 1))))
 		{
 			printf("test_sync: ERROR opening semaphore\n");
 			return -1;
@@ -45,14 +48,14 @@ uint64_t my_process_inc(uint64_t argc, char *argv[])
 	for (i = 0; i < n; i++)
 	{
 		if (use_sem)
-			my_sem_wait(SEM_ID);
+			my_sem_wait(sem);
 		slowInc(&global, inc);
 		if (use_sem)
-			my_sem_post(SEM_ID);
+			my_sem_post(sem);
 	}
 
 	if (use_sem)
-		my_sem_close(SEM_ID);
+		my_sem_close(sem);
 
 	return 0;
 }
