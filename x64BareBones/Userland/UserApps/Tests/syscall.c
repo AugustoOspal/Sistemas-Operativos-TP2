@@ -4,15 +4,13 @@
 
 int64_t my_getpid()
 {
-	sys_getPid();
-	return 0;
+	return sys_getPid();
 }
 
 int64_t my_create_process(const char *name, mainFuncPtr main, const int argc, char *argv[],
 						  int16_t fds[3], const bool foreground)
 {
-	sys_createProcess(name, main, argc, argv, fds, foreground);
-	return 0;
+	return sys_createProcess(name, main, argc, argv, fds, foreground);
 }
 
 int64_t my_nice(const uint64_t pid, const uint64_t newPrio)
@@ -41,8 +39,7 @@ int64_t my_unblock(const uint64_t pid)
 
 int64_t my_sem_open(char *sem_id, const uint64_t initialValue)
 {
-	sys_semOpen(sem_id, initialValue);
-	return 0;
+	return (int64_t) sys_semOpen(sem_id, initialValue);;
 }
 
 int64_t my_sem_wait(char *sem_id)

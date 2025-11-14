@@ -9,10 +9,9 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#define QUANTUM 1
+#define QUANTUM 5
 #define PRIO 4
-#define DEFAULT_PRIORITY 0
-#define MAX_CHILDREN 20
+#define DEFAULT_PRIORITY 2
 #define DEFAULT_FOREGROUND true
 #define STDIN 0
 #define STDOUT 1

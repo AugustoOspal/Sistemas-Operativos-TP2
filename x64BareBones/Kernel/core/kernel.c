@@ -75,7 +75,7 @@ int main()
 	// createProcess("Proceso C", processC, 0, NULL);
 	const int16_t fds[] = {STDIN, STDOUT, STDERR};
 
-	changeProcessPriority(createProcess("shell", shellAddress, 0, NULL, fds, false), 3);
+	changeProcessPriority(createProcess("shell", shellAddress, 0, NULL, fds, false), 0);
 	load_idt();
 	// play_boot_sound();
 	return 0;

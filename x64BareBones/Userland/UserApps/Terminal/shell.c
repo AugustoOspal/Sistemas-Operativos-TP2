@@ -47,7 +47,7 @@ static command_entry commands[] = {
 	{"kill", CMD_PROC, runKill},
 	{"mvar", CMD_PROC, runMvar},
 	{"test_mm", CMD_PROC, runTestMM},
-	{"test_prio", CMD_PROC, runTestPrio},
+	{"test_priority", CMD_PROC, runTestPrio},
 	{"test_processes", CMD_PROC, runTestProcesses},
 	{"test_synchro", CMD_PROC, runTestSync},
 
@@ -689,8 +689,7 @@ int runTestProcesses(int argc, char *argv[])
 
 int runTestSync(int argc, char *argv[])
 {
-	// Los tests esperan que argv[0] sea el primer argumento real, no el nombre del comando
-	return test_sync((uint64_t)(argc - 1), argv + 1);
+	return test_sync(argc, argv);
 }
 
 int main()

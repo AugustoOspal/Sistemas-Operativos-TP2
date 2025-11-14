@@ -73,6 +73,13 @@ static void printHex(unsigned int x)
 		putchar(buf[i]);
 }
 
+static void printUnsignedLongLong(unsigned long long ull)
+{
+	if (ull >= 10)
+		printUnsignedLongLong(ull / 10);
+	putchar('0' + (ull % 10));
+}
+
 int printf(const char *fmt, ...)
 {
 	va_list ap;
@@ -107,6 +114,28 @@ int printf(const char *fmt, ...)
 			}
 			case '%':
 				putchar('%');
+				break;
+			case 'l':
+				if (*(p + 1) == 'l')
+				{
+					p++;
+					if (*(p + 1) == 'u')
+					{
+						p++;
+						printUnsignedLongLong(va_arg(ap, unsigned long long));
+					}
+					else if (*(p + 1) == 'd')
+					{
+						p++; // Skip 'd'
+						// For now, treat as unsigned (proper signed long long would need another function)
+						printUnsignedLongLong(va_arg(ap, unsigned long long));
+					}
+				}
+				break;
+			default:
+				// Unknown format specifier, just print it
+				putchar('%');
+				putchar(*p);
 				break;
 		}
 	}

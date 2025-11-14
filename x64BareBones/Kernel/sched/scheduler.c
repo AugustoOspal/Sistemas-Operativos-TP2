@@ -2,6 +2,7 @@
 #include "../ipc/include/pipe.h"
 #include "../lib/ADT/DoubleLinkedList/doubleLinkedList.h"
 #include "../lib/string/strings.h"
+#include <stdint.h>
 #include "interrupts.h"
 
 #define PID_COL_WIDTH 5
@@ -32,10 +33,8 @@ typedef struct ProcessCDT
 	uint8_t priority;
 
 	ProcessADT parent;
-	uint64_t children[MAX_CHILDREN];
-	size_t childrenCount;
-	uint64_t reaped[MAX_CHILDREN]; // recolectados
-	size_t reapedCount;
+	doubleLinkedListADT children;  // Lista de PIDs (uint64_t cast a void*)
+	doubleLinkedListADT reaped;    // Lista de PIDs (uint64_t cast a void*)
 	uint64_t waitingPid; //=-1 si no espera, =0 si espera a cualquiera, >0 matchea pid
 
 	int16_t fileDescriptors[FD_AMOUNT]; // espacio para 20 descriptores de archivo abiertos
@@ -60,16 +59,13 @@ static uint64_t lastPid = 0; // Este PID es el proximo a crear
 
 static void refill_credits(void);
 static bool matchPid(void *elem, void *data);
+static bool matchPidInList(void *elem, void *data);
+static bool alwaysTrue(void *elem, void *data);
 static ProcessADT getProcessByPid(uint64_t pid);
 static int pickNextQueue(void);
 static void *pickNextProcess();
 static void deleteProcess(ProcessADT p);
 static const char *getProcessStateString(ProcessState state);
-static void formatProcessName(const char *src, char *dest, size_t maxLen);
-static void formatStringColumn(const char *src, char *dest, size_t width);
-static void formatUnsignedColumn(unsigned long value, char *dest, size_t width);
-static void formatHexColumn(unsigned long value, char *dest, size_t width);
-static bool appendLine(char *buffer, uint64_t bufferSize, int *pos, const char *line, int lineLen);
 
 static void refill_credits(void)
 {
@@ -92,81 +88,6 @@ static const char *getProcessStateString(ProcessState state)
 		default:
 			return "UNKNOWN";
 	}
-}
-
-static void formatProcessName(const char *src, char *dest, size_t maxLen)
-{
-	if (!src)
-		src = "(unnamed)";
-
-	size_t i = 0;
-	for (; i < maxLen && src[i]; i++)
-	{
-		dest[i] = src[i];
-	}
-
-	if (src[i] != '\0' && maxLen >= 3)
-	{
-		dest[maxLen - 3] = '.';
-		dest[maxLen - 2] = '.';
-		dest[maxLen - 1] = '.';
-		i = maxLen;
-	}
-
-	while (i < maxLen)
-	{
-		dest[i++] = ' ';
-	}
-
-	dest[maxLen] = '\0';
-}
-
-static void formatStringColumn(const char *src, char *dest, size_t width)
-{
-	if (!src)
-		src = "";
-
-	size_t i = 0;
-	for (; i < width && src[i]; i++)
-	{
-		dest[i] = src[i];
-	}
-
-	while (i < width)
-	{
-		dest[i++] = ' ';
-	}
-
-	dest[width] = '\0';
-}
-
-static void formatUnsignedColumn(unsigned long value, char *dest, size_t width)
-{
-	char tmp[32];
-	ksprintf(tmp, "%lu", value);
-	formatStringColumn(tmp, dest, width);
-}
-
-static void formatHexColumn(unsigned long value, char *dest, size_t width)
-{
-	char tmp[32];
-	ksprintf(tmp, "0x%lx", value);
-	formatStringColumn(tmp, dest, width);
-}
-
-static bool appendLine(char *buffer, uint64_t bufferSize, int *pos, const char *line, int lineLen)
-{
-	if (lineLen <= 0 || *pos + lineLen >= bufferSize)
-		return false;
-
-	for (int i = 0; i < lineLen; i++)
-	{
-		buffer[*pos + i] = line[i];
-	}
-
-	*pos += lineLen;
-	buffer[*pos] = '\0';
-	return true;
 }
 
 void initializeScheduler()
@@ -216,16 +137,17 @@ uint64_t addProcess(void *stackPointer, const int16_t fds[FD_AMOUNT])
 	newProcess->fileDescriptors[2] = fds[2];
 
 	newProcess->parent = globalScheduler.currentProcess;
-	newProcess->childrenCount = 0;
-	newProcess->reapedCount = 0;
+	newProcess->children = newDoubleLinkedListADT();
+	newProcess->reaped = newDoubleLinkedListADT();
 	newProcess->waitingPid = (uint64_t) -1;
 
 	addToDoubleLinkedList(globalScheduler.processTable, newProcess);
 	Enqueue(globalScheduler.priorityQueues[DEFAULT_PRIORITY], newProcess);
 
+	// Agregar a la lista de hijos del padre
 	if (globalScheduler.currentProcess)
 	{
-		globalScheduler.currentProcess->children[globalScheduler.currentProcess->childrenCount++] = newProcess->pid;
+		addToDoubleLinkedList(globalScheduler.currentProcess->children, (void *) (uintptr_t) newProcess->pid);
 	}
 	return newProcess->pid;
 }
@@ -235,6 +157,22 @@ static bool matchPid(void *elem, void *data)
 	ProcessADT proc = (ProcessADT) elem;
 	uint64_t *targetPid = (uint64_t *) data;
 	return proc->pid == *targetPid;
+}
+
+// Helper para comparar PIDs almacenados como void* en listas
+static bool matchPidInList(void *elem, void *data)
+{
+	uint64_t elemPid = (uint64_t) (uintptr_t) elem;
+	const uint64_t *targetPid = (const uint64_t *) data;
+	return elemPid == *targetPid;
+}
+
+// Helper que siempre retorna true (para obtener cualquier elemento de la lista)
+static bool alwaysTrue(void *elem, void *data)
+{
+	(void) elem;
+	(void) data;
+	return true;
 }
 
 static ProcessADT getProcessByPid(uint64_t pid)
@@ -346,8 +284,11 @@ void changeProcessPriority(uint64_t pid, uint8_t newPriority)
 
 static void deleteProcess(ProcessADT p)
 {
-	removeFromDoubleLinkedList(globalScheduler.processTable, matchPid, p);
-	mem_free(p->stack);
+	removeFromDoubleLinkedList(globalScheduler.processTable, matchPid, &p->pid);
+	if (p->basePointer)
+	{
+		mem_free(p->basePointer);
+	}
 
 	if (p->argv)
 	{
@@ -357,6 +298,10 @@ static void deleteProcess(ProcessADT p)
 		}
 		mem_free(p->argv);
 	}
+
+	// Liberar listas de hijos y zombies
+	FreeDoubleLinkedListCDT(p->children);
+	FreeDoubleLinkedListCDT(p->reaped);
 
 	mem_free(p);
 }
@@ -370,25 +315,36 @@ void terminateProcess(uint64_t pid)
 	RemoveFromQueue(globalScheduler.priorityQueues[p->priority], matchPid, &p->pid);
 	RemoveFromQueue(globalScheduler.blockedQueue, matchPid, &p->pid);
 
-	// cambiar padre de hijos corriendo y finalizar zombies
-	for (int i = 0; i < p->childrenCount; i++)
+	// Cambiar padre de hijos corriendo (orphan running children)
+	while (!isListEmpty(p->children))
 	{
-		ProcessADT childrenP = getProcessByPid(p->children[i]);
-		childrenP->parent = NULL;
+		uint64_t childPid = (uint64_t) findInDoubleLinkedList(p->children, alwaysTrue, NULL);
+		ProcessADT childProc = getProcessByPid(childPid);
+		if (childProc)
+		{
+			childProc->parent = NULL;
+		}
+		removeFromDoubleLinkedList(p->children, matchPidInList, &childPid);
 	}
-	p->childrenCount = 0;
 
-	for (int i = 0; i < p->reapedCount; i++)
+	// Finalizar todos los procesos zombies
+	while (!isListEmpty(p->reaped))
 	{
-		terminateProcess(p->reaped[i]);
+		uint64_t reapedPid = (uint64_t) findInDoubleLinkedList(p->reaped, alwaysTrue, NULL);
+		ProcessADT zombieProc = getProcessByPid(reapedPid);
+		removeFromDoubleLinkedList(p->reaped, matchPidInList, &reapedPid);
+		if (zombieProc)
+		{
+			deleteProcess(zombieProc);  // Borrar directamente, ya es zombie
+		}
 	}
-	p->reapedCount = 0;
 
 	p->state = ZOMBIE;
 
+	// Agregar a la lista de reaped del padre
 	if (p->parent)
 	{
-		p->parent->reaped[p->parent->reapedCount++] = p->pid;
+		addToDoubleLinkedList(p->parent->reaped, (void *) p->pid);
 		if ((p->parent->waitingPid == 0 || p->parent->waitingPid == p->pid) && p->parent->state == BLOCKED)
 		{
 			unblockProcess(p->parent->pid);
@@ -396,8 +352,10 @@ void terminateProcess(uint64_t pid)
 	}
 	else
 	{
+		// Sin padre -> borrar directamente
 		deleteProcess(p);
 	}
+
 	if (globalScheduler.currentProcess == p)
 	{
 		_timerInterrupt();
@@ -512,6 +470,9 @@ uint64_t getAllProcessesInfo(char *buffer, uint64_t bufferSize)
 			case BLOCKED:
 				state_str = "BLOCKED";
 				break;
+			case ZOMBIE:
+				state_str = "ZOMBIE";
+				break;
 			default:
 				state_str = "UNKNOWN";
 				break;
@@ -549,32 +510,32 @@ void kill(uint64_t pid)
 
 uint64_t wait(void *status)
 {
-	// busco proceso
+	(void) status;  // Unused parameter
 	ProcessADT process = globalScheduler.currentProcess;
 
-	// si lo que necesito no esta me bloqueo
-	if (process->reapedCount == 0)
+	// Si no hay procesos zombies, bloquear
+	if (isListEmpty(process->reaped))
 	{
 		process->waitingPid = 0; // espera a cualquiera
 		blockProcess(process->pid);
 	}
 
-	// armar status con datos de waitingProcess
-
-	// elimino proceso de reaped
-	ProcessADT reapedProcess = getProcessByPid(process->reaped[--process->reapedCount]); // el siguiente lo pisa
+	// Obtener el primer proceso zombie (any one)
+	uint64_t reapedPid = (uint64_t) findInDoubleLinkedList(process->reaped, alwaysTrue, NULL);
+	ProcessADT reapedProcess = getProcessByPid(reapedPid);
 	if (!reapedProcess)
 		return -1;
 
-	// elimino proceso zombie
-	uint64_t pid = reapedProcess->pid;
+	// Remover de lista de reaped
+	removeFromDoubleLinkedList(process->reaped, matchPidInList, &reapedPid);
+
+	// Eliminar proceso zombie
 	deleteProcess(reapedProcess);
-	return pid;
+	return reapedPid;
 }
 
 uint64_t waitPid(uint64_t pid)
 {
-	// busco proceso
 	ProcessADT waitingProcess = getProcessByPid(pid);
 	if (!waitingProcess)
 		return -1;
@@ -582,30 +543,17 @@ uint64_t waitPid(uint64_t pid)
 	if (!parentProcess)
 		return -1;
 
-	// si lo que necesito no esta me bloqueo
+	// Si el proceso no es zombie todavía, bloquear
 	if (waitingProcess->state != ZOMBIE)
 	{
 		globalScheduler.currentProcess->waitingPid = pid;
 		blockProcess(globalScheduler.currentProcess->pid);
 	}
 
-	// armar status con datos de waitingProcess
+	// Remover de la lista de reaped del padre
+	removeFromDoubleLinkedList(parentProcess->reaped, matchPidInList, &pid);
 
-	// elimino proceso de reaped
-	for (int i = 0; i < parentProcess->reapedCount; i++)
-	{
-		if (parentProcess->reaped[i] == pid)
-		{
-			// lo elimino y corro todo hacia izquierda
-			for (int j = i + 1; j < parentProcess->reapedCount; j++)
-			{
-				parentProcess->reaped[j - 1] = parentProcess->reaped[j];
-			}
-			parentProcess->reaped[--parentProcess->reapedCount] = 0;
-		}
-	}
-
-	// elimino proceso zombie
+	// Eliminar proceso zombie
 	deleteProcess(waitingProcess);
 	return pid;
 }
