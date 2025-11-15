@@ -1,9 +1,9 @@
 // This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+#include "../../UserLib/include/semaphores.h"
+#include "../../UserLib/include/usrio.h"
 #include "./include/syscall.h"
 #include "./include/test_util.h"
-#include "../../UserLib/include/usrio.h"
-#include "../../UserLib/include/semaphores.h"
 #include <stdint.h>
 
 #define SEM_ID "sem"
@@ -69,16 +69,17 @@ uint64_t test_sync(uint64_t argc, const char *argv[])
 	if (argc != 3)
 		return -1;
 
-	char *argvDec[] = {(char *)argv[1], "-1", (char *)argv[2], NULL};
-	char *argvInc[] = {(char *)argv[1], "1", (char *)argv[2], NULL};
+	char *argvDec[] = {(char *) argv[1], "-1", (char *) argv[2], NULL};
+	char *argvInc[] = {(char *) argv[1], "1", (char *) argv[2], NULL};
 
 	global = 0;
 
 	uint64_t i;
 	for (i = 0; i < TOTAL_PAIR_PROCESSES; i++)
 	{
-		pids[i] = my_create_process("my_process_inc",  (mainFuncPtr) my_process_inc, 3, argvDec, defaultFds, false);
-		pids[i + TOTAL_PAIR_PROCESSES] = my_create_process("my_process_inc",  (mainFuncPtr) my_process_inc, 3, argvInc, defaultFds, false);
+		pids[i] = my_create_process("my_process_inc", (mainFuncPtr) my_process_inc, 3, argvDec, defaultFds, false);
+		pids[i + TOTAL_PAIR_PROCESSES] =
+			my_create_process("my_process_inc", (mainFuncPtr) my_process_inc, 3, argvInc, defaultFds, false);
 	}
 
 	for (i = 0; i < TOTAL_PAIR_PROCESSES; i++)

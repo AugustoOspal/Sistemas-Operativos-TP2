@@ -55,7 +55,6 @@ int64_t getProcessStatus(uint64_t pid);
 
 void ps();
 
-
 /*
  *  @brief implementacion de cat
  *  Imprime el stdin tal como lo recibe.

@@ -1,15 +1,14 @@
 #ifndef SISTEMAS_OPERATIVOS_TP2_OFFICIAL_SYSCALLS_H
 #define SISTEMAS_OPERATIVOS_TP2_OFFICIAL_SYSCALLS_H
 
+#include "../../../UserLib/include/semaphores.h"
 #include <stdbool.h>
 #include <stdint.h>
-#include "../../../UserLib/include/semaphores.h"
 
 typedef int (*mainFuncPtr)(int argc, char *argv[]);
 
 int64_t my_getpid();
-uint64_t my_create_process(const char *name, mainFuncPtr main, int argc, char *argv[], int16_t fds[3],
-						  bool foreground);
+uint64_t my_create_process(const char *name, mainFuncPtr main, int argc, char *argv[], int16_t fds[3], bool foreground);
 int64_t my_nice(uint64_t pid, uint64_t newPrio);
 int my_kill(uint64_t pid);
 int64_t my_block(uint64_t pid);

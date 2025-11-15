@@ -1,7 +1,7 @@
 // This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
-#include "../../UserLib/include/syscallLib.h"
 #include "./include/syscall.h"
+#include "../../UserLib/include/syscallLib.h"
 #include <stdint.h>
 
 int64_t my_getpid()
@@ -9,8 +9,8 @@ int64_t my_getpid()
 	return sys_getPid();
 }
 
-uint64_t my_create_process(const char *name, mainFuncPtr main, const int argc, char *argv[],
-						  int16_t fds[3], const bool foreground)
+uint64_t my_create_process(const char *name, mainFuncPtr main, const int argc, char *argv[], int16_t fds[3],
+						   const bool foreground)
 {
 	return sys_createProcess(name, main, argc, argv, fds, foreground);
 }

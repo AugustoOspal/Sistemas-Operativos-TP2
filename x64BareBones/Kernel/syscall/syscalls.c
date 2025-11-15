@@ -50,7 +50,6 @@ uint8_t isSpecialChar(char c)
 // TODO: Creo que la sys_write no deberia imprimir en pantalla, ver si se puede modularizar
 uint64_t sys_write(const uint8_t fd, const char *str, const uint64_t count)
 {
-
 	// TODO: implementar STDERR
 	if (fd == STDOUT)
 	{

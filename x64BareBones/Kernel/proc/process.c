@@ -2,8 +2,8 @@
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include "process.h"
 #include "../sched/include/scheduler.h"
-#include "pmem.h"
 #include "lib.h"
+#include "pmem.h"
 
 extern void *initializeProcess(startWrapperPtr startWrapper, void *stack, mainFuncPtr main, int argc, char *argv[]);
 

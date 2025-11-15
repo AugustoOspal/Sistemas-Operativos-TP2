@@ -1,13 +1,13 @@
 #ifndef SHELL_H_
 #define SHELL_H_
 
+#include "../../ReadersWriters/lib/readersWriters.h"
+#include "../../Tests/include/tests.h"
 #include "mem.h"
 #include "pongisLib.h"
-#include "../../ReadersWriters/lib/readersWriters.h"
 #include "stringLib.h"
 #include "test_processes.h" // TODO: Despues sacar esto
 #include "timeLib.h"
-#include "../../Tests/include/tests.h"
 #include "usrio.h"
 #include "videoLib.h"
 #include <stdbool.h>
@@ -60,7 +60,5 @@ int runTestMM(int argc, char *argv[]);
 int runTestPrio(int argc, char *argv[]);
 int runTestProcesses(int argc, char *argv[]);
 int runTestSync(int argc, char *argv[]);
-
-
 
 #endif

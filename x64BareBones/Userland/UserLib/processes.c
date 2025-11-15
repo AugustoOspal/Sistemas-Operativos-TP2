@@ -66,19 +66,28 @@ void ps()
 	printf("%s", buffer);
 }
 
-void cat(){
+void cat()
+{
 	int charsInline = 0;
 	char c;
-	while((c = getchar()) != '\0'){
-		if(c == '\b'){
-			if(charsInline > 0){
+	while ((c = getchar()) != '\0')
+	{
+		if (c == '\b')
+		{
+			if (charsInline > 0)
+			{
 				charsInline--;
 				putchar(c);
 			}
-		}else{
-			if(c == '\n'){
+		}
+		else
+		{
+			if (c == '\n')
+			{
 				charsInline = 0;
-			}else{
+			}
+			else
+			{
 				charsInline++;
 			}
 			putchar(c);

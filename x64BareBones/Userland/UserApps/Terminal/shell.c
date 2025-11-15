@@ -667,19 +667,19 @@ int runMvar(int argc, char *argv[])
 int runTestMM(int argc, char *argv[])
 {
 	// Los tests esperan que argv[0] sea el primer argumento real, no el nombre del comando
-	return test_mm((uint64_t)(argc - 1), argv + 1);
+	return test_mm((uint64_t) (argc - 1), argv + 1);
 }
 
 int runTestPrio(int argc, char *argv[])
 {
 	// Los tests esperan que argv[0] sea el primer argumento real, no el nombre del comando
-	return test_prio((uint64_t)(argc - 1), argv + 1);
+	return test_prio((uint64_t) (argc - 1), argv + 1);
 }
 
 int runTestProcesses(int argc, char *argv[])
 {
 	// Los tests esperan que argv[0] sea el primer argumento real, no el nombre del comando
-	return test_processes((uint64_t)(argc - 1), argv + 1);
+	return test_processes((uint64_t) (argc - 1), argv + 1);
 }
 
 int runTestSync(int argc, char *argv[])

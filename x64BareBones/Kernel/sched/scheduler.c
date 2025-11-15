@@ -4,8 +4,8 @@
 #include "../ipc/include/pipe.h"
 #include "../lib/ADT/DoubleLinkedList/doubleLinkedList.h"
 #include "../lib/string/strings.h"
-#include <stdint.h>
 #include "interrupts.h"
+#include <stdint.h>
 
 #define PID_COL_WIDTH 5
 #define NAME_COL_WIDTH 16
@@ -35,9 +35,9 @@ typedef struct ProcessCDT
 	uint8_t priority;
 
 	ProcessADT parent;
-	doubleLinkedListADT children;  // Lista de PIDs (uint64_t cast a void*)
-	doubleLinkedListADT reaped;    // Lista de PIDs (uint64_t cast a void*)
-	uint64_t waitingPid; //=-1 si no espera, =0 si espera a cualquiera, >0 matchea pid
+	doubleLinkedListADT children; // Lista de PIDs (uint64_t cast a void*)
+	doubleLinkedListADT reaped;	  // Lista de PIDs (uint64_t cast a void*)
+	uint64_t waitingPid;		  //=-1 si no espera, =0 si espera a cualquiera, >0 matchea pid
 
 	int16_t fileDescriptors[FD_AMOUNT]; // espacio para 20 descriptores de archivo abiertos
 
@@ -337,7 +337,7 @@ int terminateProcess(const uint64_t pid)
 		removeFromDoubleLinkedList(p->reaped, matchPidInList, &reapedPid);
 		if (zombieProc)
 		{
-			deleteProcess(zombieProc);  // Borrar directamente, ya es zombie
+			deleteProcess(zombieProc); // Borrar directamente, ya es zombie
 		}
 	}
 
@@ -446,7 +446,7 @@ uint64_t getAllProcessesInfo(char *buffer, uint64_t bufferSize)
 		return 0;
 
 	// Escribir header CSV
-	size_t pos = (size_t)ksprintf(buffer, "PID,Name,Priority,State,Foreground,Stack,BasePointer\n");
+	size_t pos = (size_t) ksprintf(buffer, "PID,Name,Priority,State,Foreground,Stack,BasePointer\n");
 
 	if (pos >= bufferSize)
 	{
@@ -487,9 +487,9 @@ uint64_t getAllProcessesInfo(char *buffer, uint64_t bufferSize)
 							   p->nombre ? p->nombre : "(unnamed)", p->priority, state_str,
 							   p->foreground ? "Yes" : "No", (unsigned long) p->stack, (unsigned long) p->basePointer);
 
-		if (written > 0 && pos + (size_t)written < bufferSize)
+		if (written > 0 && pos + (size_t) written < bufferSize)
 		{
-			pos += (size_t)written;
+			pos += (size_t) written;
 			count++;
 		}
 		else
@@ -509,7 +509,7 @@ uint64_t getAllProcessesInfo(char *buffer, uint64_t bufferSize)
 
 uint64_t wait(void *status)
 {
-	(void) status;  // Unused parameter
+	(void) status; // Unused parameter
 	ProcessADT process = globalScheduler.currentProcess;
 
 	// Si no hay procesos zombies, bloquear
