@@ -38,7 +38,7 @@ typedef struct
 } Registers_t;
 
 void syscallDispatcher(Registers_t *regs);
-void loadSnapshot(Registers_t *regs);
+void loadSnapshot(const Registers_t *regs);
 void resetCursorCoord(void);
 
 #endif /* SYSCALLS_H_ */

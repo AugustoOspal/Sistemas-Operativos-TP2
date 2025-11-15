@@ -65,7 +65,7 @@ typedef LevelT *LevelP;
 void drawLevel(uint16_t level, MipP mip1, MipP mip2, BallP ball, HoleP hole);
 uint8_t checkColisionMipBall(MipP mip, BallP ball);
 uint8_t checkValidScreenPosition(uint32_t x, uint32_t y, uint32_t radius);
-uint8_t startMenu(MipP mip1, MipP mip2);
+int8_t startMenu(MipP mip1, MipP mip2);
 void endMenu(uint8_t winner);
 
 // Pelota

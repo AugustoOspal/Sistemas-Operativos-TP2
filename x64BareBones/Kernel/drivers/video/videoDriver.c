@@ -1,3 +1,41 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include "videoDriver.h"
 #include "fonts.h"
 #include "lib.h"
@@ -50,7 +88,7 @@ VBEInfoPtr VBE_mode_info = (VBEInfoPtr) 0x0000000000005C00;
 
 void putPixel(uint32_t hexColor, uint64_t x, uint64_t y)
 {
-	uint8_t *framebuffer = (uint8_t *) VBE_mode_info->framebuffer;
+	uint8_t *framebuffer = (uint8_t *) (uintptr_t) VBE_mode_info->framebuffer;
 	uint64_t offset = (x * ((VBE_mode_info->bpp) / 8)) + (y * VBE_mode_info->pitch);
 	framebuffer[offset] = (hexColor) & 0xFF;
 	framebuffer[offset + 1] = (hexColor >> 8) & 0xFF;
@@ -78,7 +116,7 @@ uint8_t isValidScreenCoordinate(uint16_t x, uint16_t y)
 	uint16_t width = getScreenWidth();
 	uint16_t height = getScreenHeight();
 
-	return x >= 0 && x <= width && y >= 0 && y <= height;
+	return x <= width && y <= height;
 }
 
 // Si queremos chequear si un string va a entrar en la pantalla hay que decirle el ancho y alto del string
@@ -135,7 +173,7 @@ void drawChar(char c, uint32_t color, uint64_t x, uint64_t y)
 
 void drawString(const char *s, uint32_t hexColor, uint64_t x, uint64_t y)
 {
-	int w = getWidth(), h = getHeight();
+	int w = getCurrentFontWidth(), h = getCurrentFontHeight();
 	for (const char *p = s; *p; p++)
 	{
 		if (!isValidScreenPrint(x, y, w, h))
@@ -164,7 +202,7 @@ void drawRectangle(uint64_t width, uint64_t heigth, uint32_t hexColor, uint64_t 
 	}
 }
 
-static void plotCircleOctants(uint32_t hexColor, int64_t xc, int64_t yc, int64_t dx, int64_t dy)
+static void __attribute__((unused)) plotCircleOctants(uint32_t hexColor, int64_t xc, int64_t yc, int64_t dx, int64_t dy)
 {
 	putPixelIfValid(hexColor, xc + dx, yc + dy);
 	putPixelIfValid(hexColor, xc - dx, yc + dy);

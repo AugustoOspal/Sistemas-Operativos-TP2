@@ -1,3 +1,41 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include "scheduler.h"
 #include "../ipc/include/pipe.h"
 #include "../lib/ADT/DoubleLinkedList/doubleLinkedList.h"
@@ -28,7 +66,7 @@ typedef struct ProcessCDT
 	char **argv;
 
 	uint64_t pid;
-	char *nombre;
+	const char *nombre;
 	ProcessState state;
 	uint8_t priority;
 
@@ -107,7 +145,7 @@ void initializeScheduler()
 
 	globalScheduler.blockedQueue = NewQueue();
 
-	int fds[] = {STDIN, STDOUT, STDERR};
+	const int16_t fds[] = {STDIN, STDOUT, STDERR};
 	createProcess("idle", idleMain, 0, NULL, fds, false); // idle nunca es foreground
 	idleProcess = Dequeue(globalScheduler.priorityQueues[DEFAULT_PRIORITY]);
 }
@@ -155,7 +193,7 @@ uint64_t addProcess(void *stackPointer, const int16_t fds[FD_AMOUNT])
 static bool matchPid(void *elem, void *data)
 {
 	ProcessADT proc = (ProcessADT) elem;
-	uint64_t *targetPid = (uint64_t *) data;
+	const uint64_t *targetPid = (const uint64_t *) data;
 	return proc->pid == *targetPid;
 }
 
@@ -163,7 +201,7 @@ static bool matchPid(void *elem, void *data)
 static bool matchPidInList(void *elem, void *data)
 {
 	uint64_t elemPid = (uint64_t) (uintptr_t) elem;
-	const uint64_t *targetPid = (const uint64_t *) data;
+	uint64_t *targetPid = (uint64_t *) data;
 	return elemPid == *targetPid;
 }
 
@@ -444,7 +482,7 @@ uint64_t getAllProcessesInfo(char *buffer, uint64_t bufferSize)
 		return 0;
 
 	// Escribir header CSV
-	int pos = ksprintf(buffer, "PID,Name,Priority,State,Foreground,Stack,BasePointer\n");
+	size_t pos = (size_t)ksprintf(buffer, "PID,Name,Priority,State,Foreground,Stack,BasePointer\n");
 
 	if (pos >= bufferSize)
 	{
@@ -485,9 +523,9 @@ uint64_t getAllProcessesInfo(char *buffer, uint64_t bufferSize)
 							   p->nombre ? p->nombre : "(unnamed)", p->priority, state_str,
 							   p->foreground ? "Yes" : "No", (unsigned long) p->stack, (unsigned long) p->basePointer);
 
-		if (written > 0 && pos + written < bufferSize)
+		if (written > 0 && pos + (size_t)written < bufferSize)
 		{
-			pos += written;
+			pos += (size_t)written;
 			count++;
 		}
 		else

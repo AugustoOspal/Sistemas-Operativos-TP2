@@ -1,3 +1,41 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include "keyboardDriver.h"
 #include "../../proc/include/process.h"
 #include "../../sched/include/scheduler.h"
@@ -96,22 +134,22 @@ char procesScanCode(const unsigned int scancode)
 	{
 		case SC_LSHIFT_PRESS:
 			kbd_modifier_state.lshift = is_press;
-			return;
+			return 0;
 		case SC_RSHIFT_PRESS:
 			kbd_modifier_state.rshift = is_press;
-			return;
+			return 0;
 		case SC_CAPSLOCK_PRESS:
 			if (is_press)
 			{ // CapsLock es un toggle, actúa solo al apretar
 				kbd_modifier_state.caps_lock_on = !kbd_modifier_state.caps_lock_on;
 			}
-			return;
+			return 0;
 		case SC_CTRL_PRESS:
 			kbd_modifier_state.ctrl = is_press;
-			return;
+			return 0;
 		case SC_ALT_PRESS:
 			kbd_modifier_state.alt = is_press;
-			return;
+			return 0;
 	}
 
 	// 2. Si es un "press" de una tecla no modificadora, procesar para agarrar el carácter
@@ -121,16 +159,14 @@ char procesScanCode(const unsigned int scancode)
 		char char_normal = 0;
 		char char_shifted = 0;
 
-		if (make_code < 128)
-		{
-			char_normal = scancode_to_ascii_map_normal[make_code];
-			char_shifted = scancode_to_ascii_map_shifted[make_code];
-		}
+		// make_code is always < 128 due to: make_code = scancode & 0x7F
+		char_normal = scancode_to_ascii_map_normal[make_code];
+		char_shifted = scancode_to_ascii_map_shifted[make_code];
 
 		// Si es no imprimible o no esta mapeada
 		if (char_normal == 0)
 		{
-			return;
+			return 0;
 		}
 
 		int is_alpha_lower = (char_normal >= 'a' && char_normal <= 'z');

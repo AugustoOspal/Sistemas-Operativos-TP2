@@ -1,3 +1,41 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 #include "exceptions.h"
 #include "fonts.h"
 #include "syscalls.h"
@@ -12,7 +50,7 @@ static const char *exception_messages[] = {"Exception: Division by Zero", "Excep
 
 static void printRegisters(const Registers_t *regs);
 
-void exceptionDispatcher(Registers_t *regs, int exception)
+void exceptionDispatcher(const Registers_t *regs, int exception)
 {
 	clearScreen();
 	// Imprimir mensaje de la excepcion
@@ -34,13 +72,12 @@ void exceptionDispatcher(Registers_t *regs, int exception)
 
 static void printRegisters(const Registers_t *regs)
 {
-	uint64_t *regs_array = (uint64_t *) regs;
+	const uint64_t *regs_array = (const uint64_t *) regs;
 	unsigned int linesPrinted = 2; // Empezar a imprimir debajo del mensaje de excepcion
-	unsigned int currentY = 0;
 
 	for (int i = 0; i < CANT_REGS; i++)
 	{
-		currentY = (getCurrentFontHeight() + FONT_CHAR_GAP) * linesPrinted++;
+		unsigned int currentY = (getCurrentFontHeight() + FONT_CHAR_GAP) * linesPrinted++;
 		drawString(regs_strings[i], RED, 0, currentY);
 		drawHexa(regs_array[i], RED, 10 * (getCurrentFontWidth() + FONT_CHAR_GAP), currentY);
 	}

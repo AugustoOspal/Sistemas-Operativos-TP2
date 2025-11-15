@@ -37,8 +37,8 @@ typedef struct
 } FontChar;
 
 FontChar getCharBitMap(char c);
-int getWidth(void);
-int getHeight(void);
+int getCurrentFontWidth(void);
+int getCurrentFontHeight(void);
 void zoomInFont(void);
 void zoomOutFont(void);
 extern int currentFont;

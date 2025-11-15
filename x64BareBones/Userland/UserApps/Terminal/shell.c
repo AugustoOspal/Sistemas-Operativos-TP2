@@ -1,3 +1,6 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+
 #include "shell.h"
 
 #include "../../../Kernel/ipc/include/pipe.h"
@@ -23,8 +26,6 @@ static char *argv_storage[MAX_PIPE_CMDS][MAX_COMMAND_ARGS + 2];
 static command_entry commands[] = {
 	// COMANDOS BUILTIN
 	{"help", CMD_BUILTIN, help},
-	{"exception 1", CMD_BUILTIN, exception_1},
-	{"exception 2", CMD_BUILTIN, exception_2},
 	{"pongisgolf", CMD_BUILTIN, startPongis},
 	{"zoom in", CMD_BUILTIN, zoom_in},
 	{"zoom out", CMD_BUILTIN, zoom_out},
@@ -189,6 +190,13 @@ static int fillArgVector(parsed_command_t *parsed, char *argsStart)
 		while (*cursor != '\0')
 		{
 			cursor = skipSpaces(cursor);
+			if (!cursor)
+			{
+				parsed->argv[argc] = NULL;
+				parsed->argc = argc;
+				return 0;
+			}
+
 			if (*cursor == '\0')
 			{
 				break;
@@ -254,7 +262,7 @@ static int parseEntry(char *input, parsed_command_t *outCommands, int maxCommand
 	while (expectCommand)
 	{
 		char *segmentStart = skipSpaces(cursor);
-		if (*segmentStart == '\0') // fin del input
+		if (segmentStart && *segmentStart == '\0') // fin del input
 		{
 			if (count == 0)
 			{
@@ -495,7 +503,7 @@ int startPongis(int argc, char *argv[])
 	return 0;
 }
 
-void notACommand(char *input)
+void notACommand(const char *input)
 {
 	printf("Command \"%s\" not found. Type 'help' for a list of commands.\n", input);
 }
@@ -525,19 +533,6 @@ int exitShell(int argc, char *argv[])
 
 	printf("\n[Exit succesful]\n");
 	active = 0;
-	return 0;
-}
-
-int exception_1(int argc, char *argv[])
-{
-	int a = 1 / 0;
-	(void) a;
-	return 0;
-}
-
-int exception_2(int argc, char *argv[])
-{
-	opCodeException();
 	return 0;
 }
 
