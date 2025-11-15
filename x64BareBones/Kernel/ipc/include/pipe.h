@@ -6,7 +6,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#define MAX_PIPES 8
+#define MAX_PIPES 2
 #define PIPE_BUFFER 256
 #define SEM_NAME_SIZE 32
 #define BASIC_FDS 3 // 0,1,2 reservados para stdin, stdout, stderr

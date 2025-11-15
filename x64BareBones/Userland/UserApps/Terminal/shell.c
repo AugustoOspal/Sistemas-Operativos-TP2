@@ -8,7 +8,7 @@
 #include "processes.h"
 
 #define BUFFER 500
-#define MAX_PIPE_CMDS 8
+#define MAX_PIPE_CMDS 3
 #define MAX_COMMAND_ARGS 8
 static int16_t defaultFds[] = {STDIN, STDOUT, STDERR};
 #define SPECIAL_KEY_MAX_VALUE 5
