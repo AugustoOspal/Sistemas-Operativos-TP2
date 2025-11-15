@@ -262,7 +262,7 @@ static int parseEntry(char *input, parsed_command_t *outCommands, int maxCommand
 	while (expectCommand)
 	{
 		char *segmentStart = skipSpaces(cursor);
-		if (segmentStart && *segmentStart == '\0') // fin del input
+		if (!segmentStart || *segmentStart == '\0') // fin del input o NULL
 		{
 			if (count == 0)
 			{
@@ -301,7 +301,7 @@ static int parseEntry(char *input, parsed_command_t *outCommands, int maxCommand
 		}
 
 		char *cleanSegment = trimSegment(segmentStart);
-		if (*cleanSegment == '\0')
+		if (!cleanSegment || *cleanSegment == '\0')
 		{
 			printf("Empty command in pipeline.\n");
 			return -1;
@@ -377,7 +377,7 @@ static void executePipeline(const parsed_command_t *cmds, const unsigned int cou
 		pipeIds[i] = pipeOpen(pipeFds[i]);
 		if (pipeIds[i] < 0)
 		{
-			printf("Failed to create pipe %d.\n", i);
+			printf("Failed to create pipe %u.\n", i);
 			for (unsigned int j = 0; j < i; j++)
 				pipeClose(pipeIds[j]);
 			return;
@@ -489,7 +489,7 @@ int getRegisters(int argc, char *argv[])
 		printf("Register snapshot:\n");
 		for (int i = 0; i < 20; i++)
 		{
-			printf("  %s: %x\n", register_names[i], registers[i]);
+			printf("  %s: %lu\n", register_names[i], registers[i]);
 		}
 	}
 	return 0;
@@ -588,9 +588,9 @@ int runMem(int argc, char *argv[])
 	pm_stats_t stats;
 	get_mem_info(&stats);
 	printf("Memory stats:\n");
-	printf("  Total: %d bytes\n", stats.total);
-	printf("  Used:  %d bytes\n", stats.used);
-	printf("  Free:  %d bytes\n", stats.free);
+	printf("  Total: %lu bytes\n", stats.total);
+	printf("  Used:  %lu bytes\n", stats.used);
+	printf("  Free:  %lu bytes\n", stats.free);
 	return 0;
 }
 

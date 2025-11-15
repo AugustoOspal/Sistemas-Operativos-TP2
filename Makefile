@@ -2,6 +2,9 @@ all:
 	cd x64BareBones && make all
 
 clean:
+	rm ./PVS-Studio.log
+	rm ./report.tasks
+	rm ./strace_out
 	cd x64BareBones && make clean
 
 format:
@@ -16,8 +19,7 @@ check-cppcheck:
 	cppcheck --quiet --enable=all --force --inconclusive --suppress=comparePointers --suppress=zerodiv --suppress=unusedFunction --suppress=unusedVariable --suppress=unreadVariable --suppress=unsignedLessThanZero --suppress=constParameterPointer --suppress=constVariablePointer --suppress=unusedStructMember --suppress=variableScope --suppress=missingInclude --suppress=ctunullpointer x64BareBones/Kernel x64BareBones/Userland
 
 check-pvs-studio:
-	find x64BareBones -name "*.c" -type f | while read line; do sed -i '1s/^\(.*\)$$/\/\/ This is a personal academic project. Dear PVS-Studio, please check it.\n\1/' "$$line"; done
-	find x64BareBones -name "*.c" -type f | while read line; do sed -i '2s/^\(.*\)$$/\/\/ PVS-Studio Static Code Analyzer for C, C++ and C#: http:\/\/www.viva64.com\n\1/' "$$line"; done
+	x64BareBones/compile.sh
 	pvs-studio-analyzer credentials "PVS-Studio Free" "FREE-FREE-FREE-FREE"
 	pvs-studio-analyzer trace -- make all
 	pvs-studio-analyzer analyze
