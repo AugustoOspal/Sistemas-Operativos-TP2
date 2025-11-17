@@ -4,6 +4,7 @@
 
 #define BLOCK_SIZE(o) ((size_t) 1 << (o))
 #define ALIGN_DOWN(x, a) ((x) & ~((a) - 1))
+#define ALIGN_UP(x, a) (((x) + ((a) - 1)) & ~((a) - 1))
 
 typedef struct node
 {
@@ -54,7 +55,8 @@ int mem_init(void *base, size_t length)
 	for (int i = max_order; i >= BUDDY_MIN_ORDER; i--)
 	{
 		size_t bs = BLOCK_SIZE(i);
-		while (((cur + bs) <= end) && !(cur & (bs - 1)))
+		cur = ALIGN_UP(cur, bs);
+		while ((cur + bs) <= end)
 		{
 			((node_t *) cur)->next = free_list[i];
 			free_list[i] = (node_t *) cur;
@@ -94,6 +96,8 @@ void *mem_alloc(size_t size)
 		free_list[o] = (node_t *) addr;
 		((node_t *) half)->next = free_list[o];
 		free_list[o] = (node_t *) half;
+		order_map[(addr - base_addr) >> BUDDY_MIN_ORDER] = o;
+		order_map[(half - base_addr) >> BUDDY_MIN_ORDER] = o;
 	}
 
 	node_t *b = free_list[order];

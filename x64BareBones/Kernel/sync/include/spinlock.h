@@ -8,13 +8,13 @@
 
 #include <stdint.h>
 
-/*
+/**
  *  @brief Hace busy waiting esperando a que se libere el lock
  *  @param lock del spinlock
  */
 extern void acquire(uint64_t *lock);
 
-/*
+/**
  *  @brief Intenta agarrar el lock una vez, pero no sigue intentando si falla
  *  @param lock del spinlock
  *  @return 0 si fue exitoso y agarro el lock, 1 si fallo y no lo pudo agarrar

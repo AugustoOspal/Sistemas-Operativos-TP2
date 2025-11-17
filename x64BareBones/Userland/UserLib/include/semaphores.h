@@ -5,7 +5,7 @@
 
 typedef void *semaphoreP;
 
-/*
+/**
  *  @brief Abre un semaforo que cumpla con ese nombre o lo crea en caso de que no exista.
  *  Asocia el semaforo con el proceso que llama a esta función y setea el valor del semaforo en value.
  *  @param name Nombre del semaforo a abrir o crear
@@ -13,14 +13,14 @@ typedef void *semaphoreP;
  */
 semaphoreP semOpen(const char *name, int value);
 
-/*
+/**
  *  @brief Cierra la asociacion que había entre el semaforo y el proceso que
  *  llama a esta función y decrece la cantidad de procesos asociados.
  *
  */
 void semClose(semaphoreP sem);
 
-/*
+/**
  *  @brief Lo mismo que semWait pero no se bloquea, si no puede acceder al semaforo
  *  retorna error.
  *  @return -1 si no pudo acceder, 0 si tuvo exito
@@ -30,7 +30,7 @@ int semTryWait(semaphoreP sem);
 void semPost(semaphoreP sem);
 void semWait(semaphoreP sem);
 
-/*
+/**
  *  @param sem Semaforo al que se le quiere ver el valor
  *  @param sval Variable donde se va a almacenar el valor del semaforo o la cantidad de procesos bloqueados
  *  de forma negativa.
@@ -39,7 +39,7 @@ void semWait(semaphoreP sem);
  */
 int semGetValue(semaphoreP sem, int *sval);
 
-/*
+/**
  *  @brief Hace inaccesible el semaforo con ese nombre y lo marca para que sea destruido
  *  después de que todos los procesos dejen de usarlo (puede ser inmediatamente si todos los procesos
  *  ya lo cerraron). Si hay procesos esperando el semaforo, pero ningún proceso asociado al semaforo

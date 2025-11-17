@@ -346,6 +346,7 @@ int terminateProcess(const uint64_t pid)
 	// Agregar a la lista de reaped del padre
 	if (p->parent)
 	{
+		removeFromDoubleLinkedList(p->parent->children, matchPidInList, &p->pid);
 		addToDoubleLinkedList(p->parent->reaped, (void *) p->pid);
 		if ((p->parent->waitingPid == 0 || p->parent->waitingPid == p->pid) && p->parent->state == BLOCKED)
 		{

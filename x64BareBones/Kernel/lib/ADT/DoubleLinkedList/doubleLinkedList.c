@@ -31,17 +31,21 @@ doubleLinkedListADT newDoubleLinkedListADT(void)
 
 void FreeDoubleLinkedListCDT(doubleLinkedListADT list)
 {
-	if (!list || !list->length)
+	if (!list)
 	{
 		return;
 	}
-	node_t *cur = list->head;
-	while (cur)
-	{
-		node_t *next = cur->next;
 
-		mem_free(cur);
-		cur = next;
+	if (list->length > 0)
+	{
+		node_t *cur = list->head;
+		while (cur)
+		{
+			node_t *next = cur->next;
+
+			mem_free(cur);
+			cur = next;
+		}
 	}
 	mem_free(list);
 }

@@ -26,6 +26,6 @@ SECTIONS
 	endOfKernel = .;
 
 	/* Reserva 32KB para kernel stack (8 pags) */
-    _pm_pool_start = ALIGN(endOfKernel + 0x8000, 0x1000);
+    _pm_pool_start = ALIGN(0x600000, 0x1000);
     _pm_pool_end   = _pm_pool_start + 8M;
 }

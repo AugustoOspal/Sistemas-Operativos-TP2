@@ -33,6 +33,8 @@ static const uint64_t PageSize = 0x1000;
 static void *const shellAddress = (void *) 0x400000;
 static void *const shellDataAddress = (void *) 0x500000;
 
+const int16_t fds[] = {STDIN, STDOUT, STDERR};
+
 typedef int (*EntryPoint)();
 
 void clearBSS(void *bssAddress, uint64_t bssSize)
@@ -70,13 +72,6 @@ int main()
 	initializeScheduler();
 	semaphoresInit();
 	keyboard_init();
-
-	// Test de procesos
-	// createProcess("Proceso A", processA, 0, NULL);
-	// createProcess("Proceso B", processB, 0, NULL);
-	// createProcess("Proceso C", processC, 0, NULL);
-	const int16_t fds[] = {STDIN, STDOUT, STDERR};
-
 	changeProcessPriority(createProcess("shell", shellAddress, 0, NULL, fds, false), 0);
 	load_idt();
 	// play_boot_sound();

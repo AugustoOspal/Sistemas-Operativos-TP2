@@ -63,6 +63,10 @@ uint64_t createProcess(const char *name, const mainFuncPtr main, const int argc,
 {
 	// TODO: Validar malloc
 	void *stackStart = mem_alloc(STACK_SIZE);
+
+	if (!stackStart)
+		return 0;
+
 	void *stackEnd = stackStart + STACK_SIZE;
 
 	// Copiar argumentos al heap
