@@ -98,6 +98,7 @@ A lo largo del trabajo práctico comentamos en que partes usamos cada recurso de
 
 También usamos inteligencia artificial (principalmente claude CLI), aunque no fue de mucha ayuda porque suele incorporar 
 bugs muy dificiles de detectar al largo plazo, por lo que solamente lo usamos para verificar algunas implementaciones
+
 ---
 ## Comandos y tests disponibles
 - help – muestra todos los comandos registrados. Sin parámetros.
